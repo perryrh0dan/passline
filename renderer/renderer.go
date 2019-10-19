@@ -7,8 +7,8 @@ import (
 )
 
 // DisplayItem single item
-func DisplayItem(item storage.Item) {
-	fmt.Printf("Website: %s, Password: %s\n", item.Website, item.Password)
+func DisplayItem(item storage.Website) {
+	fmt.Printf("Website: %s, Password: %s\n", item.Domain, item.Password)
 }
 
 // InvalidWebsite error message

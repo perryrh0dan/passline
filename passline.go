@@ -33,6 +33,11 @@ func displayBySite(args []string) {
 }
 
 // Generate a random password
-func generate() string {
-	return "12345678"
+func generate(args []string) {
+	if len(args) == 2 {
+		domain := args[0]
+		username := args[1]
+		password := "123456789"
+		storage.Add(storage.Website{Domain: domain, Username: username, Password: password})
+	}
 }

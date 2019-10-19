@@ -36,8 +36,7 @@ func main() {
 			Aliases: []string{"g"},
 			Usage:   "Generate a password for a website",
 			Action: func(c *cli.Context) error {
-				password := generate()
-				fmt.Println(password)
+				generate(c.Args())
 				return nil
 			},
 		},

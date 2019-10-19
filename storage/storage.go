@@ -1,20 +1,19 @@
 package storage
 
-// ItemStorage for all websites
-type ItemStorage struct {
-	Items []Item `json:"items"`
+// Data for passline
+type Data struct {
+	Websites []Website
 }
 
-// Item in storage
-type Item struct {
-	// Website name
-	Website string `json:"website"`
-	// Password (encoded)
-	Password string `json:"password"`
+// Website structure
+type Website struct {
+	Domain   string `json:"domain`
+	Username string `json:"username`
+	Password string `json:"password`
 }
 
 // Storage interface
 type Storage interface {
-	get(website string) (Item, error)
-	set(item Item)
+	get(website string) (Website, error)
+	set(item Website)
 }
