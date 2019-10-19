@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -10,7 +11,6 @@ import (
 )
 
 func main() {
-	var language string
 	app := cli.NewApp()
 
 	app.Flags = []cli.Flag{
@@ -26,29 +26,18 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) error {
-		name := "someone"
-		if c.NArg() > 0 {
-			name = c.Args()[0]
-		}
-		if language == "spanish" {
-			fmt.Println("Hola", name)
-		} else {
-			fmt.Println("Hello", name)
-		}
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter Password: ")
+		text, _ := reader.ReadString('\n')
+		fmt.Println(text)
 		return nil
 	}
 
 	app.Commands = []cli.Command{
 		{
-			Name: "",
-			Action: func(c *cli.Context) error {
-				return nil
-			},
-		},
-		{
-			Name:    "complete",
-			Aliases: []string{"c"},
-			Usage:   "complete a task on the list",
+			Name:    "generate",
+			Aliases: []string{"g"},
+			Usage:   "Generate a password for a website",
 			Action: func(c *cli.Context) error {
 				fmt.Println("Complete")
 				return nil
@@ -57,7 +46,7 @@ func main() {
 		{
 			Name:    "add",
 			Aliases: []string{"a"},
-			Usage:   "add a task to the list",
+			Usage:   "Add a existing password for a website",
 			Action: func(c *cli.Context) error {
 				fmt.Println("Add")
 				return nil
