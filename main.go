@@ -6,6 +6,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/perryrh0dan/passline/core"
 	"github.com/urfave/cli"
 )
 
@@ -26,7 +27,7 @@ func main() {
 
 	// default command to get password
 	app.Action = func(c *cli.Context) error {
-		displayBySite(c.Args())
+		core.DisplayBySite(c.Args())
 		return nil
 	}
 
@@ -36,7 +37,7 @@ func main() {
 			Aliases: []string{"g"},
 			Usage:   "Generate a password for a website",
 			Action: func(c *cli.Context) error {
-				generateForSite(c.Args())
+				core.GenerateForSite(c.Args())
 				return nil
 			},
 		},
