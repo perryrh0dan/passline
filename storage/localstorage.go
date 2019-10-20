@@ -13,7 +13,7 @@ var storageFile string
 
 func init() {
 	storageDir = path.Join(getMainDir(), "storage")
-	storageFile = path.Join(storageDir, "passline.json")
+	storageFile = path.Join(storageDir, "storage.json")
 
 	ensureDirectories()
 }

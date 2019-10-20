@@ -11,13 +11,13 @@ import (
 
 func main() {
 	app := cli.NewApp()
+	app.Name = "Passline"
+	app.Usage = "Password manager"
+	app.HelpName = "passline"
+	app.Version = "0.0.1"
+	app.Description = "Password manager for the command line"
 
 	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "lang, l",
-			Value: "english",
-			Usage: "Language for the greeting",
-		},
 		cli.StringFlag{
 			Name:  "config, c",
 			Usage: "Load configuration from `FILE`",
@@ -36,7 +36,7 @@ func main() {
 			Aliases: []string{"g"},
 			Usage:   "Generate a password for a website",
 			Action: func(c *cli.Context) error {
-				generate(c.Args())
+				generateForSite(c.Args())
 				return nil
 			},
 		},
