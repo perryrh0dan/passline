@@ -9,45 +9,60 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
+	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/perryrh0dan/passline/crypt"
 	"github.com/perryrh0dan/passline/renderer"
 	"github.com/perryrh0dan/passline/storage"
-
-	"golang.org/x/crypto/ssh/terminal"
 )
 
-func getPassword() ([]byte, error) {
-	fmt.Print("Enter Global Password: ")
+func getPassword(c *cli.Context) ([]byte, error) {
+	password := c.String("password")
 
-	// ask for global password
-	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		return nil, err
+	if password == "" {
+		// Get global password
+		fmt.Print("Enter Global Password: ")
+
+		// Ask for global password
+		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Println()
+		return bytePassword, nil
+	} else {
+		return []byte(password), nil
 	}
-	fmt.Println()
-	return bytePassword, nil
 }
 
 // DisplayBySite the password
-func DisplayBySite(args []string) error {
+func DisplayBySite(c *cli.Context) error {
+	args := c.Args()
+
 	if len(args) == 1 {
+		// Check if entry for website exists
 		item, err := storage.Get(args[0])
 		if err != nil {
 			renderer.InvalidWebsite(args[0])
 			return err
 		}
 
-		globalPassword, err := getPassword()
+		globalPassword, err := getPassword(c)
 		if err != nil {
 			return err
 		}
-
+		// Generate key from password with kdf
 		key := crypt.GenerateKey(globalPassword)
+
+		// Decrypt password
 		item.Password, err = crypt.AesGcmDecrypt(key, item.Password, item.Nonce)
 		if err != nil {
 			return err
 		}
+
+		// Display item and copy password to clipboard
 		renderer.DisplayWebsite(item)
 		err = clipboard.WriteAll(item.Password)
 		if err != nil {
@@ -67,16 +82,21 @@ func DisplayBySite(args []string) error {
 }
 
 // Generate a random password for a website
-func GenerateForSite(args []string) error {
-	if len(args) == 2 {
-		domain := args[0]
-		username := args[1]
-		password := generatePassword(20)
+func GenerateForSite(c *cli.Context) error {
+	args := c.Args()
 
-		website := storage.Website{Domain: domain, Username: username, Password: password}
+	if len(args) == 2 {
+		// Check if entry exists
+		_, err := storage.Get(args[0])
+		if err == nil {
+			return nil
+		}
+
+		// Generate new website entry
+		website := storage.Website{Domain: args[0], Username: args[1], Password: generatePassword(20)}
 		renderer.DisplayWebsite(website)
 
-		globalPassword, err := getPassword()
+		globalPassword, err := getPassword(c)
 		if err != nil {
 			return err
 		}

@@ -20,33 +20,35 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:  "config, c",
-			Usage: "Load configuration from `FILE`",
+			Name:  "password, p",
+			Usage: "Password",
 		},
 	}
 
 	// default command to get password
 	app.Action = func(c *cli.Context) error {
-		core.DisplayBySite(c.Args())
+		_ = core.DisplayBySite(c)
 		return nil
 	}
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "add",
-			Aliases: []string{"a"},
-			Usage:   "Add a existing password for a website",
+			Name:      "add",
+			Aliases:   []string{"a"},
+			Usage:     "Add a existing password for a website",
+			ArgsUsage: "<website> <username> <password>",
 			Action: func(c *cli.Context) error {
 				fmt.Println("Add")
 				return nil
 			},
 		},
 		{
-			Name:    "generate",
-			Aliases: []string{"g"},
-			Usage:   "Generate a password for a website",
+			Name:      "generate",
+			Aliases:   []string{"g"},
+			Usage:     "Generate a password for a website",
+			ArgsUsage: "<website> <username>",
 			Action: func(c *cli.Context) error {
-				core.GenerateForSite(c.Args())
+				_ = core.GenerateForSite(c)
 				return nil
 			},
 		},
@@ -55,7 +57,7 @@ func main() {
 			Aliases: []string{"l"},
 			Usage:   "List all websites",
 			Action: func(c *cli.Context) error {
-				core.ListSites()
+				_ = core.ListSites()
 				return nil
 			},
 		},
