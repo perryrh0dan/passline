@@ -9,7 +9,13 @@ import (
 
 // DisplayWebsite single item
 func DisplayWebsite(item storage.Website) {
-	fmt.Printf("Website: %s, Password: %s\n", item.Domain, item.Password)
+	fmt.Printf("Website: %s\nUsername: %s\nPassword: %s\n", item.Domain, item.Username, item.Password)
+}
+
+func DisplayWebsites(websites []storage.Website) {
+	for _, website := range websites {
+		fmt.Printf("%s\n", website.Domain)
+	}
 }
 
 // InvalidWebsite error message

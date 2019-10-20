@@ -33,6 +33,15 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
+			Name:    "add",
+			Aliases: []string{"a"},
+			Usage:   "Add a existing password for a website",
+			Action: func(c *cli.Context) error {
+				fmt.Println("Add")
+				return nil
+			},
+		},
+		{
 			Name:    "generate",
 			Aliases: []string{"g"},
 			Usage:   "Generate a password for a website",
@@ -42,11 +51,11 @@ func main() {
 			},
 		},
 		{
-			Name:    "add",
-			Aliases: []string{"a"},
-			Usage:   "Add a existing password for a website",
+			Name:    "list",
+			Aliases: []string{"l"},
+			Usage:   "List all websites",
 			Action: func(c *cli.Context) error {
-				fmt.Println("Add")
+				core.ListSites()
 				return nil
 			},
 		},

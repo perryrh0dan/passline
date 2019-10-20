@@ -4,57 +4,68 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
 	"io"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
-// Encrypt a give string with a key
-func Encrypt(key []byte, text string) (string, error) {
+// AesGcmEncrypt takes an encryption key and a plaintext string and encrypts it with AES256 in GCM mode, which provides authenticated encryption. Returns the ciphertext and the used nonce.
+func AesGcmEncrypt(key []byte, text string) (string, string, error) {
 	// key := []byte(keyText)
-	plaintext := []byte(text)
+	plaintextBytes := []byte(text)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err)
 	}
 
-	// The IV needs to be unique, but not secure. Therefore it's common to
-	// include it at the beginning of the ciphertext.
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
+	nonce := make([]byte, 12)
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err.Error())
 	}
 
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	ciphertext := aesgcm.Seal(nil, nonce, plaintextBytes, nil)
 
 	// convert to base64
-	return base64.URLEncoding.EncodeToString(ciphertext), nil
+	return base64.URLEncoding.EncodeToString(ciphertext), base64.URLEncoding.EncodeToString(nonce), nil
 }
 
-// Decrypt a give string with a key
-func Decrypt(key []byte, cryptoText string) (string, error) {
+// AesGcmDecrypt takes an decryption key, a ciphertext and the corresponding nonce and decrypts it with AES256 in GCM mode. Returns the plaintext string.
+func AesGcmDecrypt(key []byte, cryptoText string, nonce string) (string, error) {
 	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
+	nonceEncoded, _ := base64.URLEncoding.DecodeString(nonce)
+	nonceBytes := []byte(nonceEncoded)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
-	// The IV needs to be unique, but not secure. Therefore it's common to
-	// include it at the beginning of the ciphertext.
-	if len(ciphertext) < aes.BlockSize {
-		panic("ciphertext too short")
+	aesgcm, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err.Error())
 	}
-	iv := ciphertext[:aes.BlockSize]
-	ciphertext = ciphertext[aes.BlockSize:]
 
-	stream := cipher.NewCFBDecrypter(block, iv)
+	plaintextBytes, err := aesgcm.Open(nil, nonceBytes, ciphertext, nil)
+	if err != nil {
+		panic(err.Error())
+	}
 
-	// XORKeyStream can work in-place if the two arguments are the same.
-	stream.XORKeyStream(ciphertext, ciphertext)
+	return fmt.Sprintf("%s", plaintextBytes), nil
+}
 
-	return fmt.Sprintf("%s", ciphertext), nil
+func GenerateKey(password []byte) []byte {
+	salt := []byte("This is the salt")
+	dk := pbkdf2.Key(password, salt, 4096, 32, sha1.New)
+	return dk
 }

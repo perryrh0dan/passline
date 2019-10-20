@@ -30,6 +30,11 @@ func Get(website string) (Website, error) {
 	return Website{}, fmt.Errorf("No entry for website %s", website)
 }
 
+func GetAll() ([]Website, error) {
+	data := getData()
+	return data.Websites, nil
+}
+
 // Add data
 func Add(website Website) error {
 	data := getData()

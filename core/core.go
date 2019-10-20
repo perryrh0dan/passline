@@ -1,12 +1,11 @@
 package core
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"math/rand"
-	"os"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -14,15 +13,20 @@ import (
 	"github.com/perryrh0dan/passline/crypt"
 	"github.com/perryrh0dan/passline/renderer"
 	"github.com/perryrh0dan/passline/storage"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
-func getPassword() []byte {
-	reader := bufio.NewReader(os.Stdin)
+func getPassword() ([]byte, error) {
 	fmt.Print("Enter Global Password: ")
 
 	// ask for global password
-	text, _ := reader.ReadString('\n')
-	return []byte(text)
+	bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println()
+	return bytePassword, nil
 }
 
 // DisplayBySite the password
@@ -34,9 +38,13 @@ func DisplayBySite(args []string) error {
 			return err
 		}
 
-		globalPassword := getPassword()
+		globalPassword, err := getPassword()
+		if err != nil {
+			return err
+		}
 
-		item.Password, err = crypt.Decrypt(globalPassword, item.Password)
+		key := crypt.GenerateKey(globalPassword)
+		item.Password, err = crypt.AesGcmDecrypt(key, item.Password, item.Nonce)
 		if err != nil {
 			return err
 		}
@@ -68,18 +76,34 @@ func GenerateForSite(args []string) error {
 		website := storage.Website{Domain: domain, Username: username, Password: password}
 		renderer.DisplayWebsite(website)
 
-		globalPassword := getPassword()
-
-		var err error
-		website.Password, err = crypt.Encrypt(globalPassword, website.Password)
+		globalPassword, err := getPassword()
 		if err != nil {
 			return err
 		}
 
-		storage.Add(website)
+		key := crypt.GenerateKey(globalPassword)
+		website.Password, website.Nonce, err = crypt.AesGcmEncrypt(key, website.Password)
+		if err != nil {
+			return err
+		}
+
+		err = storage.Add(website)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 
+	return nil
+}
+
+func ListSites() error {
+	websites, err := storage.GetAll()
+	if err != nil {
+		return nil
+	}
+
+	renderer.DisplayWebsites(websites)
 	return nil
 }
 
