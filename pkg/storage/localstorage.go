@@ -23,26 +23,26 @@ func init() {
 }
 
 // Get data
-func Get(website string) (Website, error) {
+func Get(website string) (Item, error) {
 	data := getData()
-	for i := 0; i < len(data.Websites); i++ {
-		if data.Websites[i].Domain == website {
-			return data.Websites[i], nil
+	for i := 0; i < len(data.Items); i++ {
+		if data.Items[i].Name == website {
+			return data.Items[i], nil
 		}
 	}
 
-	return Website{}, fmt.Errorf("No entry for website %s", website)
+	return Item{}, fmt.Errorf("No entry for website %s", website)
 }
 
-func GetAll() ([]Website, error) {
+func GetAll() ([]Item, error) {
 	data := getData()
-	return data.Websites, nil
+	return data.Items, nil
 }
 
 // Add data
-func Add(website Website) error {
+func Add(website Item) error {
 	data := getData()
-	data.Websites = append(data.Websites, website)
+	data.Items = append(data.Items, website)
 	setData(data)
 	return nil
 }

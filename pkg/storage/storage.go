@@ -2,12 +2,12 @@ package storage
 
 // Data for passline
 type Data struct {
-	Websites []Website
+	Items []Item
 }
 
-// Website structure
-type Website struct {
-	Domain   string `json:"domain"`
+// Item structure
+type Item struct {
+	Name   	 string `json:"name"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Nonce    string `json:"nonce"`
@@ -15,7 +15,7 @@ type Website struct {
 
 // Storage interface
 type Storage interface {
-	Get(website string) (Website, error)
-	GetAll() ([]Website, error)
-	Add(item Website)
+	Get(website string) (Item, error)
+	GetAll() ([]Item, error)
+	Add(item Item)
 }

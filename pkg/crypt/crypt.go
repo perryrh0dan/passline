@@ -13,8 +13,7 @@ import (
 )
 
 // AesGcmEncrypt takes an encryption key and a plaintext string and encrypts it with AES256 in GCM mode, which provides authenticated encryption. Returns the ciphertext and the used nonce.
-func AesGcmEncrypt(key []byte, text string) (string, string, error) {
-	// key := []byte(keyText)
+func AesGcmEncrypt(key []byte, text string) (string, error) {
 	plaintextBytes := []byte(text)
 
 	block, err := aes.NewCipher(key)
@@ -22,29 +21,25 @@ func AesGcmEncrypt(key []byte, text string) (string, string, error) {
 		panic(err)
 	}
 
-	nonce := make([]byte, 12)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
-	}
-
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	// The IV needs to be unique, but not secure. Therefore it's common to
-	// include it at the beginning of the ciphertext.
-	ciphertext := aesgcm.Seal(nil, nonce, plaintextBytes, nil)
+	nonce := make([]byte, aesgcm.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err.Error())
+	}
+
+	ciphertext := aesgcm.Seal(nonce, nonce, plaintextBytes, nil)
 
 	// convert to base64
-	return base64.URLEncoding.EncodeToString(ciphertext), base64.URLEncoding.EncodeToString(nonce), nil
+	return base64.URLEncoding.EncodeToString(ciphertext), nil
 }
 
 // AesGcmDecrypt takes an decryption key, a ciphertext and the corresponding nonce and decrypts it with AES256 in GCM mode. Returns the plaintext string.
-func AesGcmDecrypt(key []byte, cryptoText string, nonce string) (string, error) {
+func AesGcmDecrypt(key []byte, cryptoText string) (string, error) {
 	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
-	nonceEncoded, _ := base64.URLEncoding.DecodeString(nonce)
-	nonceBytes := []byte(nonceEncoded)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -56,7 +51,9 @@ func AesGcmDecrypt(key []byte, cryptoText string, nonce string) (string, error) 
 		panic(err.Error())
 	}
 
-	plaintextBytes, err := aesgcm.Open(nil, nonceBytes, ciphertext, nil)
+	nonceSize := aesgcm.NonceSize()
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	plaintextBytes, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		panic(err.Error())
 	}

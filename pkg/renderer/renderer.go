@@ -7,20 +7,20 @@ import (
 	"github.com/perryrh0dan/passline/pkg/storage"
 )
 
-// DisplayWebsite single item
-func DisplayWebsite(item storage.Website) {
-	fmt.Printf("Website: %s\nUsername: %s\nPassword: %s\n", item.Domain, item.Username, item.Password)
+// DisplayItem single item
+func DisplayItem(item storage.Item) {
+	fmt.Printf("Name: %s\nUsername: %s\nPassword: %s\n", item.Name, item.Username, item.Password)
 }
 
-func DisplayWebsites(websites []storage.Website) {
+func DisplayItems(websites []storage.Item) {
 	for _, website := range websites {
-		fmt.Printf("%s\n", website.Domain)
+		fmt.Printf("%s\n", website.Name)
 	}
 }
 
-// InvalidWebsite error message
-func InvalidWebsite(website string) {
-	fmt.Printf("Unable to find password for website: %s\n", website)
+// InvalidName error message
+func InvalidName(name string) {
+	fmt.Printf("Unable to find item with name: %s\n", name)
 }
 
 func ClipboardError() {

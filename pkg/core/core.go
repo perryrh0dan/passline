@@ -45,7 +45,7 @@ func DisplayBySite(c *cli.Context) error {
 		// Check if entry for website exists
 		item, err := storage.Get(args[0])
 		if err != nil {
-			renderer.InvalidWebsite(args[0])
+			renderer.InvalidName(args[0])
 			return err
 		}
 
@@ -57,13 +57,13 @@ func DisplayBySite(c *cli.Context) error {
 		key := crypt.GenerateKey(globalPassword)
 
 		// Decrypt password
-		item.Password, err = crypt.AesGcmDecrypt(key, item.Password, item.Nonce)
+		item.Password, err = crypt.AesGcmDecrypt(key, item.Password)
 		if err != nil {
 			return err
 		}
 
 		// Display item and copy password to clipboard
-		renderer.DisplayWebsite(item)
+		renderer.DisplayItem(item)
 		err = clipboard.WriteAll(item.Password)
 		if err != nil {
 			renderer.ClipboardError()
@@ -73,7 +73,7 @@ func DisplayBySite(c *cli.Context) error {
 		return nil
 	} else {
 		if len(args) < 1 {
-			renderer.MissingArgument([]string{"domain"})
+			renderer.MissingArgument([]string{"name"})
 			return errors.New("Not enough arguments")
 		} else {
 			return errors.New("Too many arguments")
@@ -93,8 +93,8 @@ func GenerateForSite(c *cli.Context) error {
 		}
 
 		// Generate new website entry
-		website := storage.Website{Domain: args[0], Username: args[1], Password: generatePassword(20)}
-		renderer.DisplayWebsite(website)
+		website := storage.Item{Name: args[0], Username: args[1], Password: generatePassword(20)}
+		renderer.DisplayItem(website)
 
 		globalPassword, err := getPassword(c)
 		if err != nil {
@@ -102,7 +102,7 @@ func GenerateForSite(c *cli.Context) error {
 		}
 
 		key := crypt.GenerateKey(globalPassword)
-		website.Password, website.Nonce, err = crypt.AesGcmEncrypt(key, website.Password)
+		website.Password, err = crypt.AesGcmEncrypt(key, website.Password)
 		if err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func ListSites() error {
 		return nil
 	}
 
-	renderer.DisplayWebsites(websites)
+	renderer.DisplayItems(websites)
 	return nil
 }
 
