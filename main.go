@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/perryrh0dan/passline/core"
+	"github.com/perryrh0dan/passline/pkg/core"
 	"github.com/urfave/cli"
 )
 

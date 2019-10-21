@@ -6,13 +6,17 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/perryrh0dan/passline/pkg/config"
 )
 
 var storageDir string
 var storageFile string
 
 func init() {
-	storageDir = path.Join(getMainDir(), "storage")
+	mainDir, _ := getMainDir()
+
+	storageDir = path.Join(mainDir, "storage")
 	storageFile = path.Join(storageDir, "storage.json")
 
 	ensureDirectories()
@@ -43,9 +47,13 @@ func Add(website Website) error {
 	return nil
 }
 
-func getMainDir() string {
-	dir := path.Join("~", ".passline")
-	return dir
+func getMainDir() (string, error) {
+	config, err := config.Get()
+	if err != nil {
+		return "", err
+	}
+
+	return config.Directory, nil
 }
 
 func ensureDirectories() {
@@ -53,14 +61,21 @@ func ensureDirectories() {
 	ensureStorageDir()
 }
 
-func ensureMainDir() {
-	_, err := os.Stat(getMainDir())
+func ensureMainDir() error {
+	mainDir, err := getMainDir()
 	if err != nil {
-		err := os.MkdirAll(getMainDir(), os.ModePerm)
+		return err
+	}
+
+	_, err = os.Stat(mainDir)
+	if err != nil {
+		err := os.MkdirAll(mainDir, os.ModePerm)
 		if err != nil {
 			println("Cant create directory")
 		}
 	}
+
+	return nil
 }
 
 func ensureStorageDir() {

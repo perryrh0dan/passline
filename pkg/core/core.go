@@ -12,9 +12,9 @@ import (
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/perryrh0dan/passline/crypt"
-	"github.com/perryrh0dan/passline/renderer"
-	"github.com/perryrh0dan/passline/storage"
+	"github.com/perryrh0dan/passline/pkg/crypt"
+	"github.com/perryrh0dan/passline/pkg/renderer"
+	"github.com/perryrh0dan/passline/pkg/storage"
 )
 
 func getPassword(c *cli.Context) ([]byte, error) {

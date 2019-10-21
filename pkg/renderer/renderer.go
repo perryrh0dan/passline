@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/perryrh0dan/passline/storage"
+	"github.com/perryrh0dan/passline/pkg/storage"
 )
 
 // DisplayWebsite single item
