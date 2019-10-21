@@ -23,10 +23,18 @@ func InvalidName(name string) {
 	fmt.Printf("Unable to find item with name: %s\n", name)
 }
 
+func InvalidPassword() {
+	fmt.Printf("Invalid Password\n")
+}
+
 func ClipboardError() {
 	fmt.Printf("Error occured while copying to clipboard\n")
 }
 
 func MissingArgument(arguments []string) {
 	fmt.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))
+}
+
+func NameAlreadyExists(name string) {
+	fmt.Printf("error: name already exists %s\n", name)
 }

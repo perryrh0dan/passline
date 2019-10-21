@@ -18,23 +18,52 @@ import (
 )
 
 func getPassword(c *cli.Context) ([]byte, error) {
-	password := c.String("password")
+	password := []byte(c.String("password"))
 
-	if password == "" {
+	if len(password) <= 0 {
 		// Get global password
 		fmt.Print("Enter Global Password: ")
 
 		// Ask for global password
-		bytePassword, err := terminal.ReadPassword(int(syscall.Stdin))
+		var err error
+		password, err = terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			return nil, err
 		}
 
 		fmt.Println()
-		return bytePassword, nil
-	} else {
-		return []byte(password), nil
 	}
+
+	valid, err := checkPassword(password)
+	if err != nil || valid == false {
+		return nil, errors.New("Invalid password")
+	}
+
+	return password, nil
+}
+
+func checkPassword(password []byte) (bool, error) {
+	data, err := storage.GetAll()
+	if err != nil {
+		return false, err
+	}
+
+	if len(data) == 0 {
+		return true, nil
+	}
+
+	item, err := storage.GetByindex(0)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = crypt.AesGcmDecrypt(password, item.Password)
+	if err != nil {
+		renderer.InvalidPassword()
+		return false, err
+	}
+
+	return true, nil
 }
 
 // DisplayBySite the password
@@ -43,7 +72,7 @@ func DisplayBySite(c *cli.Context) error {
 
 	if len(args) == 1 {
 		// Check if entry for website exists
-		item, err := storage.Get(args[0])
+		item, err := storage.GetByName(args[0])
 		if err != nil {
 			renderer.InvalidName(args[0])
 			return err
@@ -53,11 +82,9 @@ func DisplayBySite(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		// Generate key from password with kdf
-		key := crypt.GenerateKey(globalPassword)
 
 		// Decrypt password
-		item.Password, err = crypt.AesGcmDecrypt(key, item.Password)
+		item.Password, err = crypt.AesGcmDecrypt(globalPassword, item.Password)
 		if err != nil {
 			return err
 		}
@@ -81,33 +108,34 @@ func DisplayBySite(c *cli.Context) error {
 	}
 }
 
-// Generate a random password for a website
+// Generate a random password for a item
 func GenerateForSite(c *cli.Context) error {
 	args := c.Args()
 
 	if len(args) == 2 {
 		// Check if entry exists
-		_, err := storage.Get(args[0])
+		_, err := storage.GetByName(args[0])
 		if err == nil {
-			return nil
+			renderer.NameAlreadyExists(args[0])
+			return err
 		}
 
-		// Generate new website entry
-		website := storage.Item{Name: args[0], Username: args[1], Password: generatePassword(20)}
-		renderer.DisplayItem(website)
-
+		// Check for password. No needed before generation but the flow is much better before
 		globalPassword, err := getPassword(c)
 		if err != nil {
 			return err
 		}
 
-		key := crypt.GenerateKey(globalPassword)
-		website.Password, err = crypt.AesGcmEncrypt(key, website.Password)
+		// Generate new item entry
+		item := storage.Item{Name: args[0], Username: args[1], Password: generatePassword(20)}
+		renderer.DisplayItem(item)
+
+		item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
 		if err != nil {
 			return err
 		}
 
-		err = storage.Add(website)
+		err = storage.Add(item)
 		if err != nil {
 			return err
 		}

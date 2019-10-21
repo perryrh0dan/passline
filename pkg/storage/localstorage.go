@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -23,15 +24,24 @@ func init() {
 }
 
 // Get data
-func Get(website string) (Item, error) {
+func GetByName(name string) (Item, error) {
 	data := getData()
 	for i := 0; i < len(data.Items); i++ {
-		if data.Items[i].Name == website {
+		if data.Items[i].Name == name {
 			return data.Items[i], nil
 		}
 	}
 
-	return Item{}, fmt.Errorf("No entry for website %s", website)
+	return Item{}, fmt.Errorf("No entry for website %s", name)
+}
+
+func GetByindex(index int) (Item, error) {
+	data := getData()
+	if 0 <= index && index < len(data.Items) {
+		return data.Items[index], nil
+	} else {
+		return Item{}, errors.New("Out of index")
+	}
 }
 
 func GetAll() ([]Item, error) {

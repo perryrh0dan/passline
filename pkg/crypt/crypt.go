@@ -13,25 +13,27 @@ import (
 )
 
 // AesGcmEncrypt takes an encryption key and a plaintext string and encrypts it with AES256 in GCM mode, which provides authenticated encryption. Returns the ciphertext and the used nonce.
-func AesGcmEncrypt(key []byte, text string) (string, error) {
+func AesGcmEncrypt(password []byte, text string) (string, error) {
+	// Generate key from password with kdf
+	key := GenerateKey(password)
 	plaintextBytes := []byte(text)
 
 	// Creation of the new block cipher based on the key
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	// Wrap the block cipher in a Galois Counter Mode (GCM) with standard nonce length
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	// Create a random nonce
 	nonce := make([]byte, aesgcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	// The first parameter is the prefix value
@@ -42,24 +44,27 @@ func AesGcmEncrypt(key []byte, text string) (string, error) {
 }
 
 // AesGcmDecrypt takes an decryption key, a ciphertext and the corresponding nonce and decrypts it with AES256 in GCM mode. Returns the plaintext string.
-func AesGcmDecrypt(key []byte, cryptoText string) (string, error) {
+func AesGcmDecrypt(password []byte, cryptoText string) (string, error) {
+	// Generate key from password with kdf
+	key := GenerateKey(password)
+
 	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	nonceSize := aesgcm.NonceSize()
 	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
 	plaintextBytes, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	return fmt.Sprintf("%s", plaintextBytes), nil
