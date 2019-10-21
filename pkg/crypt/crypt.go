@@ -16,24 +16,28 @@ import (
 func AesGcmEncrypt(key []byte, text string) (string, error) {
 	plaintextBytes := []byte(text)
 
+	// Creation of the new block cipher based on the key
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err)
 	}
 
+	// Wrap the block cipher in a Galois Counter Mode (GCM) with standard nonce length
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		panic(err.Error())
 	}
 
+	// Create a random nonce
 	nonce := make([]byte, aesgcm.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		panic(err.Error())
 	}
 
+	// The first parameter is the prefix value
 	ciphertext := aesgcm.Seal(nonce, nonce, plaintextBytes, nil)
 
-	// convert to base64
+	// Convert to base64
 	return base64.URLEncoding.EncodeToString(ciphertext), nil
 }
 
