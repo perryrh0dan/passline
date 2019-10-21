@@ -15,6 +15,7 @@ import (
 	"github.com/perryrh0dan/passline/pkg/crypt"
 	"github.com/perryrh0dan/passline/pkg/renderer"
 	"github.com/perryrh0dan/passline/pkg/storage"
+	"github.com/perryrh0dan/passline/pkg/structs"
 )
 
 func getPassword(c *cli.Context) ([]byte, error) {
@@ -127,7 +128,7 @@ func GenerateForSite(c *cli.Context) error {
 		}
 
 		// Generate new item entry
-		item := storage.Item{Name: args[0], Username: args[1], Password: generatePassword(20)}
+		item := structs.Item{Name: args[0], Username: args[1], Password: generatePassword(20)}
 		renderer.DisplayItem(item)
 
 		item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
@@ -139,7 +140,25 @@ func GenerateForSite(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		return nil
+	}
+
+	return nil
+}
+
+func DeleteItem(c *cli.Context) error {
+	args := c.Args()
+
+	if len(args) == 1 {
+		item, err := storage.GetByName(args[0])
+		if err != nil {
+			renderer.InvalidName(args[0])
+			return err
+		}
+
+		err = storage.Delete(item)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

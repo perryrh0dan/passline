@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sort"
 
 	"github.com/perryrh0dan/passline/pkg/core"
@@ -33,10 +32,19 @@ func setupApp() *cli.App {
 		{
 			Name:      "add",
 			Aliases:   []string{"a"},
-			Usage:     "Add a existing password for a website",
-			ArgsUsage: "<website> <username> <password>",
+			Usage:     "Add an existing password for a website",
+			ArgsUsage: "<name> <username> <password>",
 			Action: func(c *cli.Context) error {
-				fmt.Println("Add")
+				return nil
+			},
+		},
+		{
+			Name:      "delete",
+			Aliases:   []string{"d"},
+			Usage:     "Delete an item",
+			ArgsUsage: "<name>",
+			Action: func(c *cli.Context) error {
+				_ = core.DeleteItem(c)
 				return nil
 			},
 		},

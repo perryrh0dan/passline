@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/perryrh0dan/passline/pkg/storage"
+	"github.com/perryrh0dan/passline/pkg/structs"
 )
 
 // DisplayItem single item
-func DisplayItem(item storage.Item) {
+func DisplayItem(item structs.Item) {
 	fmt.Printf("Name: %s\nUsername: %s\nPassword: %s\n", item.Name, item.Username, item.Password)
 }
 
-func DisplayItems(websites []storage.Item) {
+func DisplayItems(websites []structs.Item) {
 	for _, website := range websites {
 		fmt.Printf("%s\n", website.Name)
 	}

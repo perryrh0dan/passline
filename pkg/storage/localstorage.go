@@ -9,6 +9,8 @@ import (
 	"path"
 
 	"github.com/perryrh0dan/passline/pkg/config"
+	"github.com/perryrh0dan/passline/pkg/structs"
+	"github.com/perryrh0dan/passline/pkg/util"
 )
 
 var storageDir string
@@ -24,7 +26,7 @@ func init() {
 }
 
 // Get data
-func GetByName(name string) (Item, error) {
+func GetByName(name string) (structs.Item, error) {
 	data := getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -32,27 +34,35 @@ func GetByName(name string) (Item, error) {
 		}
 	}
 
-	return Item{}, fmt.Errorf("No entry for website %s", name)
+	return structs.Item{}, fmt.Errorf("No entry for website %s", name)
 }
 
-func GetByindex(index int) (Item, error) {
+func GetByindex(index int) (structs.Item, error) {
 	data := getData()
 	if 0 <= index && index < len(data.Items) {
 		return data.Items[index], nil
 	} else {
-		return Item{}, errors.New("Out of index")
+		return structs.Item{}, errors.New("Out of index")
 	}
 }
 
-func GetAll() ([]Item, error) {
+func GetAll() ([]structs.Item, error) {
 	data := getData()
 	return data.Items, nil
 }
 
 // Add data
-func Add(website Item) error {
+func Add(website structs.Item) error {
 	data := getData()
 	data.Items = append(data.Items, website)
+	setData(data)
+	return nil
+}
+
+func Delete(item structs.Item) error {
+	data := getData()
+	index := util.GetIndexOfItem(data.Items, item)
+	data.Items = util.RemoveFromArray(data.Items, index)
 	setData(data)
 	return nil
 }
@@ -98,8 +108,8 @@ func ensureStorageDir() {
 	}
 }
 
-func getData() Data {
-	data := Data{}
+func getData() structs.Data {
+	data := structs.Data{}
 
 	_, err := os.Stat(storageFile)
 	if err == nil {
@@ -110,7 +120,7 @@ func getData() Data {
 	return data
 }
 
-func setData(data Data) {
+func setData(data structs.Data) {
 	_, err := os.Stat(storageDir)
 	if err == nil {
 		file, _ := json.MarshalIndent(data, "", " ")
