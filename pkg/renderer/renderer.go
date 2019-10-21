@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/perryrh0dan/passline/pkg/structs"
 )
 
@@ -32,7 +33,8 @@ func ClipboardError() {
 }
 
 func MissingArgument(arguments []string) {
-	fmt.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))
+	d := color.New(color.FgRed)
+	d.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))
 }
 
 func NameAlreadyExists(name string) {

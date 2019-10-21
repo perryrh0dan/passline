@@ -59,9 +59,10 @@ func setupApp() *cli.App {
 			},
 		},
 		{
-			Name:    "list",
-			Aliases: []string{"l"},
-			Usage:   "List all items",
+			Name:      "list",
+			Aliases:   []string{"l"},
+			Usage:     "List all items",
+			ArgsUsage: " ",
 			Action: func(c *cli.Context) error {
 				_ = core.ListSites()
 				return nil
