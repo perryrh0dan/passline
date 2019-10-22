@@ -13,21 +13,24 @@ import (
 	"github.com/perryrh0dan/passline/pkg/util"
 )
 
-var storageDir string
-var storageFile string
+type LocalStorage struct {
+	storageDir  string
+	storageFile string
+}
 
-func init() {
-	mainDir, _ := getMainDir()
+func (ls *LocalStorage) Init() error {
+	mainDir, _ := ls.getMainDir()
 
-	storageDir = path.Join(mainDir, "storage")
-	storageFile = path.Join(storageDir, "storage.json")
+	ls.storageDir = path.Join(mainDir, "storage")
+	ls.storageFile = path.Join(ls.storageDir, "storage.json")
 
-	ensureDirectories()
+	ls.ensureDirectories()
+	return nil
 }
 
 // Get data
-func GetByName(name string) (structs.Item, error) {
-	data := getData()
+func (ls LocalStorage) GetByName(name string) (structs.Item, error) {
+	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
 			return data.Items[i], nil
@@ -37,8 +40,8 @@ func GetByName(name string) (structs.Item, error) {
 	return structs.Item{}, fmt.Errorf("No entry for website %s", name)
 }
 
-func GetByindex(index int) (structs.Item, error) {
-	data := getData()
+func (ls LocalStorage) GetByIndex(index int) (structs.Item, error) {
+	data := ls.getData()
 	if 0 <= index && index < len(data.Items) {
 		return data.Items[index], nil
 	} else {
@@ -46,28 +49,28 @@ func GetByindex(index int) (structs.Item, error) {
 	}
 }
 
-func GetAll() ([]structs.Item, error) {
-	data := getData()
+func (ls LocalStorage) GetAll() ([]structs.Item, error) {
+	data := ls.getData()
 	return data.Items, nil
 }
 
 // Add data
-func Add(website structs.Item) error {
-	data := getData()
+func (ls LocalStorage) Add(website structs.Item) error {
+	data := ls.getData()
 	data.Items = append(data.Items, website)
-	setData(data)
+	ls.setData(data)
 	return nil
 }
 
-func Delete(item structs.Item) error {
-	data := getData()
+func (ls LocalStorage) Delete(item structs.Item) error {
+	data := ls.getData()
 	index := util.GetIndexOfItem(data.Items, item)
 	data.Items = util.RemoveFromArray(data.Items, index)
-	setData(data)
+	ls.setData(data)
 	return nil
 }
 
-func getMainDir() (string, error) {
+func (s LocalStorage) getMainDir() (string, error) {
 	config, err := config.Get()
 	if err != nil {
 		return "", err
@@ -76,13 +79,13 @@ func getMainDir() (string, error) {
 	return config.Directory, nil
 }
 
-func ensureDirectories() {
-	ensureMainDir()
-	ensureStorageDir()
+func (ls LocalStorage) ensureDirectories() {
+	ls.ensureMainDir()
+	ls.ensureStorageDir()
 }
 
-func ensureMainDir() error {
-	mainDir, err := getMainDir()
+func (ls LocalStorage) ensureMainDir() error {
+	mainDir, err := ls.getMainDir()
 	if err != nil {
 		return err
 	}
@@ -98,32 +101,32 @@ func ensureMainDir() error {
 	return nil
 }
 
-func ensureStorageDir() {
-	_, err := os.Stat(storageDir)
+func (ls LocalStorage) ensureStorageDir() {
+	_, err := os.Stat(ls.storageDir)
 	if err != nil {
-		err := os.Mkdir(storageDir, os.ModePerm)
+		err := os.Mkdir(ls.storageDir, os.ModePerm)
 		if err != nil {
 			println("Cant create directory")
 		}
 	}
 }
 
-func getData() structs.Data {
+func (ls LocalStorage) getData() structs.Data {
 	data := structs.Data{}
 
-	_, err := os.Stat(storageFile)
+	_, err := os.Stat(ls.storageFile)
 	if err == nil {
-		file, _ := ioutil.ReadFile(storageFile)
+		file, _ := ioutil.ReadFile(ls.storageFile)
 		_ = json.Unmarshal([]byte(file), &data)
 	}
 
 	return data
 }
 
-func setData(data structs.Data) {
-	_, err := os.Stat(storageDir)
+func (ls LocalStorage) setData(data structs.Data) {
+	_, err := os.Stat(ls.storageDir)
 	if err == nil {
 		file, _ := json.MarshalIndent(data, "", " ")
-		_ = ioutil.WriteFile(storageFile, file, 0644)
+		_ = ioutil.WriteFile(ls.storageFile, file, 0644)
 	}
 }

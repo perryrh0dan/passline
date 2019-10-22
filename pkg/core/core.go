@@ -1,22 +1,42 @@
 package core
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/atotto/clipboard"
+	"github.com/fatih/color"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"github.com/perryrh0dan/passline/pkg/config"
 	"github.com/perryrh0dan/passline/pkg/crypt"
 	"github.com/perryrh0dan/passline/pkg/renderer"
 	"github.com/perryrh0dan/passline/pkg/storage"
 	"github.com/perryrh0dan/passline/pkg/structs"
 )
+
+var store storage.Storage
+
+func init() {
+	conf, _ := config.Get()
+	switch conf.Storage {
+	case "local":
+		store = &storage.LocalStorage{}
+	case "firestore":
+		store = &storage.FireStore{}
+	}
+	err := store.Init()
+	if err != nil {
+		renderer.StorageError()
+	}
+}
 
 func getPassword(c *cli.Context) ([]byte, error) {
 	password := []byte(c.String("password"))
@@ -44,7 +64,7 @@ func getPassword(c *cli.Context) ([]byte, error) {
 }
 
 func checkPassword(password []byte) (bool, error) {
-	data, err := storage.GetAll()
+	data, err := store.GetAll()
 	if err != nil {
 		return false, err
 	}
@@ -53,7 +73,7 @@ func checkPassword(password []byte) (bool, error) {
 		return true, nil
 	}
 
-	item, err := storage.GetByindex(0)
+	item, err := store.GetByIndex(0)
 	if err != nil {
 		return false, err
 	}
@@ -67,13 +87,19 @@ func checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
+func getInput() string {
+	reader := bufio.NewReader(os.Stdin)
+	text, _ := reader.ReadString('\n')
+	return text
+}
+
 // DisplayBySite the password
 func DisplayBySite(c *cli.Context) error {
 	args := c.Args()
 
 	if len(args) == 1 {
 		// Check if entry for website exists
-		item, err := storage.GetByName(args[0])
+		item, err := store.GetByName(args[0])
 		if err != nil {
 			renderer.InvalidName(args[0])
 			return err
@@ -111,36 +137,42 @@ func DisplayBySite(c *cli.Context) error {
 
 // Generate a random password for a item
 func GenerateForSite(c *cli.Context) error {
-	args := c.Args()
+	// User input name
+	renderer.CreatingMessage()
+	fmt.Printf("Please enter the URL []: ")
+	name := getInput()
 
-	if len(args) == 2 {
-		// Check if entry exists
-		_, err := storage.GetByName(args[0])
-		if err == nil {
-			renderer.NameAlreadyExists(args[0])
-			return err
-		}
-
-		// Check for password. No needed before generation but the flow is much better before
-		globalPassword, err := getPassword(c)
-		if err != nil {
-			return err
-		}
-
-		// Generate new item entry
-		item := structs.Item{Name: args[0], Username: args[1], Password: generatePassword(20)}
-		renderer.DisplayItem(item)
-
-		item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
-		if err != nil {
-			return err
-		}
-
-		err = storage.Add(item)
-		if err != nil {
-			return err
-		}
+	// Check if entry/name already exists
+	_, err := store.GetByName(name)
+	if err == nil {
+		renderer.NameAlreadyExists(name)
+		return err
 	}
+
+	// User input username
+	fmt.Printf("Please enter the Username/Login []: ")
+	username := getInput()
+
+	// Check for global password.
+	globalPassword, err := getPassword(c)
+	if err != nil {
+		return err
+	}
+
+	// Generate new item entry
+	item := structs.Item{Name: name, Username: username, Password: generatePassword(20)}
+
+	item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
+	if err != nil {
+		return err
+	}
+
+	err = store.Add(item)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", color.YellowString(name))
 
 	return nil
 }
@@ -149,13 +181,13 @@ func DeleteItem(c *cli.Context) error {
 	args := c.Args()
 
 	if len(args) == 1 {
-		item, err := storage.GetByName(args[0])
+		item, err := store.GetByName(args[0])
 		if err != nil {
 			renderer.InvalidName(args[0])
 			return err
 		}
 
-		err = storage.Delete(item)
+		err = store.Delete(item)
 		if err != nil {
 			return err
 		}
@@ -165,7 +197,7 @@ func DeleteItem(c *cli.Context) error {
 }
 
 func ListSites() error {
-	websites, err := storage.GetAll()
+	websites, err := store.GetAll()
 	if err != nil {
 		return nil
 	}

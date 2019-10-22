@@ -32,6 +32,16 @@ func ClipboardError() {
 	fmt.Printf("Error occured while copying to clipboard\n")
 }
 
+func StorageError() {
+	d := color.New(color.FgRed)
+	d.Printf("error: unable to initialice storage\n")
+}
+
+func CreatingMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Creating Website login...\n")
+}
+
 func MissingArgument(arguments []string) {
 	d := color.New(color.FgRed)
 	d.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))

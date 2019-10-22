@@ -49,9 +49,19 @@ func setupApp() *cli.App {
 			},
 		},
 		{
-			Name:      "generate",
-			Aliases:   []string{"g"},
-			Usage:     "Generate a password for an item",
+			Name:    "create",
+			Aliases: []string{"c"},
+			Usage:   "Generate a password for an item",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "name, n",
+					Usage: "Name of the item",
+				},
+				cli.StringFlag{
+					Name:  "username, u",
+					Usage: "Username",
+				},
+			},
 			ArgsUsage: "<website> <username>",
 			Action: func(c *cli.Context) error {
 				_ = core.GenerateForSite(c)
