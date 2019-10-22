@@ -4,11 +4,9 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/fatih/color"
@@ -20,6 +18,7 @@ import (
 	"github.com/perryrh0dan/passline/pkg/renderer"
 	"github.com/perryrh0dan/passline/pkg/storage"
 	"github.com/perryrh0dan/passline/pkg/structs"
+	"github.com/perryrh0dan/passline/pkg/utils"
 )
 
 var store storage.Storage
@@ -90,57 +89,57 @@ func checkPassword(password []byte) (bool, error) {
 func getInput() string {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
+	text = strings.TrimSuffix(text, "\n")
 	return text
 }
 
 // DisplayBySite the password
-func DisplayBySite(c *cli.Context) error {
-	args := c.Args()
+func DisplayByName(c *cli.Context) error {
 
-	if len(args) == 1 {
-		// Check if entry for website exists
-		item, err := store.GetByName(args[0])
-		if err != nil {
-			renderer.InvalidName(args[0])
-			return err
-		}
-
-		globalPassword, err := getPassword(c)
-		if err != nil {
-			return err
-		}
-
-		// Decrypt password
-		item.Password, err = crypt.AesGcmDecrypt(globalPassword, item.Password)
-		if err != nil {
-			return err
-		}
-
-		// Display item and copy password to clipboard
-		renderer.DisplayItem(item)
-		err = clipboard.WriteAll(item.Password)
-		if err != nil {
-			renderer.ClipboardError()
-			return err
-		}
-
-		return nil
-	} else {
-		if len(args) < 1 {
-			renderer.MissingArgument([]string{"name"})
-			return errors.New("Not enough arguments")
-		} else {
-			return errors.New("Too many arguments")
-		}
+	// Check for name flag or ask for input
+	name := c.String("name")
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
 	}
+
+	// Check if entry/name exists
+	item, err := store.GetByName(name)
+	if err != nil {
+		renderer.InvalidName(name)
+		return err
+	}
+
+	globalPassword, err := getPassword(c)
+	if err != nil {
+		return err
+	}
+
+	// Decrypt password
+	item.Password, err = crypt.AesGcmDecrypt(globalPassword, item.Password)
+	if err != nil {
+		return err
+	}
+
+	err = clipboard.WriteAll(item.Password)
+	if err != nil {
+		renderer.ClipboardError()
+		return err
+	}
+
+	return nil
 }
 
 // Generate a random password for a item
 func GenerateForSite(c *cli.Context) error {
-	// User input name
 	renderer.CreatingMessage()
-	fmt.Printf("Please enter the URL []: ")
-	name := getInput()
+
+	// Check for name flag or ask for input
+	name := c.String("name")
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
+	}
 
 	// Check if entry/name already exists
 	_, err := store.GetByName(name)
@@ -149,18 +148,21 @@ func GenerateForSite(c *cli.Context) error {
 		return err
 	}
 
-	// User input username
-	fmt.Printf("Please enter the Username/Login []: ")
-	username := getInput()
+	// Check for username flag or aks for input
+	username := c.String("username")
+	if username == "" {
+		fmt.Printf("Please enter the Username/Login []: ")
+		username = getInput()
+	}
 
-	// Check for global password.
+	// Get global password.
 	globalPassword, err := getPassword(c)
 	if err != nil {
 		return err
 	}
 
-	// Generate new item entry
-	item := structs.Item{Name: name, Username: username, Password: generatePassword(20)}
+	// Generate new item
+	item := structs.Item{Name: name, Username: username, Password: utils.GeneratePassword(20)}
 
 	item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
 	if err != nil {
@@ -172,31 +174,37 @@ func GenerateForSite(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", color.YellowString(name))
+	coloredName := color.YellowString(name)
+	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", coloredName)
 
 	return nil
 }
 
-func DeleteItem(c *cli.Context) error {
-	args := c.Args()
+func DeleteByName(c *cli.Context) error {
+	// Check for name flag or ask for input
+	name := c.String("name")
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
+	}
 
-	if len(args) == 1 {
-		item, err := store.GetByName(args[0])
-		if err != nil {
-			renderer.InvalidName(args[0])
-			return err
-		}
+	// Check if entry/name already exists
+	item, err := store.GetByName(name)
+	if err != nil {
+		renderer.InvalidName(name)
+		return err
+	}
 
-		err = store.Delete(item)
-		if err != nil {
-			return err
-		}
+	// Delete item
+	err = store.Delete(item)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func ListSites() error {
+func ListAllItems() error {
 	websites, err := store.GetAll()
 	if err != nil {
 		return nil
@@ -204,18 +212,4 @@ func ListSites() error {
 
 	renderer.DisplayItems(websites)
 	return nil
-}
-
-func generatePassword(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789" +
-		"!$%&()/?")
-	var b strings.Builder
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
-	}
-	password := b.String() // E.g. "ExcbsVQs"
-	return password
 }

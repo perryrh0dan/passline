@@ -10,7 +10,7 @@ import (
 
 	"github.com/perryrh0dan/passline/pkg/config"
 	"github.com/perryrh0dan/passline/pkg/structs"
-	"github.com/perryrh0dan/passline/pkg/util"
+	"github.com/perryrh0dan/passline/pkg/utils"
 )
 
 type LocalStorage struct {
@@ -64,8 +64,8 @@ func (ls LocalStorage) Add(website structs.Item) error {
 
 func (ls LocalStorage) Delete(item structs.Item) error {
 	data := ls.getData()
-	index := util.GetIndexOfItem(data.Items, item)
-	data.Items = util.RemoveFromArray(data.Items, index)
+	index := utils.GetIndexOfItem(data.Items, item)
+	data.Items = utils.RemoveFromArray(data.Items, index)
 	ls.setData(data)
 	return nil
 }
