@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/fatih/color"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
 
@@ -90,57 +89,69 @@ func getInput() string {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSuffix(text, "\n")
+	// TODO Test if working for Linux
+	text = strings.TrimSuffix(text, "\r")
 	return text
 }
 
-// DisplayBySite the password
-func DisplayBySite(c *cli.Context) error {
+// DisplayByName the password
+func DisplayByName(c *cli.Context) error {
 	args := c.Args()
 
-	if len(args) == 1 {
-		// Check if entry for website exists
-		item, err := store.GetByName(args[0])
-		if err != nil {
-			renderer.InvalidName(args[0])
-			return err
-		}
-
-		globalPassword, err := getPassword(c)
-		if err != nil {
-			return err
-		}
-
-		// Decrypt password
-		item.Password, err = crypt.AesGcmDecrypt(globalPassword, item.Password)
-		if err != nil {
-			return err
-		}
-
-		// Display item and copy password to clipboard
-		renderer.DisplayItem(item)
-		err = clipboard.WriteAll(item.Password)
-		if err != nil {
-			renderer.ClipboardError()
-			return err
-		}
-
-		return nil
-	} else {
-		if len(args) < 1 {
-			renderer.MissingArgument([]string{"name"})
-			return errors.New("Not enough arguments")
-		} else {
-			return errors.New("Too many arguments")
-		}
+	name := ""
+	if len(args) >= 1 {
+		name = args[0]
 	}
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
+	}
+
+	// Check if item for name exists
+	item, err := store.GetByName(name)
+	if err != nil {
+		renderer.InvalidName(name)
+		return err
+	}
+
+	// Get and Check for global password.
+	globalPassword, err := getPassword(c)
+	if err != nil {
+		return err
+	}
+
+	// Decrypt password
+	item.Password, err = crypt.AesGcmDecrypt(globalPassword, item.Password)
+	if err != nil {
+		return err
+	}
+
+	// Display item and copy password to clipboard
+	renderer.DisplayItem(item)
+	err = clipboard.WriteAll(item.Password)
+	if err != nil {
+		renderer.ClipboardError()
+		return err
+	}
+
+	renderer.SuccessfullCopiedToClipboard(item.Name)
+	return nil
 }
 
 // Generate a random password for a item
 func GenerateForSite(c *cli.Context) error {
-	// User input name
+	args := c.Args()
 	renderer.CreatingMessage()
-	fmt.Printf("Please enter the URL []: ")
-	name := getInput()
+
+	// User input name
+	name := ""
+	if len(args) >= 1 {
+		name = args[0]
+	}
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
+	}
 
 	// Check if entry/name already exists
 	_, err := store.GetByName(name)
@@ -150,17 +161,24 @@ func GenerateForSite(c *cli.Context) error {
 	}
 
 	// User input username
-	fmt.Printf("Please enter the Username/Login []: ")
-	username := getInput()
+	username := ""
+	if len(args) >= 2 {
+		username = args[1]
+	}
+	if username == "" {
+		fmt.Printf("Please enter the Username/Login []: ")
+		username = getInput()
+	}
 
-	// Check for global password.
+	// Get and Check for global password.
 	globalPassword, err := getPassword(c)
 	if err != nil {
 		return err
 	}
 
 	// Generate new item entry
-	item := storage.Item{Name: name, Username: username, Password: generatePassword(20)}
+	password := generatePassword(20)
+	item := storage.Item{Name: name, Username: username, Password: password}
 
 	item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
 	if err != nil {
@@ -171,26 +189,37 @@ func GenerateForSite(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	err = clipboard.WriteAll(password)
+	if err != nil {
+		renderer.ClipboardError()
+		return err
+	}
 
-	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", color.YellowString(name))
-
+	renderer.SuccessfullCopiedToClipboard(item.Name)
 	return nil
 }
 
 func DeleteItem(c *cli.Context) error {
 	args := c.Args()
 
-	if len(args) == 1 {
-		item, err := store.GetByName(args[0])
-		if err != nil {
-			renderer.InvalidName(args[0])
-			return err
-		}
+	name := ""
+	if len(args) >= 1 {
+		name = args[0]
+	}
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
+	}
 
-		err = store.Delete(item)
-		if err != nil {
-			return err
-		}
+	item, err := store.GetByName(name)
+	if err != nil {
+		renderer.InvalidName(name)
+		return err
+	}
+
+	err = store.Delete(item)
+	if err != nil {
+		return err
 	}
 
 	return nil

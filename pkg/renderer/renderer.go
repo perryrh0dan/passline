@@ -10,13 +10,20 @@ import (
 
 // DisplayItem single item
 func DisplayItem(item storage.Item) {
-	fmt.Printf("Name: %s\nUsername: %s\nPassword: %s\n", item.Name, item.Username, item.Password)
+	fmt.Printf("Name: %s\n", item.Name)
+	fmt.Printf("Name: %s\n", item.Username)
+	fmt.Printf("Password: %s\n", item.Password)
 }
 
 func DisplayItems(websites []storage.Item) {
 	for _, website := range websites {
 		fmt.Printf("%s\n", website.Name)
 	}
+}
+
+func SuccessfullCopiedToClipboard(name string) {
+	name = color.YellowString(name)
+	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", name)
 }
 
 // InvalidName error message

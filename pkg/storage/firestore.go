@@ -83,11 +83,11 @@ func (fs FireStore) Add(item Item) error {
 	if err != nil {
 		log.Fatalf("Failed adding aturing: %v", err)
 	}
-	
+
 	return nil
 }
 
-func (fs FireStore) Delete(Item) error {
+func (fs FireStore) Delete(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(context.Background())
 	if err != nil {
 		log.Printf("An error has occured: %s", err)
