@@ -5,15 +5,15 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/perryrh0dan/passline/pkg/structs"
+	"github.com/perryrh0dan/passline/pkg/storage"
 )
 
 // DisplayItem single item
-func DisplayItem(item structs.Item) {
+func DisplayItem(item storage.Item) {
 	fmt.Printf("Name: %s\nUsername: %s\nPassword: %s\n", item.Name, item.Username, item.Password)
 }
 
-func DisplayItems(websites []structs.Item) {
+func DisplayItems(websites []storage.Item) {
 	for _, website := range websites {
 		fmt.Printf("%s\n", website.Name)
 	}

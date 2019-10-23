@@ -1,13 +1,22 @@
 package storage
 
-import "github.com/perryrh0dan/passline/pkg/structs"
+type Data struct {
+	Items []Item
+}
+
+// Item structure
+type Item struct {
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
 
 // Storage interface
 type Storage interface {
 	Init() error
-	GetByName(string) (structs.Item, error)
-	GetByIndex(int) (structs.Item, error)
-	GetAll() ([]structs.Item, error)
-	Add(structs.Item) error
-	Delete(structs.Item) error
+	GetByName(string) (Item, error)
+	GetByIndex(int) (Item, error)
+	GetAll() ([]Item, error)
+	Add(Item) error
+	Delete(Item) error
 }

@@ -19,7 +19,6 @@ import (
 	"github.com/perryrh0dan/passline/pkg/crypt"
 	"github.com/perryrh0dan/passline/pkg/renderer"
 	"github.com/perryrh0dan/passline/pkg/storage"
-	"github.com/perryrh0dan/passline/pkg/structs"
 )
 
 var store storage.Storage
@@ -90,6 +89,7 @@ func checkPassword(password []byte) (bool, error) {
 func getInput() string {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
+	text = strings.TrimSuffix(text, "\n")
 	return text
 }
 
@@ -160,7 +160,7 @@ func GenerateForSite(c *cli.Context) error {
 	}
 
 	// Generate new item entry
-	item := structs.Item{Name: name, Username: username, Password: generatePassword(20)}
+	item := storage.Item{Name: name, Username: username, Password: generatePassword(20)}
 
 	item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
 	if err != nil {

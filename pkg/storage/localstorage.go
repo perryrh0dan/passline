@@ -9,8 +9,6 @@ import (
 	"path"
 
 	"github.com/perryrh0dan/passline/pkg/config"
-	"github.com/perryrh0dan/passline/pkg/structs"
-	"github.com/perryrh0dan/passline/pkg/util"
 )
 
 type LocalStorage struct {
@@ -29,7 +27,7 @@ func (ls *LocalStorage) Init() error {
 }
 
 // Get data
-func (ls LocalStorage) GetByName(name string) (structs.Item, error) {
+func (ls LocalStorage) GetByName(name string) (Item, error) {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -37,35 +35,35 @@ func (ls LocalStorage) GetByName(name string) (structs.Item, error) {
 		}
 	}
 
-	return structs.Item{}, fmt.Errorf("No entry for website %s", name)
+	return Item{}, fmt.Errorf("No entry for website %s", name)
 }
 
-func (ls LocalStorage) GetByIndex(index int) (structs.Item, error) {
+func (ls LocalStorage) GetByIndex(index int) (Item, error) {
 	data := ls.getData()
-	if 0 <= index && index < len(data.Items) {
-		return data.Items[index], nil
-	} else {
-		return structs.Item{}, errors.New("Out of index")
+	if index < 0 && index > len(data.Items) {
+		return Item{}, errors.New("Out of index")
 	}
+
+	return data.Items[index], nil
 }
 
-func (ls LocalStorage) GetAll() ([]structs.Item, error) {
+func (ls LocalStorage) GetAll() ([]Item, error) {
 	data := ls.getData()
 	return data.Items, nil
 }
 
 // Add data
-func (ls LocalStorage) Add(website structs.Item) error {
+func (ls LocalStorage) Add(website Item) error {
 	data := ls.getData()
 	data.Items = append(data.Items, website)
 	ls.setData(data)
 	return nil
 }
 
-func (ls LocalStorage) Delete(item structs.Item) error {
+func (ls LocalStorage) Delete(item Item) error {
 	data := ls.getData()
-	index := util.GetIndexOfItem(data.Items, item)
-	data.Items = util.RemoveFromArray(data.Items, index)
+	index := getIndexOfItem(data.Items, item)
+	data.Items = removeFromArray(data.Items, index)
 	ls.setData(data)
 	return nil
 }
@@ -111,8 +109,8 @@ func (ls LocalStorage) ensureStorageDir() {
 	}
 }
 
-func (ls LocalStorage) getData() structs.Data {
-	data := structs.Data{}
+func (ls LocalStorage) getData() Data {
+	data := Data{}
 
 	_, err := os.Stat(ls.storageFile)
 	if err == nil {
@@ -123,10 +121,25 @@ func (ls LocalStorage) getData() structs.Data {
 	return data
 }
 
-func (ls LocalStorage) setData(data structs.Data) {
+func (ls LocalStorage) setData(data Data) {
 	_, err := os.Stat(ls.storageDir)
 	if err == nil {
 		file, _ := json.MarshalIndent(data, "", " ")
 		_ = ioutil.WriteFile(ls.storageFile, file, 0644)
 	}
+}
+
+func removeFromArray(s []Item, i int) []Item {
+	s[len(s)-1], s[i] = s[i], s[len(s)-1]
+	return s[:len(s)-1]
+}
+
+func getIndexOfItem(slice []Item, item Item) int {
+	for p, v := range slice {
+		if v == item {
+			return p
+		}
+		return -1
+	}
+	return -1
 }
