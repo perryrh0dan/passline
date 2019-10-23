@@ -76,7 +76,7 @@ func checkPassword(password []byte) (bool, error) {
 		return false, err
 	}
 
-	_, err = crypt.AesGcmDecrypt(password, item.Password)
+	_, err = crypt.AesGcmDecrypt(password, item.Credentials[0].Password)
 	if err != nil {
 		renderer.InvalidPassword()
 		return false, err
@@ -114,27 +114,52 @@ func DisplayByName(c *cli.Context) error {
 		return err
 	}
 
+	var credential storage.Credential
+	// Only need username for multiple credentials
+	if len(item.Credentials) > 1 {
+		// User input username
+		username := ""
+		if len(args) >= 2 {
+			username = args[1]
+		}
+		if username == "" {
+			fmt.Printf("Please enter the Username/Login []: ")
+			username = getInput()
+		}
+
+		// Check if name, username combination exists
+		item, err := store.GetByName(name)
+		if err == nil {
+			credential, err = item.GetCredentialByUsername(username)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		credential = item.Credentials[0]
+	}
+
 	// Get and Check for global password.
 	globalPassword, err := getPassword(c)
 	if err != nil {
 		return err
 	}
 
-	// Decrypt password
-	item.Password, err = crypt.AesGcmDecrypt(globalPassword, item.Password)
+	// Decrypt passwords
+	credential.Password, err = crypt.AesGcmDecrypt(globalPassword, credential.Password)
 	if err != nil {
 		return err
 	}
 
 	// Display item and copy password to clipboard
-	renderer.DisplayItem(item)
-	err = clipboard.WriteAll(item.Password)
+	renderer.DisplayCredential(credential)
+	err = clipboard.WriteAll(credential.Password)
 	if err != nil {
 		renderer.ClipboardError()
 		return err
 	}
 
-	renderer.SuccessfullCopiedToClipboard(item.Name)
+	renderer.SuccessfullCopiedToClipboard(item.Name, credential.Username)
 	return nil
 }
 
@@ -153,13 +178,6 @@ func GenerateForSite(c *cli.Context) error {
 		name = getInput()
 	}
 
-	// Check if entry/name already exists
-	_, err := store.GetByName(name)
-	if err == nil {
-		renderer.NameAlreadyExists(name)
-		return err
-	}
-
 	// User input username
 	username := ""
 	if len(args) >= 2 {
@@ -170,32 +188,52 @@ func GenerateForSite(c *cli.Context) error {
 		username = getInput()
 	}
 
+	// Check if name, username combination exists
+	item, err := store.GetByName(name)
+	if err == nil {
+		_, err = item.GetCredentialByUsername(username)
+		if err == nil {
+			return err
+		}
+	}
+
 	// Get and Check for global password.
 	globalPassword, err := getPassword(c)
 	if err != nil {
 		return err
 	}
 
-	// Generate new item entry
+	// Generate password and crypt password
 	password := generatePassword(20)
-	item := storage.Item{Name: name, Username: username, Password: password}
+	cryptedPassword, err := crypt.AesGcmEncrypt(globalPassword, password)
 
-	item.Password, err = crypt.AesGcmEncrypt(globalPassword, item.Password)
+	// Create Credentials
+	credential := storage.Credential{Username: username, Password: cryptedPassword}
+
+	// Check if item already exists
+	item, err = store.GetByName(name)
 	if err != nil {
-		return err
+		// Generate new item entry
+		item := storage.Item{Name: name, Credentials: []storage.Credential{credential}}
+		err = store.AddItem(item)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Add to existing item
+		err := store.AddCredential(name, credential)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = store.Add(item)
-	if err != nil {
-		return err
-	}
 	err = clipboard.WriteAll(password)
 	if err != nil {
 		renderer.ClipboardError()
 		return err
 	}
 
-	renderer.SuccessfullCopiedToClipboard(item.Name)
+	renderer.SuccessfullCopiedToClipboard(name, username)
 	return nil
 }
 
@@ -217,21 +255,60 @@ func DeleteItem(c *cli.Context) error {
 		return err
 	}
 
-	err = store.Delete(item)
-	if err != nil {
-		return err
+	if len(item.Credentials) <= 1 {
+		// If Item has only one Credential delete item
+		err = store.DeleteItem(item)
+		if err != nil {
+			return err
+		}
+	} else {
+		// If Item has multiple Credentials ask for username
+		// User input username
+		username := ""
+		if len(args) >= 2 {
+			username = args[1]
+		}
+		if username == "" {
+			fmt.Printf("Please enter the Username/Login []: ")
+			username = getInput()
+		}
+
+		// Check if name, username combination exists
+		var credential storage.Credential
+		credential, err = item.GetCredentialByUsername(username)
+		if err != nil {
+			return err
+		}
+
+		err = store.DeleteCredential(item, credential)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func ListSites() error {
-	websites, err := store.GetAll()
-	if err != nil {
-		return nil
+func ListSites(c *cli.Context) error {
+	args := c.Args()
+
+	if len(args) >= 1 {
+		item, err := store.GetByName(args[0])
+		if err != nil {
+			renderer.InvalidName(args[0])
+			return err
+		}
+
+		renderer.DisplayItem(item)
+	} else {
+		items, err := store.GetAll()
+		if err != nil {
+			return nil
+		}
+
+		renderer.DisplayItems(items)
 	}
 
-	renderer.DisplayItems(websites)
 	return nil
 }
 

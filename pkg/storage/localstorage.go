@@ -26,7 +26,7 @@ func (ls *LocalStorage) Init() error {
 	return nil
 }
 
-// Get data
+// Get item by name
 func (ls LocalStorage) GetByName(name string) (Item, error) {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
@@ -53,17 +53,52 @@ func (ls LocalStorage) GetAll() ([]Item, error) {
 }
 
 // Add data
-func (ls LocalStorage) Add(website Item) error {
+func (ls LocalStorage) AddItem(website Item) error {
 	data := ls.getData()
 	data.Items = append(data.Items, website)
 	ls.setData(data)
 	return nil
 }
 
-func (ls LocalStorage) Delete(item Item) error {
+func (ls LocalStorage) AddCredential(name string, credential Credential) error {
+	data := ls.getData()
+	for i := 0; i < len(data.Items); i++ {
+		if data.Items[i].Name == name {
+			for y := 0; y < len(data.Items[i].Credentials); y++ {
+				if data.Items[i].Credentials[y].Username == credential.Username {
+					return errors.New("Username already exists")
+				}
+			}
+			data.Items[i].Credentials = append(data.Items[i].Credentials, credential)
+			break
+		}
+	}
+
+	ls.setData(data)
+	return nil
+}
+
+func (ls LocalStorage) DeleteItem(item Item) error {
 	data := ls.getData()
 	index := getIndexOfItem(data.Items, item)
-	data.Items = removeFromArray(data.Items, index)
+	data.Items = removeFromItems(data.Items, index)
+	ls.setData(data)
+	return nil
+}
+
+func (ls LocalStorage) DeleteCredential(item Item, credential Credential) error {
+	data := ls.getData()
+	indexItem := getIndexOfItem(data.Items, item)
+	if indexItem == -1 {
+		return errors.New("Item not found")
+	}
+
+	indexCredential := getIndexOfCredential(data.Items[indexItem].Credentials, credential)
+	if indexCredential == -1 {
+		return errors.New("Item not found")
+	}
+
+	data.Items[indexItem].Credentials = removeFromCredentials(data.Items[indexItem].Credentials, indexCredential)
 	ls.setData(data)
 	return nil
 }
@@ -127,19 +162,4 @@ func (ls LocalStorage) setData(data Data) {
 		file, _ := json.MarshalIndent(data, "", " ")
 		_ = ioutil.WriteFile(ls.storageFile, file, 0644)
 	}
-}
-
-func removeFromArray(s []Item, i int) []Item {
-	s[len(s)-1], s[i] = s[i], s[len(s)-1]
-	return s[:len(s)-1]
-}
-
-func getIndexOfItem(slice []Item, item Item) int {
-	for p, v := range slice {
-		if v == item {
-			return p
-		}
-		return -1
-	}
-	return -1
 }

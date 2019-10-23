@@ -78,20 +78,50 @@ func (fs FireStore) GetAll() ([]Item, error) {
 	return items, nil
 }
 
-func (fs FireStore) Add(item Item) error {
+func (fs FireStore) AddItem(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Set(context.Background(), item)
 	if err != nil {
-		log.Fatalf("Failed adding aturing: %v", err)
+		log.Fatalf("Failed adding item: %v", err)
 	}
 
 	return nil
 }
 
-func (fs FireStore) Delete(item Item) error {
+func (fs FireStore) AddCredential(name string, credential Credential) error {
+	item, err := fs.GetByName(name)
+	if err != nil {
+		return err
+	}
+
+	item.Credentials = append(item.Credentials, credential)
+	err = fs.AddItem(item)
+	if err != nil {
+		log.Fatalf("Failed updating credentials: %v", err)
+	}
+
+	return nil
+}
+
+func (fs FireStore) DeleteItem(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(context.Background())
 	if err != nil {
 		log.Printf("An error has occured: %s", err)
 		return err
+	}
+
+	return nil
+}
+
+func (fs FireStore) DeleteCredential(item Item, credential Credential) error {
+	indexCredential := getIndexOfCredential(item.Credentials, credential)
+	if indexCredential == -1 {
+		return errors.New("Item not found")
+	}
+
+	item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
+	err := fs.AddItem(item)
+	if err != nil {
+		log.Fatalf("Failed updating credentials: %v", err)
 	}
 
 	return nil

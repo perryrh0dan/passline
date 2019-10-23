@@ -16,10 +16,7 @@ func setupApp() *cli.App {
 	app.Description = "Password manager for the command line"
 
 	// default command to get password
-	app.Action = func(c *cli.Context) error {
-		_ = core.DisplayByName(c)
-		return nil
-	}
+	app.Action = core.DisplayByName
 
 	app.Commands = []cli.Command{
 		{
@@ -49,11 +46,8 @@ func setupApp() *cli.App {
 			Name:      "list",
 			Aliases:   []string{"ls"},
 			Usage:     "List all items",
-			ArgsUsage: " ",
-			Action: func(c *cli.Context) error {
-				_ = core.ListSites()
-				return nil
-			},
+			ArgsUsage: "<name>",
+			Action:    core.ListSites,
 		},
 	}
 

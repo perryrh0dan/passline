@@ -11,8 +11,14 @@ import (
 // DisplayItem single item
 func DisplayItem(item storage.Item) {
 	fmt.Printf("Name: %s\n", item.Name)
-	fmt.Printf("Name: %s\n", item.Username)
-	fmt.Printf("Password: %s\n", item.Password)
+	for i := 0; i < len(item.Credentials); i++ {
+		fmt.Printf("%s\n", item.Credentials[i].Username)
+	}
+}
+
+func DisplayCredential(credential storage.Credential) {
+	fmt.Printf("Username: %s\n", credential.Username)
+	fmt.Printf("Password: %s\n", credential.Password)
 }
 
 func DisplayItems(websites []storage.Item) {
@@ -21,8 +27,8 @@ func DisplayItems(websites []storage.Item) {
 	}
 }
 
-func SuccessfullCopiedToClipboard(name string) {
-	name = color.YellowString(name)
+func SuccessfullCopiedToClipboard(name string, username string) {
+	name = color.YellowString(name + "/" + username)
 	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", name)
 }
 
