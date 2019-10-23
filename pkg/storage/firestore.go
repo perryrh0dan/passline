@@ -3,6 +3,7 @@ package storage
 import (
 	"errors"
 	"log"
+	"path"
 
 	"golang.org/x/net/context"
 
@@ -17,9 +18,12 @@ type FireStore struct {
 }
 
 func (fs *FireStore) Init() error {
+	mainDir, _ := getMainDir()
+	credentialsFile := path.Join(mainDir, "firebase.json")
+
 	ctx := context.Background()
 
-	opt := option.WithCredentialsFile("C:\\Users\\tpoe\\go\\src\\github.com\\perryrh0dan\\passline\\todo-83ef9-firebase-adminsdk-86yi4-73d003112b.json")
+	opt := option.WithCredentialsFile(credentialsFile)
 	config := &firebase.Config{ProjectID: "todo-83ef9"}
 	app, err := firebase.NewApp(ctx, config, opt)
 	if err != nil {

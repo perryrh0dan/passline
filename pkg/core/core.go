@@ -111,7 +111,7 @@ func DisplayByName(c *cli.Context) error {
 	item, err := store.GetByName(name)
 	if err != nil {
 		renderer.InvalidName(name)
-		return err
+		return nil
 	}
 
 	var credential storage.Credential
@@ -132,7 +132,7 @@ func DisplayByName(c *cli.Context) error {
 		if err == nil {
 			credential, err = item.GetCredentialByUsername(username)
 			if err != nil {
-				return err
+				return nil
 			}
 		}
 	} else {
@@ -142,13 +142,13 @@ func DisplayByName(c *cli.Context) error {
 	// Get and Check for global password.
 	globalPassword, err := getPassword(c)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	// Decrypt passwords
 	credential.Password, err = crypt.AesGcmDecrypt(globalPassword, credential.Password)
 	if err != nil {
-		return err
+		os.Exit(0)
 	}
 
 	// Display item and copy password to clipboard
@@ -156,7 +156,7 @@ func DisplayByName(c *cli.Context) error {
 	err = clipboard.WriteAll(credential.Password)
 	if err != nil {
 		renderer.ClipboardError()
-		return err
+		return nil
 	}
 
 	renderer.SuccessfullCopiedToClipboard(item.Name, credential.Username)
@@ -193,14 +193,14 @@ func GenerateForSite(c *cli.Context) error {
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
-			return err
+			return nil
 		}
 	}
 
 	// Get and Check for global password.
 	globalPassword, err := getPassword(c)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	// Generate password and crypt password
@@ -217,20 +217,20 @@ func GenerateForSite(c *cli.Context) error {
 		item := storage.Item{Name: name, Credentials: []storage.Credential{credential}}
 		err = store.AddItem(item)
 		if err != nil {
-			return err
+			os.Exit(0)
 		}
 	} else {
 		// Add to existing item
 		err := store.AddCredential(name, credential)
 		if err != nil {
-			return err
+			os.Exit(0)
 		}
 	}
 
 	err = clipboard.WriteAll(password)
 	if err != nil {
 		renderer.ClipboardError()
-		return err
+		os.Exit(0)
 	}
 
 	renderer.SuccessfullCopiedToClipboard(name, username)
@@ -252,14 +252,14 @@ func DeleteItem(c *cli.Context) error {
 	item, err := store.GetByName(name)
 	if err != nil {
 		renderer.InvalidName(name)
-		return err
+		os.Exit(0)
 	}
 
 	if len(item.Credentials) <= 1 {
 		// If Item has only one Credential delete item
 		err = store.DeleteItem(item)
 		if err != nil {
-			return err
+			os.Exit(0)
 		}
 	} else {
 		// If Item has multiple Credentials ask for username
@@ -277,12 +277,12 @@ func DeleteItem(c *cli.Context) error {
 		var credential storage.Credential
 		credential, err = item.GetCredentialByUsername(username)
 		if err != nil {
-			return err
+			os.Exit(0)
 		}
 
 		err = store.DeleteCredential(item, credential)
 		if err != nil {
-			return err
+			os.Exit(0)
 		}
 	}
 
@@ -296,7 +296,7 @@ func ListSites(c *cli.Context) error {
 		item, err := store.GetByName(args[0])
 		if err != nil {
 			renderer.InvalidName(args[0])
-			return err
+			os.Exit(0)
 		}
 
 		renderer.DisplayItem(item)

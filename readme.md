@@ -3,7 +3,7 @@
 </h1>
 
 <h4 align="center">
-  Tasks, boards & notes for the command-line habitat
+  Password manager for the command line
 </h4>
 
 <div align="center">

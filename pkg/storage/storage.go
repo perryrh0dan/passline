@@ -2,6 +2,8 @@ package storage
 
 import (
 	"errors"
+
+	"github.com/perryrh0dan/passline/pkg/config"
 )
 
 type Data struct {
@@ -39,6 +41,15 @@ type Storage interface {
 	AddCredential(string, Credential) error
 	DeleteItem(Item) error
 	DeleteCredential(Item, Credential) error
+}
+
+func getMainDir() (string, error) {
+	config, err := config.Get()
+	if err != nil {
+		return "", err
+	}
+
+	return config.Directory, nil
 }
 
 func removeFromItems(s []Item, i int) []Item {

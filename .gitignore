@@ -13,3 +13,6 @@
 
 # VSCode 
 .vscode/
+
+# Snapcraft
+*.snap

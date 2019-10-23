@@ -3,12 +3,9 @@ package storage
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-
-	"github.com/perryrh0dan/passline/pkg/config"
 )
 
 type LocalStorage struct {
@@ -17,7 +14,7 @@ type LocalStorage struct {
 }
 
 func (ls *LocalStorage) Init() error {
-	mainDir, _ := ls.getMainDir()
+	mainDir, _ := getMainDir()
 
 	ls.storageDir = path.Join(mainDir, "storage")
 	ls.storageFile = path.Join(ls.storageDir, "storage.json")
@@ -35,7 +32,7 @@ func (ls LocalStorage) GetByName(name string) (Item, error) {
 		}
 	}
 
-	return Item{}, fmt.Errorf("No entry for website %s", name)
+	return Item{}, errors.New("Item not found")
 }
 
 func (ls LocalStorage) GetByIndex(index int) (Item, error) {
@@ -103,22 +100,13 @@ func (ls LocalStorage) DeleteCredential(item Item, credential Credential) error 
 	return nil
 }
 
-func (s LocalStorage) getMainDir() (string, error) {
-	config, err := config.Get()
-	if err != nil {
-		return "", err
-	}
-
-	return config.Directory, nil
-}
-
 func (ls LocalStorage) ensureDirectories() {
 	ls.ensureMainDir()
 	ls.ensureStorageDir()
 }
 
 func (ls LocalStorage) ensureMainDir() error {
-	mainDir, err := ls.getMainDir()
+	mainDir, err := getMainDir()
 	if err != nil {
 		return err
 	}
