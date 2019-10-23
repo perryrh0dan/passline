@@ -1,0 +1,25 @@
+name: passline
+version: 0.0.1
+summary: Password manager for the command line
+description: |
+  Readme not rdy
+
+grade: stable
+confinement: strict
+base: core18
+
+architectures:
+  - amd64
+
+parts:
+  passline:
+    plugin: go
+    go-importpath: github.com/perryrh0dan/passline
+    source: .
+    source-type: git
+    build-packages:
+      - gcc
+
+apps:
+  passline:
+    command: bin/passline

@@ -5,18 +5,31 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/perryrh0dan/passline/pkg/structs"
+	"github.com/perryrh0dan/passline/pkg/storage"
 )
 
 // DisplayItem single item
-func DisplayItem(item structs.Item) {
-	fmt.Printf("Name: %s\nUsername: %s\nPassword: %s\n", item.Name, item.Username, item.Password)
+func DisplayItem(item storage.Item) {
+	fmt.Printf("Name: %s\n", item.Name)
+	for i := 0; i < len(item.Credentials); i++ {
+		fmt.Printf("%s\n", item.Credentials[i].Username)
+	}
 }
 
-func DisplayItems(websites []structs.Item) {
+func DisplayCredential(credential storage.Credential) {
+	fmt.Printf("Username: %s\n", credential.Username)
+	fmt.Printf("Password: %s\n", credential.Password)
+}
+
+func DisplayItems(websites []storage.Item) {
 	for _, website := range websites {
 		fmt.Printf("%s\n", website.Name)
 	}
+}
+
+func SuccessfullCopiedToClipboard(name string, username string) {
+	name = color.YellowString(name + "/" + username)
+	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", name)
 }
 
 // InvalidName error message

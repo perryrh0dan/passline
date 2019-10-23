@@ -14,19 +14,10 @@ func setupApp() *cli.App {
 	app.HelpName = "passline"
 	app.Version = "0.0.1"
 	app.Description = "Password manager for the command line"
-
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:  "password, p",
-			Usage: "Password",
-		},
-	}
+	app.EnableBashCompletion = true
 
 	// default command to get password
-	app.Action = func(c *cli.Context) error {
-		_ = core.DisplayBySite(c)
-		return nil
-	}
+	app.Action = core.DisplayByName
 
 	app.Commands = []cli.Command{
 		{
@@ -43,40 +34,21 @@ func setupApp() *cli.App {
 			Aliases:   []string{"d"},
 			Usage:     "Delete an item",
 			ArgsUsage: "<name>",
-			Action: func(c *cli.Context) error {
-				_ = core.DeleteItem(c)
-				return nil
-			},
+			Action:    core.DeleteItem,
 		},
 		{
-			Name:    "create",
-			Aliases: []string{"c"},
-			Usage:   "Generate a password for an item",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:  "name, n",
-					Usage: "Name of the item",
-				},
-				cli.StringFlag{
-					Name:  "username, u",
-					Usage: "Username",
-				},
-			},
-			ArgsUsage: "<website> <username>",
-			Action: func(c *cli.Context) error {
-				_ = core.GenerateForSite(c)
-				return nil
-			},
+			Name:      "create",
+			Aliases:   []string{"c"},
+			Usage:     "Generate a password for an item",
+			ArgsUsage: "<name> <username>",
+			Action:    core.GenerateForSite,
 		},
 		{
 			Name:      "list",
-			Aliases:   []string{"l"},
+			Aliases:   []string{"ls"},
 			Usage:     "List all items",
-			ArgsUsage: " ",
-			Action: func(c *cli.Context) error {
-				_ = core.ListSites()
-				return nil
-			},
+			ArgsUsage: "<name>",
+			Action:    core.ListSites,
 		},
 	}
 
