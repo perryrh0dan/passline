@@ -25,10 +25,10 @@ var store storage.Storage
 func init() {
 	conf, _ := config.Get()
 	switch conf.Storage {
-	case "local":
-		store = &storage.LocalStorage{}
 	case "firestore":
 		store = &storage.FireStore{}
+	default:
+		store = &storage.LocalStorage{}
 	}
 	err := store.Init()
 	if err != nil {
@@ -55,7 +55,7 @@ func getPassword(c *cli.Context) ([]byte, error) {
 	}
 
 	valid, err := checkPassword(password)
-	if err != nil || valid == false {
+	if err != nil || !valid {
 		return nil, errors.New("Invalid password")
 	}
 
@@ -89,7 +89,7 @@ func checkPassword(password []byte) (bool, error) {
 func getInput(message string, values ...string) string {
 	// Print message
 	if len(values) == 0 {
-		fmt.Printf(message)
+		fmt.Print(message)
 	} else {
 		fmt.Printf(message, values[0])
 	}
@@ -279,6 +279,7 @@ func DeleteItem(c *cli.Context) error {
 		var credential storage.Credential
 		credential, err = item.GetCredentialByUsername(username)
 		if err != nil {
+			renderer.InvalidUsername(name, username)
 			os.Exit(0)
 		}
 
@@ -325,7 +326,8 @@ func EditItem(c *cli.Context) error {
 		// Check if name, username combination exists
 		_, err = item.GetCredentialByUsername(username)
 		if err != nil {
-			return err
+			renderer.InvalidUsername(name, username)
+			os.Exit(0)
 		}
 	}
 
@@ -366,6 +368,9 @@ func ListSites(c *cli.Context) error {
 			return nil
 		}
 
+		if len(items) == 0 {
+			renderer.NoItemsMessage()
+		}
 		renderer.DisplayItems(items)
 	}
 

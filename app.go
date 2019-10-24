@@ -19,7 +19,8 @@ func setupApp() *cli.App {
 
 	// Append website information to default helper print
 	app.CustomAppHelpTemplate = fmt.Sprintf(`%s
-WEBSITE: https://github.com/perryrh0dan/passline
+WEBSITE: 
+   https://github.com/perryrh0dan/passline
 
 	`, cli.AppHelpTemplate)
 

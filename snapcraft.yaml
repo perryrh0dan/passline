@@ -23,3 +23,7 @@ parts:
 apps:
   passline:
     command: bin/passline
+    plugs:
+      - home
+      - network
+      - network-control

@@ -37,6 +37,10 @@ func InvalidName(name string) {
 	fmt.Printf("Unable to find item with name: %s\n", name)
 }
 
+func InvalidUsername(name string, username string) {
+	fmt.Printf("Unable to find username: %s in item: %s", username, name)
+}
+
 func InvalidPassword() {
 	fmt.Printf("Invalid Password\n")
 }
@@ -48,6 +52,12 @@ func ClipboardError() {
 func StorageError() {
 	d := color.New(color.FgRed)
 	d.Printf("error: unable to initialice storage\n")
+}
+
+func NoItemsMessage() {
+	d := color.New(color.FgYellow)
+	d.Printf("No items yet\n")
+
 }
 
 func CreatingMessage() {
