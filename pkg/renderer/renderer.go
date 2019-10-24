@@ -55,6 +55,11 @@ func CreatingMessage() {
 	d.Printf("Creating Website login...\n")
 }
 
+func ChangingMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Changing item...\n")
+}
+
 func MissingArgument(arguments []string) {
 	d := color.New(color.FgRed)
 	d.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))

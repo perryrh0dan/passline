@@ -86,7 +86,14 @@ func checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
-func getInput() string {
+func getInput(message string, values ...string) string {
+	// Print message
+	if len(values) == 0 {
+		fmt.Printf(message)
+	} else {
+		fmt.Printf(message, values[0])
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSuffix(text, "\n")
@@ -104,8 +111,7 @@ func DisplayByName(c *cli.Context) error {
 		name = args[0]
 	}
 	if name == "" {
-		fmt.Printf("Please enter the URL []: ")
-		name = getInput()
+		name = getInput("Please enter the URL []: ")
 	}
 
 	// Check if item for name exists
@@ -124,8 +130,7 @@ func DisplayByName(c *cli.Context) error {
 			username = args[1]
 		}
 		if username == "" {
-			fmt.Printf("Please enter the Username/Login []: ")
-			username = getInput()
+			username = getInput("Please enter the Username/Login []: ")
 		}
 
 		// Check if name, username combination exists
@@ -175,8 +180,7 @@ func GenerateForSite(c *cli.Context) error {
 		name = args[0]
 	}
 	if name == "" {
-		fmt.Printf("Please enter the URL []: ")
-		name = getInput()
+		name = getInput("Please enter the URL []: ")
 	}
 
 	// User input username
@@ -185,8 +189,7 @@ func GenerateForSite(c *cli.Context) error {
 		username = args[1]
 	}
 	if username == "" {
-		fmt.Printf("Please enter the Username/Login []: ")
-		username = getInput()
+		username = getInput("Please enter the Username/Login []: ")
 	}
 
 	// Check if name, username combination exists
@@ -246,8 +249,7 @@ func DeleteItem(c *cli.Context) error {
 		name = args[0]
 	}
 	if name == "" {
-		fmt.Printf("Please enter the URL []: ")
-		name = getInput()
+		name = getInput("Please enter the URL []: ")
 	}
 
 	item, err := store.GetByName(name)
@@ -270,8 +272,7 @@ func DeleteItem(c *cli.Context) error {
 			username = args[1]
 		}
 		if username == "" {
-			fmt.Printf("Please enter the Username/Login []: ")
-			username = getInput()
+			username = getInput("Please enter the Username/Login []: ")
 		}
 
 		// Check if name, username combination exists
@@ -292,6 +293,7 @@ func DeleteItem(c *cli.Context) error {
 
 func EditItem(c *cli.Context) error {
 	args := c.Args()
+	renderer.ChangingMessage()
 
 	// User input name
 	name := ""
@@ -299,8 +301,7 @@ func EditItem(c *cli.Context) error {
 		name = args[0]
 	}
 	if name == "" {
-		fmt.Printf("Please enter the URL []: ")
-		name = getInput()
+		name = getInput("Please enter the URL []: ")
 	}
 
 	item, err := store.GetByName(name)
@@ -318,8 +319,7 @@ func EditItem(c *cli.Context) error {
 			username = args[1]
 		}
 		if username == "" {
-			fmt.Printf("Please enter the Username/Login []: ")
-			username = getInput()
+			username = getInput("Please enter the Username/Login []: ")
 		}
 
 		// Check if name, username combination exists
@@ -330,9 +330,7 @@ func EditItem(c *cli.Context) error {
 	}
 
 	// Get new username
-	newUsername := ""
-	fmt.Printf("Please enter a new Username/Login []: (%s) ", username)
-	newUsername = getInput()
+	newUsername := getInput("Please enter a new Username/Login []: (%s) ", username)
 	if newUsername == "" {
 		newUsername = username
 	}
