@@ -100,6 +100,20 @@ func (ls LocalStorage) DeleteCredential(item Item, credential Credential) error 
 	return nil
 }
 
+func (ls LocalStorage) UpdateItem(item Item) error {
+	err := ls.DeleteItem(item)
+	if err != nil {
+		return err
+	}
+
+	err = ls.AddItem(item)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ls LocalStorage) ensureDirectories() {
 	ls.ensureMainDir()
 	ls.ensureStorageDir()

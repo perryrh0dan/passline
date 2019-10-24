@@ -290,6 +290,67 @@ func DeleteItem(c *cli.Context) error {
 	return nil
 }
 
+func EditItem(c *cli.Context) error {
+	args := c.Args()
+
+	// User input name
+	name := ""
+	if len(args) >= 1 {
+		name = args[0]
+	}
+	if name == "" {
+		fmt.Printf("Please enter the URL []: ")
+		name = getInput()
+	}
+
+	item, err := store.GetByName(name)
+	if err != nil {
+		renderer.InvalidName(name)
+		os.Exit(0)
+	}
+
+	username := ""
+	if len(item.Credentials) == 1 {
+		username = item.Credentials[0].Username
+	} else {
+		// User input username
+		if len(args) >= 2 {
+			username = args[1]
+		}
+		if username == "" {
+			fmt.Printf("Please enter the Username/Login []: ")
+			username = getInput()
+		}
+
+		// Check if name, username combination exists
+		_, err = item.GetCredentialByUsername(username)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Get new username
+	newUsername := ""
+	fmt.Printf("Please enter a new Username/Login []: (%s) ", username)
+	newUsername = getInput()
+	if newUsername == "" {
+		newUsername = username
+	}
+
+	for i := 0; i < len(item.Credentials); i++ {
+		if item.Credentials[i].Username == username {
+			item.Credentials[i].Username = newUsername
+		}
+	}
+
+	err = store.UpdateItem(item)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	return nil
+}
+
 func ListSites(c *cli.Context) error {
 	args := c.Args()
 

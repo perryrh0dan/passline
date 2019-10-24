@@ -140,3 +140,17 @@ func (fs FireStore) DeleteCredential(item Item, credential Credential) error {
 
 	return nil
 }
+
+func (fs FireStore) UpdateItem(item Item) error {
+	err := fs.DeleteItem(item)
+	if err != nil {
+		return err
+	}
+
+	err = fs.AddItem(item)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

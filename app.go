@@ -30,18 +30,25 @@ func setupApp() *cli.App {
 			},
 		},
 		{
-			Name:      "delete",
-			Aliases:   []string{"d"},
-			Usage:     "Delete an item",
-			ArgsUsage: "<name>",
-			Action:    core.DeleteItem,
-		},
-		{
 			Name:      "create",
 			Aliases:   []string{"c"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
 			Action:    core.GenerateForSite,
+		},
+		{
+			Name:      "delete",
+			Aliases:   []string{"d"},
+			Usage:     "Delete an item",
+			ArgsUsage: "<name> <username>",
+			Action:    core.DeleteItem,
+		},
+		{
+			Name:      "edit",
+			Aliases:   []string{"e"},
+			Usage:     "Edit an item",
+			ArgsUsage: "<name> <username>",
+			Action:    core.EditItem,
 		},
 		{
 			Name:      "list",
