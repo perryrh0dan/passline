@@ -1,0 +1,8 @@
+language: go
+go:
+  - master
+go_import_path: github.com/passline
+jobs:
+  include:
+    - stage: test
+      script: go test ./...

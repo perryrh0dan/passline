@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/perryrh0dan/passline/pkg/core"
@@ -15,6 +16,12 @@ func setupApp() *cli.App {
 	app.Version = "0.0.1"
 	app.Description = "Password manager for the command line"
 	app.EnableBashCompletion = true
+
+	// Append website information to default helper print
+	app.CustomAppHelpTemplate = fmt.Sprintf(`%s
+WEBSITE: https://github.com/perryrh0dan/passline
+
+	`, cli.AppHelpTemplate)
 
 	// default command to get password
 	app.Action = core.DisplayByName
