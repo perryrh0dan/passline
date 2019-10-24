@@ -35,6 +35,7 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ``` bash
 snap install passline
+snap alias passline pl # set alias
 ```
 
 **Note:** Due to the snap's strictly confined nature, both the storage & configuration files will be saved under the [ `$SNAP_USER_DATA` ](https://docs.snapcraft.io/reference/env) environment variable instead of the generic `$HOME` one.

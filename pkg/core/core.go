@@ -138,7 +138,8 @@ func DisplayByName(c *cli.Context) error {
 		if err == nil {
 			credential, err = item.GetCredentialByUsername(username)
 			if err != nil {
-				return nil
+				renderer.InvalidUsername(name, username)
+				os.Exit(0)
 			}
 		}
 	} else {

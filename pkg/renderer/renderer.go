@@ -38,7 +38,7 @@ func InvalidName(name string) {
 }
 
 func InvalidUsername(name string, username string) {
-	fmt.Printf("Unable to find username: %s in item: %s", username, name)
+	fmt.Printf("Unable to find username: %s in item: %s\n", username, name)
 }
 
 func InvalidPassword() {
