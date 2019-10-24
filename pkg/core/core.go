@@ -33,6 +33,7 @@ func init() {
 	err := store.Init()
 	if err != nil {
 		renderer.StorageError()
+		os.Exit(1)
 	}
 }
 

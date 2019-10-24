@@ -3,6 +3,7 @@ package storage
 import (
 	"errors"
 	"log"
+	"os"
 	"path"
 
 	"golang.org/x/net/context"
@@ -21,6 +22,13 @@ func (fs *FireStore) Init() error {
 	mainDir, _ := getMainDir()
 	credentialsFile := path.Join(mainDir, "firebase.json")
 
+	// Check for credentials file
+	_, err := os.Stat(credentialsFile)
+	if err != nil {
+		log.Fatalf("error missing firebase credentials file\n")
+		return err
+	}
+
 	ctx := context.Background()
 
 	opt := option.WithCredentialsFile(credentialsFile)
@@ -28,11 +36,13 @@ func (fs *FireStore) Init() error {
 	app, err := firebase.NewApp(ctx, config, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
+		return err
 	}
 
 	fs.client, err = app.Firestore(ctx)
 	if err != nil {
 		log.Fatalln(err)
+		return err
 	}
 
 	return nil
