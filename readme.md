@@ -66,6 +66,9 @@ COMMANDS:
 GLOBAL OPTIONS:
    --help, -h     show help
    --version, -v  print the version
+
+WEBSITE:
+   https://github.com/perryrh0dan/passline
 ```
 
 ## Development
