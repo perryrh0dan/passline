@@ -34,7 +34,7 @@ func SuccessfulCopiedToClipboard(name string, username string) {
 
 func SuccessfulChangedItem() {
 	d := color.New(color.FgGreen)
-	d.printf("Successful changed item")
+	d.Printf("Successful changed item")
 }
 
 // InvalidName error message

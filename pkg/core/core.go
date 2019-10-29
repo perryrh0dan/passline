@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -18,6 +17,7 @@ import (
 	"github.com/perryrh0dan/passline/pkg/crypt"
 	"github.com/perryrh0dan/passline/pkg/renderer"
 	"github.com/perryrh0dan/passline/pkg/storage"
+	"github.com/perryrh0dan/passline/pkg/ui"
 )
 
 var store storage.Storage
@@ -86,33 +86,14 @@ func checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
-func getInput(message string, values ...string) string {
-	// Print message
-	if len(values) == 0 {
-		fmt.Print(message)
-	} else {
-		fmt.Printf(message, values[0])
-	}
-
-	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
-	text = strings.TrimSuffix(text, "\n")
-	// TODO Test if working for Linux
-	text = strings.TrimSuffix(text, "\r")
-	return text
-}
-
 // DisplayByName the password
 func DisplayByName(c *cli.Context) error {
 	args := c.Args()
 	renderer.DisplayMessage()
 
-	name := ""
-	if len(args) >= 1 {
-		name = args[0]
-	}
-	if name == "" {
-		name = getInput("Please enter the URL []: ")
+	name, err := ui.GetArgOrInput(args, 0, "Please enter the URL []: ", nil)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	// Check if item for name exists
@@ -126,12 +107,9 @@ func DisplayByName(c *cli.Context) error {
 	// Only need username for multiple credentials
 	if len(item.Credentials) > 1 {
 		// User input username
-		username := ""
-		if len(args) >= 2 {
-			username = args[1]
-		}
-		if username == "" {
-			username = getInput("Please enter the Username/Login []: ")
+		username, err := ui.GetArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
+		if err != nil {
+			os.Exit(1)
 		}
 
 		// Check if name, username combination exists
@@ -177,21 +155,15 @@ func GenerateForSite(c *cli.Context) error {
 	renderer.CreateMessage()
 
 	// User input name
-	name := ""
-	if len(args) >= 1 {
-		name = args[0]
-	}
-	if name == "" {
-		name = getInput("Please enter the URL []: ")
+	name, err := ui.GetArgOrInput(args, 0, "Please enter the URL []: ", nil)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	// User input username
-	username := ""
-	if len(args) >= 2 {
-		username = args[1]
-	}
-	if username == "" {
-		username = getInput("Please enter the Username/Login []: ")
+	username, err := ui.GetArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	// Check if name, username combination exists
@@ -246,12 +218,9 @@ func GenerateForSite(c *cli.Context) error {
 func DeleteItem(c *cli.Context) error {
 	args := c.Args()
 
-	name := ""
-	if len(args) >= 1 {
-		name = args[0]
-	}
-	if name == "" {
-		name = getInput("Please enter the URL []: ")
+	name, err := ui.GetArgOrInput(args, 0, "Please enter the URL []: ", nil)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	item, err := store.GetByName(name)
@@ -269,12 +238,9 @@ func DeleteItem(c *cli.Context) error {
 	} else {
 		// If Item has multiple Credentials ask for username
 		// User input username
-		username := ""
-		if len(args) >= 2 {
-			username = args[1]
-		}
-		if username == "" {
-			username = getInput("Please enter the Username/Login []: ")
+		username, err := ui.GetArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
+		if err != nil {
+			os.Exit(1)
 		}
 
 		// Check if name, username combination exists
@@ -299,12 +265,9 @@ func EditItem(c *cli.Context) error {
 	renderer.ChangeMessage()
 
 	// User input name
-	name := ""
-	if len(args) >= 1 {
-		name = args[0]
-	}
-	if name == "" {
-		name = getInput("Please enter the URL []: ")
+	name, err := ui.GetArgOrInput(args, 0, "Please enter the URL []: ", nil)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	item, err := store.GetByName(name)
@@ -318,11 +281,9 @@ func EditItem(c *cli.Context) error {
 		username = item.Credentials[0].Username
 	} else {
 		// User input username
-		if len(args) >= 2 {
-			username = args[1]
-		}
-		if username == "" {
-			username = getInput("Please enter the Username/Login []: ")
+		username, err := ui.GetArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
+		if err != nil {
+			os.Exit(1)
 		}
 
 		// Check if name, username combination exists
@@ -334,7 +295,7 @@ func EditItem(c *cli.Context) error {
 	}
 
 	// Get new username
-	newUsername := getInput("Please enter a new Username/Login []: (%s) ", username)
+	newUsername := ui.GetInput("Please enter a new Username/Login []: (%s) ", []string{username})
 	if newUsername == "" {
 		newUsername = username
 	}
