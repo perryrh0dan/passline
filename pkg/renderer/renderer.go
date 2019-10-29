@@ -27,9 +27,14 @@ func DisplayItems(websites []storage.Item) {
 	}
 }
 
-func SuccessfullCopiedToClipboard(name string, username string) {
+func SuccessfulCopiedToClipboard(name string, username string) {
 	name = color.YellowString(name + "/" + username)
 	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", name)
+}
+
+func SuccessfulChangedItem() {
+	d := color.New(color.FgGreen)
+	d.printf("Successful changed item")
 }
 
 // InvalidName error message
@@ -60,12 +65,17 @@ func NoItemsMessage() {
 
 }
 
-func CreatingMessage() {
+func DisplayMessage() {
 	d := color.New(color.FgGreen)
-	d.Printf("Creating Website login...\n")
+	d.Printf("Display item...\n")
 }
 
-func ChangingMessage() {
+func CreateMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Creating item...\n")
+}
+
+func ChangeMessage() {
 	d := color.New(color.FgGreen)
 	d.Printf("Changing item...\n")
 }

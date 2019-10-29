@@ -26,6 +26,16 @@ func (item Item) GetCredentialByUsername(username string) (Credential, error) {
 	return Credential{}, errors.New("Not found")
 }
 
+func (item Item) GetCredentialsName() ([]string, error) {
+	var list []string
+
+	for i := 0; i < len(item.Credentials); i++ {
+		list = append(list, item.Credentials[i].Username)
+	}
+
+	return list, nil
+}
+
 type Credential struct {
 	Username string `json:"username"`
 	Password string `json:"password"`

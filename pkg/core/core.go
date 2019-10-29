@@ -105,6 +105,7 @@ func getInput(message string, values ...string) string {
 // DisplayByName the password
 func DisplayByName(c *cli.Context) error {
 	args := c.Args()
+	renderer.DisplayMessage()
 
 	name := ""
 	if len(args) >= 1 {
@@ -166,14 +167,14 @@ func DisplayByName(c *cli.Context) error {
 		return nil
 	}
 
-	renderer.SuccessfullCopiedToClipboard(item.Name, credential.Username)
+	renderer.SuccessfulCopiedToClipboard(item.Name, credential.Username)
 	return nil
 }
 
 // Generate a random password for a item
 func GenerateForSite(c *cli.Context) error {
 	args := c.Args()
-	renderer.CreatingMessage()
+	renderer.CreateMessage()
 
 	// User input name
 	name := ""
@@ -238,7 +239,7 @@ func GenerateForSite(c *cli.Context) error {
 		os.Exit(0)
 	}
 
-	renderer.SuccessfullCopiedToClipboard(name, username)
+	renderer.SuccessfulCopiedToClipboard(name, username)
 	return nil
 }
 
@@ -295,7 +296,7 @@ func DeleteItem(c *cli.Context) error {
 
 func EditItem(c *cli.Context) error {
 	args := c.Args()
-	renderer.ChangingMessage()
+	renderer.ChangeMessage()
 
 	// User input name
 	name := ""
@@ -338,6 +339,9 @@ func EditItem(c *cli.Context) error {
 		newUsername = username
 	}
 
+	// Get new password
+	// newPassword := getInput("Please enter a new Password []: (********)")
+
 	for i := 0; i < len(item.Credentials); i++ {
 		if item.Credentials[i].Username == username {
 			item.Credentials[i].Username = newUsername
@@ -348,6 +352,8 @@ func EditItem(c *cli.Context) error {
 	if err != nil {
 		os.Exit(1)
 	}
+
+	renderer.SuccessfulChangedItem()
 
 	return nil
 }
