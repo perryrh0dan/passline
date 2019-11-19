@@ -36,6 +36,15 @@ func (item Item) GetCredentialsName() ([]string, error) {
 	return list, nil
 }
 
+func (item *Item) GetUsernameArray() []string {
+	var creds []string
+	for _, cred := range item.Credentials {
+		creds = append(creds, cred.Username)
+	}
+
+	return creds
+}
+
 type Credential struct {
 	Username string `json:"username"`
 	Password string `json:"password"`

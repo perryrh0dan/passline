@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
-	"github.com/urfave/cli"
+	ucli "github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/perryrh0dan/passline/pkg/config"
@@ -37,7 +37,7 @@ func init() {
 	}
 }
 
-func getPassword(c *cli.Context) ([]byte, error) {
+func getPassword(c *ucli.Context) ([]byte, error) {
 	password := []byte(c.String("password"))
 
 	if len(password) <= 0 {
@@ -87,7 +87,7 @@ func checkPassword(password []byte) (bool, error) {
 }
 
 // DisplayByName the password
-func DisplayByName(c *cli.Context) error {
+func DisplayByName(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DisplayMessage()
 
@@ -107,9 +107,24 @@ func DisplayByName(c *cli.Context) error {
 	// Only need username for multiple credentials
 	if len(item.Credentials) > 1 {
 		// User input username
-		username, err := ui.GetArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
+
+		conf, err := config.Get()
 		if err != nil {
 			os.Exit(1)
+		}
+
+		var username string
+
+		if conf.Selection {
+			username, err = ui.GetArgOrSelect(args, 1, "Please select a Username/Login:", item.GetUsernameArray())
+			if err != nil {
+				os.Exit(1)
+			}
+		} else {
+			username, err = ui.GetArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
+			if err != nil {
+				os.Exit(1)
+			}
 		}
 
 		// Check if name, username combination exists
@@ -150,7 +165,7 @@ func DisplayByName(c *cli.Context) error {
 }
 
 // Generate a random password for a item
-func GenerateForSite(c *cli.Context) error {
+func GenerateForSite(c *ucli.Context) error {
 	args := c.Args()
 	renderer.CreateMessage()
 
@@ -215,7 +230,7 @@ func GenerateForSite(c *cli.Context) error {
 	return nil
 }
 
-func DeleteItem(c *cli.Context) error {
+func DeleteItem(c *ucli.Context) error {
 	args := c.Args()
 
 	name, err := ui.GetArgOrInput(args, 0, "Please enter the URL []: ", nil)
@@ -260,7 +275,7 @@ func DeleteItem(c *cli.Context) error {
 	return nil
 }
 
-func EditItem(c *cli.Context) error {
+func EditItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.ChangeMessage()
 
@@ -319,7 +334,7 @@ func EditItem(c *cli.Context) error {
 	return nil
 }
 
-func ListSites(c *cli.Context) error {
+func ListSites(c *ucli.Context) error {
 	args := c.Args()
 
 	if len(args) >= 1 {

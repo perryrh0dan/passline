@@ -10,7 +10,8 @@ import (
 
 type Config struct {
 	Directory string
-	Storage 	string
+	Storage   string
+	Selection bool
 	AutoClip  bool
 	NoColor   bool
 	NoSymbols bool
@@ -49,7 +50,8 @@ func formatPasslineDir(dirPath string) (string, error) {
 func new() Config {
 	return Config{
 		Directory: "~",
-		Storage: 	 "local",
+		Storage:   "local",
+		Selection: true,
 		AutoClip:  true,
 		NoColor:   false,
 		NoSymbols: false,
