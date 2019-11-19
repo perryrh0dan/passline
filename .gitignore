@@ -17,4 +17,4 @@
 # Snapcraft
 *.snap
 
-__debug.bin
+__debug_bin
