@@ -91,29 +91,40 @@ func (pl *Passline) checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
+func (pl *Passline) getValue(args []string, index int, message string, values []string, items []string) (string, error) {
+	// Check if Selection is active
+	if pl.config.Selection {
+		// Build message string
+		message = fmt.Sprintf("Please select a %s", message)
+		name, err := cli.ArgOrSelect(args, index, message, items)
+		if err != nil {
+			return "", err
+		}
+		return name, nil
+	} else {
+		// Build message string
+		message = fmt.Sprintf("Please enter a %s", message)
+		name, err := cli.ArgOrInput(args, index, message, values)
+		if err != nil {
+			return "", err
+		}
+		return name, nil
+	}
+}
+
 // DisplayByName the password
 func (pl *Passline) DisplayByName(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DisplayMessage()
 
-	var name string
-	if pl.config.Selection {
-		var names []string
-		items, _ := pl.store.GetAll()
-		for _, item := range items {
-			names = append(names, item.Name)
-		}
-		var err error
-		name, err = cli.ArgOrSelect(args, 1, "Please select a URL:", names)
-		if err != nil {
-			os.Exit(1)
-		}
-	} else {
-		var err error
-		name, err = cli.ArgOrInput(args, 0, "Please enter the URL []: ", nil)
-		if err != nil {
-			os.Exit(1)
-		}
+	var names []string
+	items, _ := pl.store.GetAll()
+	for _, item := range items {
+		names = append(names, item.Name)
+	}
+	name, err := pl.getValue(args, 0, "URL:", nil, names)
+	if err != nil {
+		os.Exit(1)
 	}
 
 	// Check if item for name exists
@@ -128,18 +139,9 @@ func (pl *Passline) DisplayByName(c *ucli.Context) error {
 	if len(item.Credentials) > 1 {
 		// User input username
 
-		var username string
-
-		if pl.config.Selection {
-			username, err = cli.ArgOrSelect(args, 1, "Please select a Username/Login:", item.GetUsernameArray())
-			if err != nil {
-				os.Exit(1)
-			}
-		} else {
-			username, err = cli.ArgOrInput(args, 1, "Please enter the Username/Login []: ", nil)
-			if err != nil {
-				os.Exit(1)
-			}
+		username, err := pl.getValue(args, 1, "Username/Logic", nil, item.GetUsernameArray())
+		if err != nil {
+			os.Exit(1)
 		}
 
 		// Check if name, username combination exists
