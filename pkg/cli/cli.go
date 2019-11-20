@@ -1,50 +1,26 @@
 package cli
 
-import (
-	"fmt"
-
-	"github.com/eiannone/keyboard"
-	"github.com/fatih/color"
-)
-
-func Select(message string, items []string) int {
-	selected := 0
-	fmt.Println(message)
-	printSelect(items, selected)
-	keyboard.Open()
-	defer keyboard.Close()
-	for {
-		_, key, _ := keyboard.GetKey()
-		update := false
-		switch key {
-		case 13:
-			clearLines(len(items) + 1)
-			return selected
-		case 65517:
-			if selected > 0 {
-				selected--
-				update = true
-			}
-		case 65516:
-			if selected < len(items)-1 {
-				selected++
-				update = true
-			}
-		}
-		if update {
-			moveCursorUp(len(items))
-			printSelect(items, selected)
-		}
+func ArgOrInput(args []string, index int, message string, values []string) (string, error) {
+	input := ""
+	if len(args)-1 >= index {
+		input = args[index]
 	}
+	if input == "" {
+		input = Input(message, values)
+	}
+
+	return input, nil
 }
 
-func printSelect(items []string, selected int) {
-	for index, item := range items {
-		if index != selected {
-			fmt.Println(item)
-		} else {
-			d := color.New(color.FgGreen)
-			d.Printf(item + "\n")
-		}
+func ArgOrSelect(args []string, index int, message string, items []string) (string, error) {
+	input := ""
+	if len(args)-1 >= index {
+		input = args[index]
 	}
+	if input == "" {
+		selection := Select(message, items)
+		input = items[selection]
+	}
+
+	return input, nil
 }

@@ -10,6 +10,7 @@ import (
 
 func setupApp() *cli.App {
 	app := cli.NewApp()
+	pl := core.NewPassline()
 	app.Name = "Passline"
 	app.Usage = "Password manager"
 	app.HelpName = "passline"
@@ -25,7 +26,7 @@ WEBSITE:
 	`, cli.AppHelpTemplate)
 
 	// default command to get password
-	app.Action = core.DisplayByName
+	app.Action = pl.DisplayByName
 
 	app.Commands = []cli.Command{
 		{
@@ -42,28 +43,28 @@ WEBSITE:
 			Aliases:   []string{"c"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
-			Action:    core.GenerateForSite,
+			Action:    pl.GenerateForSite,
 		},
 		{
 			Name:      "delete",
 			Aliases:   []string{"d"},
 			Usage:     "Delete an item",
 			ArgsUsage: "<name> <username>",
-			Action:    core.DeleteItem,
+			Action:    pl.DeleteItem,
 		},
 		{
 			Name:      "edit",
 			Aliases:   []string{"e"},
 			Usage:     "Edit an item",
 			ArgsUsage: "<name> <username>",
-			Action:    core.EditItem,
+			Action:    pl.EditItem,
 		},
 		{
 			Name:      "list",
 			Aliases:   []string{"ls"},
 			Usage:     "List all items",
 			ArgsUsage: "<name>",
-			Action:    core.ListSites,
+			Action:    pl.ListSites,
 		},
 	}
 

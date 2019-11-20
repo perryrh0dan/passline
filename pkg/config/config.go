@@ -58,7 +58,7 @@ func new() Config {
 	}
 }
 
-func Get() (Config, error) {
+func Get() (*Config, error) {
 	config := Config{}
 
 	file, _ := ioutil.ReadFile(configFile)
@@ -68,9 +68,9 @@ func Get() (Config, error) {
 		var err error
 		config.Directory, err = formatPasslineDir(config.Directory)
 		if err != nil {
-			return Config{}, err
+			return nil, err
 		}
 	}
 
-	return config, nil
+	return &config, nil
 }
