@@ -15,18 +15,26 @@ func Select(message string, items []string) int {
 	defer keyboard.Close()
 	for {
 		_, key, _ := keyboard.GetKey()
+		update := false
 		switch key {
+		case 13:
+			clearLines(len(items) + 1)
+			return selected
 		case 65517:
 			if selected > 0 {
 				selected--
+				update = true
 			}
 		case 65516:
 			if selected < len(items)-1 {
 				selected++
+				update = true
 			}
 		}
-		moveCursorUp(len(items))
-		printSelect(items, selected)
+		if update {
+			moveCursorUp(len(items))
+			printSelect(items, selected)
+		}
 	}
 }
 
