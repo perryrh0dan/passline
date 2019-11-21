@@ -80,6 +80,11 @@ func ChangeMessage() {
 	d.Printf("Changing item...\n")
 }
 
+func DeleteMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Deleting item...\n")
+}
+
 func MissingArgument(arguments []string) {
 	d := color.New(color.FgRed)
 	d.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))
@@ -87,4 +92,9 @@ func MissingArgument(arguments []string) {
 
 func NameAlreadyExists(name string) {
 	fmt.Printf("error: name already exists %s\n", name)
+}
+
+func NoItemsExist() {
+	d := color.New(color.FgRed)
+	d.Printf("error: no items exist")
 }

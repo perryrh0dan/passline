@@ -91,13 +91,17 @@ func (pl *Passline) checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
-// DisplayByName the password
-func (pl *Passline) DisplayByName(c *ucli.Context) error {
-	args := c.Args()
-	renderer.DisplayMessage()
-
+func (pl *Passline) DisplayItem(c *ucli.Context) error {
 	names, err := pl.store.GetAllNames()
 	handle(err)
+
+	if len(names) == 0 {
+		renderer.NoItemsExist()
+		os.Exit(0)
+	}
+
+	args := c.Args()
+	renderer.DisplayMessage()
 
 	name, err := cli.ArgOrSelect(args, 0, "URL", names)
 	handle(err)
@@ -154,8 +158,7 @@ func (pl *Passline) DisplayByName(c *ucli.Context) error {
 	return nil
 }
 
-// Generate a random password for a item
-func (pl *Passline) GenerateForSite(c *ucli.Context) error {
+func (pl *Passline) GenerateItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.CreateMessage()
 
@@ -217,10 +220,16 @@ func (pl *Passline) GenerateForSite(c *ucli.Context) error {
 }
 
 func (pl *Passline) DeleteItem(c *ucli.Context) error {
-	args := c.Args()
-
 	names, err := pl.store.GetAllNames()
 	handle(err)
+
+	if len(names) == 0 {
+		renderer.NoItemsExist()
+		os.Exit(0)
+	}
+
+	args := c.Args()
+	renderer.DeleteMessage()
 
 	name, err := cli.ArgOrSelect(args, 0, "URL", names)
 	handle(err)
@@ -261,11 +270,16 @@ func (pl *Passline) DeleteItem(c *ucli.Context) error {
 }
 
 func (pl *Passline) EditItem(c *ucli.Context) error {
-	args := c.Args()
-	renderer.ChangeMessage()
-
 	names, err := pl.store.GetAllNames()
 	handle(err)
+
+	if len(names) == 0 {
+		renderer.NoItemsExist()
+		os.Exit(0)
+	}
+
+	args := c.Args()
+	renderer.ChangeMessage()
 
 	name, err := cli.ArgOrSelect(args, 0, "URL", names)
 	handle(err)

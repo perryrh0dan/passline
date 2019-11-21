@@ -26,7 +26,7 @@ WEBSITE:
 	`, cli.AppHelpTemplate)
 
 	// default command to get password
-	app.Action = pl.DisplayByName
+	app.Action = pl.DisplayItem
 
 	app.Commands = []cli.Command{
 		{
@@ -43,7 +43,7 @@ WEBSITE:
 			Aliases:   []string{"c"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
-			Action:    pl.GenerateForSite,
+			Action:    pl.GenerateItem,
 		},
 		{
 			Name:      "delete",
