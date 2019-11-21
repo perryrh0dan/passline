@@ -89,8 +89,13 @@ func (pl *Passline) DisplayItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DisplayMessage()
 
-	name, err := cli.ArgOrSelect(args, 0, "URL", names)
-	handle(err)
+	var name string
+	if len(names) > 1 {
+		name, err = cli.ArgOrSelect(args, 0, "URL", names)
+		handle(err)
+	} else {
+		name = names[0]
+	}
 
 	// Check if item for name exists
 	item, err := pl.store.GetByName(name)
@@ -217,8 +222,13 @@ func (pl *Passline) DeleteItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DeleteMessage()
 
-	name, err := cli.ArgOrSelect(args, 0, "URL", names)
-	handle(err)
+	var name string
+	if len(names) > 1 {
+		name, err = cli.ArgOrSelect(args, 0, "URL", names)
+		handle(err)
+	} else {
+		name = names[0]
+	}
 
 	item, err := pl.store.GetByName(name)
 	if err != nil {
@@ -235,7 +245,7 @@ func (pl *Passline) DeleteItem(c *ucli.Context) error {
 	} else {
 		// If Item has multiple Credentials ask for username
 		// User input username
-		username, err := cli.ArgOrInput(args, 1, "Please enter the Username/Login []: ", "")
+		username, err := cli.ArgOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
 		handle(err)
 
 		// Check if name, username combination exists
@@ -267,8 +277,13 @@ func (pl *Passline) EditItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.ChangeMessage()
 
-	name, err := cli.ArgOrSelect(args, 0, "URL", names)
-	handle(err)
+	var name string
+	if len(names) > 1 {
+		name, err = cli.ArgOrSelect(args, 0, "URL", names)
+		handle(err)
+	} else {
+		name = names[0]
+	}
 
 	item, err := pl.store.GetByName(name)
 	if err != nil {

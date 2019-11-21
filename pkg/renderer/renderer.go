@@ -61,7 +61,6 @@ func StorageError() {
 func NoItemsMessage() {
 	d := color.New(color.FgYellow)
 	d.Printf("No items yet\n")
-
 }
 
 func DisplayMessage() {
@@ -95,5 +94,5 @@ func NameAlreadyExists(name string) {
 
 func NoItemsExist() {
 	d := color.New(color.FgRed)
-	d.Printf("error: no items exist")
+	d.Printf("error: no items exist\n")
 }

@@ -19,7 +19,6 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ## Highlights
 
-
 ## Contents
 
 * [Description](#description)
@@ -30,6 +29,8 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ## Install
 ### Binary
+1. Download the altest release for your platform
+2. Run it
 
 ### Snapcraft
 
