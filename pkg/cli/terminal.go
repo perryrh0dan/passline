@@ -28,3 +28,11 @@ func clearLines(lines int) {
 		fmt.Fprintf(os.Stdout, "\u001b[0J")
 	}
 }
+
+func hideCursor() {
+	ansi.CursorHide()
+}
+
+func showCursor() {
+	ansi.CursorShow()
+}

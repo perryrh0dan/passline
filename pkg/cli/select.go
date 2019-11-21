@@ -9,10 +9,19 @@ import (
 
 func Select(message string, items []string) int {
 	selected := 0
+
+	// Print Message
 	fmt.Println(message)
+
+	// Print Initial Selection
 	printSelect(items, selected)
+
+	// Open keyboard and Hide Cursor
 	keyboard.Open()
 	defer keyboard.Close()
+	hideCursor()
+	defer showCursor()
+
 	for {
 		_, key, _ := keyboard.GetKey()
 		update := false
@@ -31,6 +40,7 @@ func Select(message string, items []string) int {
 				update = true
 			}
 		}
+
 		if update {
 			moveCursorUp(len(items))
 			printSelect(items, selected)

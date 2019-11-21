@@ -24,7 +24,7 @@ func (ls *LocalStorage) Init() error {
 }
 
 // Get item by name
-func (ls LocalStorage) GetByName(name string) (Item, error) {
+func (ls *LocalStorage) GetByName(name string) (Item, error) {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -35,7 +35,7 @@ func (ls LocalStorage) GetByName(name string) (Item, error) {
 	return Item{}, errors.New("Item not found")
 }
 
-func (ls LocalStorage) GetByIndex(index int) (Item, error) {
+func (ls *LocalStorage) GetByIndex(index int) (Item, error) {
 	data := ls.getData()
 	if index < 0 && index > len(data.Items) {
 		return Item{}, errors.New("Out of index")
@@ -44,20 +44,20 @@ func (ls LocalStorage) GetByIndex(index int) (Item, error) {
 	return data.Items[index], nil
 }
 
-func (ls LocalStorage) GetAll() ([]Item, error) {
+func (ls *LocalStorage) GetAll() ([]Item, error) {
 	data := ls.getData()
 	return data.Items, nil
 }
 
 // Add data
-func (ls LocalStorage) AddItem(website Item) error {
+func (ls *LocalStorage) AddItem(website Item) error {
 	data := ls.getData()
 	data.Items = append(data.Items, website)
 	ls.setData(data)
 	return nil
 }
 
-func (ls LocalStorage) AddCredential(name string, credential Credential) error {
+func (ls *LocalStorage) AddCredential(name string, credential Credential) error {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -75,7 +75,7 @@ func (ls LocalStorage) AddCredential(name string, credential Credential) error {
 	return nil
 }
 
-func (ls LocalStorage) DeleteItem(item Item) error {
+func (ls *LocalStorage) DeleteItem(item Item) error {
 	data := ls.getData()
 	index := getIndexOfItem(data.Items, item)
 	data.Items = removeFromItems(data.Items, index)
@@ -83,7 +83,7 @@ func (ls LocalStorage) DeleteItem(item Item) error {
 	return nil
 }
 
-func (ls LocalStorage) DeleteCredential(item Item, credential Credential) error {
+func (ls *LocalStorage) DeleteCredential(item Item, credential Credential) error {
 	data := ls.getData()
 	indexItem := getIndexOfItem(data.Items, item)
 	if indexItem == -1 {
@@ -100,7 +100,7 @@ func (ls LocalStorage) DeleteCredential(item Item, credential Credential) error 
 	return nil
 }
 
-func (ls LocalStorage) UpdateItem(item Item) error {
+func (ls *LocalStorage) UpdateItem(item Item) error {
 	err := ls.DeleteItem(item)
 	if err != nil {
 		return err
@@ -112,6 +112,19 @@ func (ls LocalStorage) UpdateItem(item Item) error {
 	}
 
 	return nil
+}
+
+func (ls *LocalStorage) GetAllNames() ([]string, error) {
+	var names []string
+	items, err := ls.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		names = append(names, item.Name)
+	}
+	return names, nil
 }
 
 func (ls LocalStorage) ensureDirectories() {

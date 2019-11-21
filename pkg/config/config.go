@@ -11,7 +11,6 @@ import (
 type Config struct {
 	Directory string
 	Storage   string
-	Selection bool
 	AutoClip  bool
 	NoColor   bool
 	NoSymbols bool
@@ -51,7 +50,6 @@ func new() Config {
 	return Config{
 		Directory: "~",
 		Storage:   "local",
-		Selection: true,
 		AutoClip:  true,
 		NoColor:   false,
 		NoSymbols: false,

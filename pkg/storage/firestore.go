@@ -48,7 +48,7 @@ func (fs *FireStore) Init() error {
 	return nil
 }
 
-func (fs FireStore) GetByName(name string) (Item, error) {
+func (fs *FireStore) GetByName(name string) (Item, error) {
 	dsnap, err := fs.client.Collection("passline").Doc(name).Get(context.Background())
 	if err != nil {
 		return Item{}, err
@@ -59,7 +59,7 @@ func (fs FireStore) GetByName(name string) (Item, error) {
 	return item, nil
 }
 
-func (fs FireStore) GetByIndex(index int) (Item, error) {
+func (fs *FireStore) GetByIndex(index int) (Item, error) {
 	items, err := fs.GetAll()
 	if err != nil {
 		return Item{}, err
@@ -72,7 +72,7 @@ func (fs FireStore) GetByIndex(index int) (Item, error) {
 	return items[index], nil
 }
 
-func (fs FireStore) GetAll() ([]Item, error) {
+func (fs *FireStore) GetAll() ([]Item, error) {
 	items := []Item{}
 	iter := fs.client.Collection("passline").Documents(context.Background())
 	for {
@@ -92,7 +92,7 @@ func (fs FireStore) GetAll() ([]Item, error) {
 	return items, nil
 }
 
-func (fs FireStore) AddItem(item Item) error {
+func (fs *FireStore) AddItem(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Set(context.Background(), item)
 	if err != nil {
 		log.Fatalf("Failed adding item: %v", err)
@@ -101,7 +101,7 @@ func (fs FireStore) AddItem(item Item) error {
 	return nil
 }
 
-func (fs FireStore) AddCredential(name string, credential Credential) error {
+func (fs *FireStore) AddCredential(name string, credential Credential) error {
 	item, err := fs.GetByName(name)
 	if err != nil {
 		return err
@@ -116,7 +116,7 @@ func (fs FireStore) AddCredential(name string, credential Credential) error {
 	return nil
 }
 
-func (fs FireStore) DeleteItem(item Item) error {
+func (fs *FireStore) DeleteItem(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(context.Background())
 	if err != nil {
 		log.Printf("An error has occured: %s", err)
@@ -126,7 +126,7 @@ func (fs FireStore) DeleteItem(item Item) error {
 	return nil
 }
 
-func (fs FireStore) DeleteCredential(item Item, credential Credential) error {
+func (fs *FireStore) DeleteCredential(item Item, credential Credential) error {
 	indexCredential := getIndexOfCredential(item.Credentials, credential)
 	if indexCredential == -1 {
 		return errors.New("Item not found")
@@ -141,7 +141,7 @@ func (fs FireStore) DeleteCredential(item Item, credential Credential) error {
 	return nil
 }
 
-func (fs FireStore) UpdateItem(item Item) error {
+func (fs *FireStore) UpdateItem(item Item) error {
 	err := fs.DeleteItem(item)
 	if err != nil {
 		return err
@@ -153,4 +153,17 @@ func (fs FireStore) UpdateItem(item Item) error {
 	}
 
 	return nil
+}
+
+func (fs *FireStore) GetAllNames() ([]string, error) {
+	var names []string
+	items, err := fs.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		names = append(names, item.Name)
+	}
+	return names, nil
 }

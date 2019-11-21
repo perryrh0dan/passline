@@ -7,18 +7,22 @@ import (
 	"strings"
 )
 
-func Input(message string, values []string) string {
+func Input(message string, value string) (string, error) {
 	// Print message
-	if len(values) == 0 {
-		fmt.Print(message)
+
+	if value != "" {
+		fmt.Printf(message, value)
 	} else {
-		fmt.Printf(message, values[0])
+		fmt.Printf(message)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
-	text, _ := reader.ReadString('\n')
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
 	text = strings.TrimSuffix(text, "\n")
 	// TODO Test if working for Linux
 	text = strings.TrimSuffix(text, "\r")
-	return text
+	return text, nil
 }

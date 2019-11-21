@@ -61,6 +61,7 @@ type Storage interface {
 	DeleteItem(Item) error
 	DeleteCredential(Item, Credential) error
 	UpdateItem(Item) error
+	GetAllNames() ([]string, error)
 }
 
 func getMainDir() (string, error) {
