@@ -10,7 +10,6 @@ import (
 
 // DisplayItem single item
 func DisplayItem(item storage.Item) {
-	fmt.Printf("Name: %s\n", item.Name)
 	for i := 0; i < len(item.Credentials); i++ {
 		fmt.Printf("%s\n", item.Credentials[i].Username)
 	}
