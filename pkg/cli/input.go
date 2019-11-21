@@ -13,7 +13,7 @@ func Input(message string, value string) (string, error) {
 	if value != "" {
 		fmt.Printf(message, value)
 	} else {
-		fmt.Printf(message)
+		fmt.Print(message)
 	}
 
 	reader := bufio.NewReader(os.Stdin)

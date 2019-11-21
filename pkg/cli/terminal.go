@@ -3,10 +3,45 @@ package cli
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 
 	"github.com/k0kubun/go-ansi"
+	"golang.org/x/crypto/ssh/terminal"
 )
+
+func GetPassword(prompt string) []byte {
+	// Get the initial state of the terminal.
+	initialTermState, e1 := terminal.GetState(syscall.Stdin)
+	if e1 != nil {
+		panic(e1)
+	}
+
+	// Restore it in the event of an interrupt.
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, os.Kill)
+	go func() {
+		<-c
+		_ = terminal.Restore(syscall.Stdin, initialTermState)
+		fmt.Println()
+		os.Exit(1)
+	}()
+
+	// Now get the password.
+	fmt.Print(prompt)
+	p, err := terminal.ReadPassword(syscall.Stdin)
+	fmt.Println("")
+	if err != nil {
+		panic(err)
+	}
+
+	// Stop looking for ^C on the channel.
+	signal.Stop(c)
+
+	// Return the password as a string.
+	return p
+}
 
 // Move cursor up relative the current position
 func moveCursorUp(n int) {

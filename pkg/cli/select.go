@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
 )
 
-func Select(message string, items []string) int {
+func Select(message string, items []string) (int, error) {
 	selected := 0
 
 	// Print Message
@@ -26,9 +27,11 @@ func Select(message string, items []string) int {
 		_, key, _ := keyboard.GetKey()
 		update := false
 		switch key {
+		case 3:
+			return -1, errors.New("Canceled")
 		case 13:
 			clearLines(len(items) + 1)
-			return selected
+			return selected, nil
 		case 65517:
 			if selected > 0 {
 				selected--

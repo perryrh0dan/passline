@@ -6,12 +6,10 @@ import (
 	"math/rand"
 	"os"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/atotto/clipboard"
 	ucli "github.com/urfave/cli"
-	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/perryrh0dan/passline/pkg/cli"
 	"github.com/perryrh0dan/passline/pkg/config"
@@ -43,21 +41,9 @@ func NewPassline() *Passline {
 }
 
 func (pl *Passline) getPassword(c *ucli.Context) ([]byte, error) {
-	password := []byte(c.String("password"))
-
-	if len(password) <= 0 {
-		// Get global password
-		fmt.Print("Enter Global Password: ")
-
-		// Ask for global password
-		var err error
-		password, err = terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Println()
-	}
+	// Ask for global password
+	password := cli.GetPassword("Enter Global Password: ")
+	fmt.Println()
 
 	valid, err := pl.checkPassword(password)
 	if err != nil || !valid {

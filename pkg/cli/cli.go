@@ -1,6 +1,8 @@
 package cli
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func ArgOrInput(args []string, index int, message string, value string) (string, error) {
 	input := ""
@@ -26,7 +28,11 @@ func ArgOrSelect(args []string, index int, message string, items []string) (stri
 	}
 	if input == "" {
 		message := fmt.Sprintf("Please select a %s: ", message)
-		selection := Select(message, items)
+		selection, err := Select(message, items)
+		if err != nil {
+			return "", err
+		}
+
 		input = items[selection]
 		fmt.Printf("%s%s\n", message, input)
 	}
