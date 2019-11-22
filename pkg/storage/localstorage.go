@@ -77,7 +77,7 @@ func (ls *LocalStorage) AddCredential(name string, credential Credential) error 
 	return nil
 }
 
-func (ls *LocalStorage) DeleteItem(item Item) error {
+func (ls *LocalStorage) deleteItem(item Item) error {
 	data := ls.getData()
 	index := getIndexOfItem(data.Items, item)
 	data.Items = removeFromItems(data.Items, index)
@@ -101,13 +101,13 @@ func (ls *LocalStorage) DeleteCredential(item Item, credential Credential) error
 		data.Items[indexItem].Credentials = removeFromCredentials(data.Items[indexItem].Credentials, indexCredential)
 		ls.setData(data)
 	} else {
-		removeFromItems(data.Items, indexItem)
+		ls.deleteItem(data.Items[indexItem])
 	}
 	return nil
 }
 
 func (ls *LocalStorage) UpdateItem(item Item) error {
-	err := ls.DeleteItem(item)
+	err := ls.deleteItem(item)
 	if err != nil {
 		return err
 	}

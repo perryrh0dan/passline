@@ -118,7 +118,7 @@ func (fs *FireStore) AddCredential(name string, credential Credential) error {
 	return nil
 }
 
-func (fs *FireStore) DeleteItem(item Item) error {
+func (fs *FireStore) deleteItem(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(context.Background())
 	if err != nil {
 		log.Printf("An error has occured: %s", err)
@@ -134,17 +134,21 @@ func (fs *FireStore) DeleteCredential(item Item, credential Credential) error {
 		return errors.New("Item not found")
 	}
 
-	item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
-	err := fs.AddItem(item)
-	if err != nil {
-		log.Fatalf("Failed updating credentials: %v", err)
+	if len(item.Credentials) > 1 {
+		item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
+		err := fs.AddItem(item)
+		if err != nil {
+			log.Fatalf("Failed updating credentials: %v", err)
+		}
+	} else {
+		fs.deleteItem(item)
 	}
 
 	return nil
 }
 
 func (fs *FireStore) UpdateItem(item Item) error {
-	err := fs.DeleteItem(item)
+	err := fs.deleteItem(item)
 	if err != nil {
 		return err
 	}
