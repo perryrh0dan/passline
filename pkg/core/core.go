@@ -124,6 +124,7 @@ func (pl *Passline) AddItem(c *ucli.Context) error {
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
+			renderer.InvalidUsername(name, username)
 			os.Exit(0)
 		}
 	}
@@ -138,6 +139,7 @@ func (pl *Passline) AddItem(c *ucli.Context) error {
 	}
 
 	cryptedPassword, err := crypt.AesGcmEncrypt(globalPassword, password)
+	handle(err)
 
 	// Create Credentials
 	credential := storage.Credential{Username: username, Password: cryptedPassword}
@@ -221,6 +223,7 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
+			renderer.InvalidUsername(name, username)
 			os.Exit(0)
 		}
 	}
