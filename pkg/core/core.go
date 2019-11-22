@@ -107,6 +107,61 @@ func handle(err error) {
 	}
 }
 
+func (pl *Passline) AddItem(c *ucli.Context) error {
+	args := c.Args()
+	renderer.CreateMessage()
+
+	// User input name
+	name, err := cli.ArgOrInput(args, 0, "URL", "")
+	handle(err)
+
+	// User input username
+	username, err := cli.ArgOrInput(args, 1, "Username/Login", "")
+	handle(err)
+
+	// Check if name, username combination exists
+	item, err := pl.store.GetItemByName(name)
+	if err == nil {
+		_, err = item.GetCredentialByUsername(username)
+		if err == nil {
+			os.Exit(0)
+		}
+	}
+
+	password, err := cli.ArgOrInput(args, 0, "Password", "")
+	handle(err)
+
+	// Get and Check for global password.
+	globalPassword, err := pl.getPassword(c)
+	if err != nil {
+		return nil
+	}
+
+	cryptedPassword, err := crypt.AesGcmEncrypt(globalPassword, password)
+
+	// Create Credentials
+	credential := storage.Credential{Username: username, Password: cryptedPassword}
+
+	// Check if item already exists
+	item, err = pl.store.GetItemByName(name)
+	if err != nil {
+		// Generate new item entry
+		item := storage.Item{Name: name, Credentials: []storage.Credential{credential}}
+		err = pl.store.AddItem(item)
+		if err != nil {
+			os.Exit(0)
+		}
+	} else {
+		// Add to existing item
+		err := pl.store.AddCredential(name, credential)
+		if err != nil {
+			os.Exit(0)
+		}
+	}
+
+	return nil
+}
+
 func (pl *Passline) DisplayItem(c *ucli.Context) error {
 	names, err := pl.store.GetAllItemNames()
 	handle(err)

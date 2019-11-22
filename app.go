@@ -34,16 +34,7 @@ WEBSITE:
 			Aliases:   []string{"a"},
 			Usage:     "Add an existing password for a website",
 			ArgsUsage: "<name> <username> <password>",
-			Action: func(c *cli.Context) error {
-				return nil
-			},
-		},
-		{
-			Name:      "create",
-			Aliases:   []string{"c"},
-			Usage:     "Generate a password for an item",
-			ArgsUsage: "<name> <username>",
-			Action:    pl.GenerateItem,
+			Action:    pl.AddItem,
 		},
 		{
 			Name:      "delete",
@@ -58,6 +49,13 @@ WEBSITE:
 			Usage:     "Edit an item",
 			ArgsUsage: "<name> <username>",
 			Action:    pl.EditItem,
+		},
+		{
+			Name:      "generate",
+			Aliases:   []string{"g"},
+			Usage:     "Generate a password for an item",
+			ArgsUsage: "<name> <username>",
+			Action:    pl.GenerateItem,
 		},
 		{
 			Name:      "list",

@@ -54,10 +54,10 @@ func Select(message string, items []string) (int, error) {
 func printSelect(items []string, selected int) {
 	for index, item := range items {
 		if index != selected {
-			fmt.Println(item)
+			fmt.Printf("[ ] %s\n", item)
 		} else {
 			d := color.New(color.FgGreen)
-			d.Printf(item + "\n")
+			d.Printf("[x] %s\n", item)
 		}
 	}
 }

@@ -58,11 +58,11 @@ DESCRIPTION:
    Password manager for the command line
 
 COMMANDS:
-   add, a     Add an existing password for a website
-   create, c  Generate a password for an item
-   delete, d  Delete an item
-   list, ls   List all items
-   help, h    Shows a list of commands or help for one command
+   add, a       Add an existing password for a website
+   generate, g  Generate a password for an item
+   delete, d    Delete an item
+   list, ls     List all items
+   help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --help, -h     show help
