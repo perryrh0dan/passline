@@ -16,7 +16,13 @@ type Item struct {
 	Credentials []Credential `json:"credentials"`
 }
 
-func (item Item) GetCredentialByUsername(username string) (Credential, error) {
+type ByName []Item
+
+func (a ByName) Len() int           { return len(a) }
+func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
+func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+
+func (item *Item) GetCredentialByUsername(username string) (Credential, error) {
 	for i := 0; i < len(item.Credentials); i++ {
 		if item.Credentials[i].Username == username {
 			return item.Credentials[i], nil
@@ -26,7 +32,7 @@ func (item Item) GetCredentialByUsername(username string) (Credential, error) {
 	return Credential{}, errors.New("Not found")
 }
 
-func (item Item) GetCredentialsName() ([]string, error) {
+func (item *Item) GetCredentialsName() ([]string, error) {
 	var list []string
 
 	for i := 0; i < len(item.Credentials); i++ {
@@ -62,7 +68,6 @@ type Storage interface {
 	DeleteItem(Item) error
 	DeleteCredential(Item, Credential) error
 	UpdateItem(Item) error
-	GetAllNames() ([]string, error)
 }
 
 func getMainDir() (string, error) {

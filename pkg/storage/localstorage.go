@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 )
 
 type LocalStorage struct {
@@ -46,6 +47,7 @@ func (ls *LocalStorage) GetItemByIndex(index int) (Item, error) {
 
 func (ls *LocalStorage) GetAllItems() ([]Item, error) {
 	data := ls.getData()
+	sort.Sort(ByName(data.Items))
 	return data.Items, nil
 }
 
@@ -90,13 +92,17 @@ func (ls *LocalStorage) DeleteCredential(item Item, credential Credential) error
 		return errors.New("Item not found")
 	}
 
-	indexCredential := getIndexOfCredential(data.Items[indexItem].Credentials, credential)
-	if indexCredential == -1 {
-		return errors.New("Item not found")
-	}
+	if len(data.Items[indexItem].Credentials) > 1 {
+		indexCredential := getIndexOfCredential(data.Items[indexItem].Credentials, credential)
+		if indexCredential == -1 {
+			return errors.New("Item not found")
+		}
 
-	data.Items[indexItem].Credentials = removeFromCredentials(data.Items[indexItem].Credentials, indexCredential)
-	ls.setData(data)
+		data.Items[indexItem].Credentials = removeFromCredentials(data.Items[indexItem].Credentials, indexCredential)
+		ls.setData(data)
+	} else {
+		removeFromItems(data.Items, indexItem)
+	}
 	return nil
 }
 
@@ -114,7 +120,7 @@ func (ls *LocalStorage) UpdateItem(item Item) error {
 	return nil
 }
 
-func (ls *LocalStorage) GetAllNames() ([]string, error) {
+func (ls *LocalStorage) GetAllItemNames() ([]string, error) {
 	var names []string
 	items, err := ls.GetAllItems()
 	if err != nil {
@@ -124,15 +130,6 @@ func (ls *LocalStorage) GetAllNames() ([]string, error) {
 	for _, item := range items {
 		names = append(names, item.Name)
 	}
-	return names, nil
-}
-
-func (ls *LocalStorage) GetAllItemNames() ([]string, error) {
-	names, err := ls.GetAllNames()
-	if err != nil {
-		return nil, err
-	}
-
 	return names, nil
 }
 

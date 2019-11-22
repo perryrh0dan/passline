@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 
 	"golang.org/x/net/context"
 
@@ -89,6 +90,7 @@ func (fs *FireStore) GetAllItems() ([]Item, error) {
 		items = append(items, item)
 	}
 
+	sort.Sort(ByName(items))
 	return items, nil
 }
 
@@ -155,7 +157,7 @@ func (fs *FireStore) UpdateItem(item Item) error {
 	return nil
 }
 
-func (fs *FireStore) GetAllNames() ([]string, error) {
+func (fs *FireStore) GetAllItemNames() ([]string, error) {
 	var names []string
 	items, err := fs.GetAllItems()
 	if err != nil {
@@ -165,14 +167,5 @@ func (fs *FireStore) GetAllNames() ([]string, error) {
 	for _, item := range items {
 		names = append(names, item.Name)
 	}
-	return names, nil
-}
-
-func (fs *FireStore) GetAllItemNames() ([]string, error) {
-	names, err := fs.GetAllNames()
-	if err != nil {
-		return nil, err
-	}
-
 	return names, nil
 }
