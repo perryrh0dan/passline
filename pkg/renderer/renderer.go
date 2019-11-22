@@ -91,8 +91,3 @@ func MissingArgument(arguments []string) {
 func NameAlreadyExists(name string) {
 	fmt.Printf("error: name already exists %s\n", name)
 }
-
-func NoItemsExist() {
-	d := color.New(color.FgRed)
-	d.Printf("error: no items exist\n")
-}

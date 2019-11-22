@@ -48,7 +48,7 @@ func (fs *FireStore) Init() error {
 	return nil
 }
 
-func (fs *FireStore) GetByName(name string) (Item, error) {
+func (fs *FireStore) GetItemByName(name string) (Item, error) {
 	dsnap, err := fs.client.Collection("passline").Doc(name).Get(context.Background())
 	if err != nil {
 		return Item{}, err
@@ -59,8 +59,8 @@ func (fs *FireStore) GetByName(name string) (Item, error) {
 	return item, nil
 }
 
-func (fs *FireStore) GetByIndex(index int) (Item, error) {
-	items, err := fs.GetAll()
+func (fs *FireStore) GetItemByIndex(index int) (Item, error) {
+	items, err := fs.GetAllItems()
 	if err != nil {
 		return Item{}, err
 	}
@@ -72,7 +72,7 @@ func (fs *FireStore) GetByIndex(index int) (Item, error) {
 	return items[index], nil
 }
 
-func (fs *FireStore) GetAll() ([]Item, error) {
+func (fs *FireStore) GetAllItems() ([]Item, error) {
 	items := []Item{}
 	iter := fs.client.Collection("passline").Documents(context.Background())
 	for {
@@ -102,7 +102,7 @@ func (fs *FireStore) AddItem(item Item) error {
 }
 
 func (fs *FireStore) AddCredential(name string, credential Credential) error {
-	item, err := fs.GetByName(name)
+	item, err := fs.GetItemByName(name)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func (fs *FireStore) UpdateItem(item Item) error {
 
 func (fs *FireStore) GetAllNames() ([]string, error) {
 	var names []string
-	items, err := fs.GetAll()
+	items, err := fs.GetAllItems()
 	if err != nil {
 		return nil, err
 	}
@@ -165,5 +165,14 @@ func (fs *FireStore) GetAllNames() ([]string, error) {
 	for _, item := range items {
 		names = append(names, item.Name)
 	}
+	return names, nil
+}
+
+func (fs *FireStore) GetAllItemNames() ([]string, error) {
+	names, err := fs.GetAllNames()
+	if err != nil {
+		return nil, err
+	}
+
 	return names, nil
 }

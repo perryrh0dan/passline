@@ -31,7 +31,6 @@ func GetPassword(prompt string) []byte {
 	// Now get the password.
 	fmt.Print(prompt)
 	p, err := terminal.ReadPassword(int(syscall.Stdin))
-	fmt.Println("")
 	if err != nil {
 		if runtime.GOOS != "windows" {
 			panic(err)

@@ -53,9 +53,10 @@ type Credential struct {
 // Storage interface
 type Storage interface {
 	Init() error
-	GetByName(string) (Item, error)
-	GetByIndex(int) (Item, error)
-	GetAll() ([]Item, error)
+	GetItemByName(string) (Item, error)
+	GetItemByIndex(int) (Item, error)
+	GetAllItems() ([]Item, error)
+	GetAllItemNames() ([]string, error)
 	AddItem(Item) error
 	AddCredential(string, Credential) error
 	DeleteItem(Item) error

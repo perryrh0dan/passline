@@ -37,6 +37,7 @@ func ArgOrSelect(args []string, index int, message string, items []string) (stri
 			input = items[selection]
 			fmt.Printf("%s%s\n", message, input)
 		} else if len(items) == 1 {
+			fmt.Printf("Selected %s: %s\n", message, items[0])
 			return items[0], nil
 		}
 	}

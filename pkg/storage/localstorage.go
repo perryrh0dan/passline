@@ -24,7 +24,7 @@ func (ls *LocalStorage) Init() error {
 }
 
 // Get item by name
-func (ls *LocalStorage) GetByName(name string) (Item, error) {
+func (ls *LocalStorage) GetItemByName(name string) (Item, error) {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -35,7 +35,7 @@ func (ls *LocalStorage) GetByName(name string) (Item, error) {
 	return Item{}, errors.New("Item not found")
 }
 
-func (ls *LocalStorage) GetByIndex(index int) (Item, error) {
+func (ls *LocalStorage) GetItemByIndex(index int) (Item, error) {
 	data := ls.getData()
 	if index < 0 && index > len(data.Items) {
 		return Item{}, errors.New("Out of index")
@@ -44,7 +44,7 @@ func (ls *LocalStorage) GetByIndex(index int) (Item, error) {
 	return data.Items[index], nil
 }
 
-func (ls *LocalStorage) GetAll() ([]Item, error) {
+func (ls *LocalStorage) GetAllItems() ([]Item, error) {
 	data := ls.getData()
 	return data.Items, nil
 }
@@ -116,7 +116,7 @@ func (ls *LocalStorage) UpdateItem(item Item) error {
 
 func (ls *LocalStorage) GetAllNames() ([]string, error) {
 	var names []string
-	items, err := ls.GetAll()
+	items, err := ls.GetAllItems()
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +124,15 @@ func (ls *LocalStorage) GetAllNames() ([]string, error) {
 	for _, item := range items {
 		names = append(names, item.Name)
 	}
+	return names, nil
+}
+
+func (ls *LocalStorage) GetAllItemNames() ([]string, error) {
+	names, err := ls.GetAllNames()
+	if err != nil {
+		return nil, err
+	}
+
 	return names, nil
 }
 

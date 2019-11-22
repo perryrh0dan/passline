@@ -51,7 +51,7 @@ func (pl *Passline) getPassword(c *ucli.Context) ([]byte, error) {
 }
 
 func (pl *Passline) checkPassword(password []byte) (bool, error) {
-	data, err := pl.store.GetAll()
+	data, err := pl.store.GetAllItems()
 	if err != nil {
 		return false, err
 	}
@@ -60,7 +60,7 @@ func (pl *Passline) checkPassword(password []byte) (bool, error) {
 		return true, nil
 	}
 
-	item, err := pl.store.GetByIndex(0)
+	item, err := pl.store.GetItemByIndex(0)
 	if err != nil {
 		return false, err
 	}
@@ -74,24 +74,12 @@ func (pl *Passline) checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
-func (pl *Passline) getAllItemNames() []string {
-	names, err := pl.store.GetAllNames()
-	handle(err)
-
-	if len(names) == 0 {
-		renderer.NoItemsExist()
-		os.Exit(0)
-	}
-
-	return names
-}
-
 func (pl *Passline) selectItem(args, names []string) (storage.Item, error) {
 	name, err := cli.ArgOrSelect(args, 0, "URL", names)
 	handle(err)
 
 	// Get item
-	item, err := pl.store.GetByName(name)
+	item, err := pl.store.GetItemByName(name)
 	if err != nil {
 		os.Exit(0)
 	}
@@ -100,7 +88,7 @@ func (pl *Passline) selectItem(args, names []string) (storage.Item, error) {
 }
 
 func (pl *Passline) selectCredential(args []string, item storage.Item) (storage.Credential, error) {
-	username, err := cli.ArgOrSelect(args, 1, "Username/Logic", item.GetUsernameArray())
+	username, err := cli.ArgOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
 	handle(err)
 
 	// Check if name, username combination exists
@@ -120,7 +108,13 @@ func handle(err error) {
 }
 
 func (pl *Passline) DisplayItem(c *ucli.Context) error {
-	names := pl.getAllItemNames()
+	names, err := pl.store.GetAllItemNames()
+	handle(err)
+
+	if len(names) <= 0 {
+		renderer.NoItemsMessage()
+		os.Exit(0)
+	}
 
 	args := c.Args()
 	renderer.DisplayMessage()
@@ -168,7 +162,7 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 	handle(err)
 
 	// Check if name, username combination exists
-	item, err := pl.store.GetByName(name)
+	item, err := pl.store.GetItemByName(name)
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
@@ -192,7 +186,7 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 	credential := storage.Credential{Username: username, Password: cryptedPassword}
 
 	// Check if item already exists
-	item, err = pl.store.GetByName(name)
+	item, err = pl.store.GetItemByName(name)
 	if err != nil {
 		// Generate new item entry
 		item := storage.Item{Name: name, Credentials: []storage.Credential{credential}}
@@ -219,7 +213,13 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 }
 
 func (pl *Passline) DeleteItem(c *ucli.Context) error {
-	names := pl.getAllItemNames()
+	names, err := pl.store.GetAllItemNames()
+	handle(err)
+
+	if len(names) <= 0 {
+		renderer.NoItemsMessage()
+		os.Exit(0)
+	}
 
 	args := c.Args()
 	renderer.DeleteMessage()
@@ -239,7 +239,13 @@ func (pl *Passline) DeleteItem(c *ucli.Context) error {
 }
 
 func (pl *Passline) EditItem(c *ucli.Context) error {
-	names := pl.getAllItemNames()
+	names, err := pl.store.GetAllItemNames()
+	handle(err)
+
+	if len(names) <= 0 {
+		renderer.NoItemsMessage()
+		os.Exit(0)
+	}
 
 	args := c.Args()
 	renderer.ChangeMessage()
@@ -276,7 +282,7 @@ func (pl *Passline) ListSites(c *ucli.Context) error {
 	args := c.Args()
 
 	if len(args) >= 1 {
-		item, err := pl.store.GetByName(args[0])
+		item, err := pl.store.GetItemByName(args[0])
 		if err != nil {
 			renderer.InvalidName(args[0])
 			os.Exit(0)
@@ -284,7 +290,7 @@ func (pl *Passline) ListSites(c *ucli.Context) error {
 
 		renderer.DisplayItem(item)
 	} else {
-		items, err := pl.store.GetAll()
+		items, err := pl.store.GetAllItems()
 		if err != nil {
 			return nil
 		}
