@@ -8,6 +8,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	random "math/rand"
+	"strings"
+	"time"
 
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -74,4 +77,18 @@ func GenerateKey(password []byte) []byte {
 	salt := []byte("This is the salt")
 	dk := pbkdf2.Key(password, salt, 4096, 32, sha1.New)
 	return dk
+}
+
+func GeneratePassword(length int) (string, error) {
+	random.Seed(time.Now().UnixNano())
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+		"abcdefghijklmnopqrstuvwxyz" +
+		"0123456789" +
+		"!$%&()/?")
+	var b strings.Builder
+	for i := 0; i < length; i++ {
+		b.WriteRune(chars[random.Intn(len(chars))])
+	}
+	password := b.String() // E.g. "ExcbsVQs"
+	return password, nil
 }

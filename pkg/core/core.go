@@ -3,10 +3,7 @@ package core
 import (
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/atotto/clipboard"
 	ucli "github.com/urfave/cli"
@@ -77,7 +74,7 @@ func (pl *Passline) checkPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
-func (pl *Passline) DisplayItem(c *ucli.Context) error {
+func (pl *Passline) getAllItemNames() []string {
 	names, err := pl.store.GetAllNames()
 	handle(err)
 
@@ -86,44 +83,53 @@ func (pl *Passline) DisplayItem(c *ucli.Context) error {
 		os.Exit(0)
 	}
 
+	return names
+}
+
+func (pl *Passline) selectItem(args, names []string) (storage.Item, error) {
+	name, err := cli.ArgOrSelect(args, 0, "URL", names)
+	handle(err)
+
+	// Get item
+	item, err := pl.store.GetByName(name)
+	if err != nil {
+		os.Exit(0)
+	}
+
+	return item, nil
+}
+
+func (pl *Passline) selectCredential(args []string, item storage.Item) (storage.Credential, error) {
+	username, err := cli.ArgOrSelect(args, 1, "Username/Logic", item.GetUsernameArray())
+	handle(err)
+
+	// Check if name, username combination exists
+	credential, err := item.GetCredentialByUsername(username)
+	if err != nil {
+		renderer.InvalidUsername(item.Name, username)
+		os.Exit(0)
+	}
+
+	return credential, nil
+}
+
+func handle(err error) {
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func (pl *Passline) DisplayItem(c *ucli.Context) error {
+	names := pl.getAllItemNames()
+
 	args := c.Args()
 	renderer.DisplayMessage()
 
-	var name string
-	if len(names) > 1 {
-		name, err = cli.ArgOrSelect(args, 0, "URL", names)
-		handle(err)
-	} else {
-		name = names[0]
-	}
+	item, err := pl.selectItem(args, names)
+	handle(err)
 
-	// Check if item for name exists
-	item, err := pl.store.GetByName(name)
-	if err != nil {
-		renderer.InvalidName(name)
-		return nil
-	}
-
-	var credential storage.Credential
-	// Only need username for multiple credentials
-	if len(item.Credentials) > 1 {
-		// User input username
-
-		username, err := cli.ArgOrSelect(args, 1, "Username/Logic", item.GetUsernameArray())
-		handle(err)
-
-		// Check if name, username combination exists
-		item, err := pl.store.GetByName(name)
-		if err == nil {
-			credential, err = item.GetCredentialByUsername(username)
-			if err != nil {
-				renderer.InvalidUsername(name, username)
-				os.Exit(0)
-			}
-		}
-	} else {
-		credential = item.Credentials[0]
-	}
+	credential, err := pl.selectCredential(args, item)
+	handle(err)
 
 	// Get and Check for global password.
 	globalPassword, err := pl.getPassword(c)
@@ -166,7 +172,7 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
-			return nil
+			os.Exit(0)
 		}
 	}
 
@@ -177,7 +183,9 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 	}
 
 	// Generate password and crypt password
-	password := generatePassword(20)
+	password, err := crypt.GeneratePassword(20)
+	handle(err)
+
 	cryptedPassword, err := crypt.AesGcmEncrypt(globalPassword, password)
 
 	// Create Credentials
@@ -211,112 +219,47 @@ func (pl *Passline) GenerateItem(c *ucli.Context) error {
 }
 
 func (pl *Passline) DeleteItem(c *ucli.Context) error {
-	names, err := pl.store.GetAllNames()
-	handle(err)
-
-	if len(names) == 0 {
-		renderer.NoItemsExist()
-		os.Exit(0)
-	}
+	names := pl.getAllItemNames()
 
 	args := c.Args()
 	renderer.DeleteMessage()
 
-	var name string
-	if len(names) > 1 {
-		name, err = cli.ArgOrSelect(args, 0, "URL", names)
-		handle(err)
-	} else {
-		name = names[0]
-	}
+	item, err := pl.selectItem(args, names)
+	handle(err)
 
-	item, err := pl.store.GetByName(name)
+	credential, err := pl.selectCredential(args, item)
+	handle(err)
+
+	err = pl.store.DeleteCredential(item, credential)
 	if err != nil {
-		renderer.InvalidName(name)
 		os.Exit(0)
-	}
-
-	if len(item.Credentials) <= 1 {
-		// If Item has only one Credential delete item
-		err = pl.store.DeleteItem(item)
-		if err != nil {
-			os.Exit(0)
-		}
-	} else {
-		// If Item has multiple Credentials ask for username
-		// User input username
-		username, err := cli.ArgOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
-		handle(err)
-
-		// Check if name, username combination exists
-		var credential storage.Credential
-		credential, err = item.GetCredentialByUsername(username)
-		if err != nil {
-			renderer.InvalidUsername(name, username)
-			os.Exit(0)
-		}
-
-		err = pl.store.DeleteCredential(item, credential)
-		if err != nil {
-			os.Exit(0)
-		}
 	}
 
 	return nil
 }
 
 func (pl *Passline) EditItem(c *ucli.Context) error {
-	names, err := pl.store.GetAllNames()
-	handle(err)
-
-	if len(names) == 0 {
-		renderer.NoItemsExist()
-		os.Exit(0)
-	}
+	names := pl.getAllItemNames()
 
 	args := c.Args()
 	renderer.ChangeMessage()
 
-	var name string
-	if len(names) > 1 {
-		name, err = cli.ArgOrSelect(args, 0, "URL", names)
-		handle(err)
-	} else {
-		name = names[0]
-	}
+	item, err := pl.selectItem(args, names)
+	handle(err)
 
-	item, err := pl.store.GetByName(name)
-	if err != nil {
-		renderer.InvalidName(name)
-		os.Exit(0)
-	}
-
-	username := ""
-	if len(item.Credentials) == 1 {
-		username = item.Credentials[0].Username
-	} else {
-		// User input username
-		username, err := cli.ArgOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
-		handle(err)
-
-		// Check if name, username combination exists
-		_, err = item.GetCredentialByUsername(username)
-		if err != nil {
-			renderer.InvalidUsername(name, username)
-			os.Exit(0)
-		}
-	}
+	credential, err := pl.selectCredential(args, item)
+	handle(err)
 
 	// Get new username
-	newUsername, err := cli.Input("Please enter a new Username/Login []: (%s) ", username)
+	newUsername, err := cli.Input("Please enter a new Username/Login []: (%s) ", credential.Username)
 	handle(err)
 
 	if newUsername == "" {
-		newUsername = username
+		newUsername = credential.Username
 	}
 
 	for i := 0; i < len(item.Credentials); i++ {
-		if item.Credentials[i].Username == username {
+		if item.Credentials[i] == credential {
 			item.Credentials[i].Username = newUsername
 		}
 	}
@@ -353,24 +296,4 @@ func (pl *Passline) ListSites(c *ucli.Context) error {
 	}
 
 	return nil
-}
-
-func generatePassword(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789" +
-		"!$%&()/?")
-	var b strings.Builder
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
-	}
-	password := b.String() // E.g. "ExcbsVQs"
-	return password
-}
-
-func handle(err error) {
-	if err != nil {
-		os.Exit(1)
-	}
 }

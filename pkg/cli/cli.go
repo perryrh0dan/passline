@@ -27,14 +27,18 @@ func ArgOrSelect(args []string, index int, message string, items []string) (stri
 		input = args[index]
 	}
 	if input == "" {
-		message := fmt.Sprintf("Please select a %s: ", message)
-		selection, err := Select(message, items)
-		if err != nil {
-			return "", err
-		}
+		if len(items) > 1 {
+			message := fmt.Sprintf("Please select a %s: ", message)
+			selection, err := Select(message, items)
+			if err != nil {
+				return "", err
+			}
 
-		input = items[selection]
-		fmt.Printf("%s%s\n", message, input)
+			input = items[selection]
+			fmt.Printf("%s%s\n", message, input)
+		} else if len(items) == 1 {
+			return items[0], nil
+		}
 	}
 
 	return input, nil
