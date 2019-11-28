@@ -73,6 +73,11 @@ func CreateMessage() {
 	d.Printf("Creating item...\n")
 }
 
+func GenerateMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Generating item...\n")
+}
+
 func ChangeMessage() {
 	d := color.New(color.FgGreen)
 	d.Printf("Changing item...\n")

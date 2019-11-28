@@ -19,7 +19,7 @@ type FireStore struct {
 	client *firestore.Client
 }
 
-func (fs *FireStore) Init() error {
+func NewFirestore() (*FireStore, error) {
 	mainDir, _ := getMainDir()
 	credentialsFile := path.Join(mainDir, "firebase.json")
 
@@ -27,7 +27,7 @@ func (fs *FireStore) Init() error {
 	_, err := os.Stat(credentialsFile)
 	if err != nil {
 		log.Fatalf("error missing firebase credentials file\n")
-		return err
+		return nil, err
 	}
 
 	ctx := context.Background()
@@ -37,16 +37,16 @@ func (fs *FireStore) Init() error {
 	app, err := firebase.NewApp(ctx, config, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
-		return err
+		return nil, err
 	}
 
-	fs.client, err = app.Firestore(ctx)
+	client, err := app.Firestore(ctx)
 	if err != nil {
 		log.Fatalln(err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &FireStore{client: client}, nil
 }
 
 func (fs *FireStore) GetItemByName(name string) (Item, error) {

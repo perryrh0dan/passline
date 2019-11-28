@@ -58,7 +58,6 @@ type Credential struct {
 
 // Storage interface
 type Storage interface {
-	Init() error
 	GetItemByName(string) (Item, error)
 	GetItemByIndex(int) (Item, error)
 	GetAllItems() ([]Item, error)

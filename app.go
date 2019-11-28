@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/perryrh0dan/passline/pkg/core"
-	"github.com/urfave/cli"
+	ucli "github.com/urfave/cli"
+
+	"github.com/perryrh0dan/passline/pkg/cli"
 )
 
-func setupApp() *cli.App {
-	app := cli.NewApp()
-	pl := core.NewPassline()
+func setupApp() *ucli.App {
+	app := ucli.NewApp()
 	app.Name = "Passline"
 	app.Usage = "Password manager"
 	app.HelpName = "passline"
@@ -23,51 +23,51 @@ func setupApp() *cli.App {
 WEBSITE: 
    https://github.com/perryrh0dan/passline
 
-	`, cli.AppHelpTemplate)
+	`, ucli.AppHelpTemplate)
 
 	// default command to get password
-	app.Action = pl.DisplayItem
+	app.Action = cli.DisplayItem
 
-	app.Commands = []cli.Command{
+	app.Commands = []ucli.Command{
 		{
 			Name:      "add",
 			Aliases:   []string{"a"},
 			Usage:     "Add an existing password for a website",
 			ArgsUsage: "<name> <username> <password>",
-			Action:    pl.AddItem,
+			Action:    cli.AddItem,
 		},
 		{
 			Name:      "delete",
 			Aliases:   []string{"d"},
 			Usage:     "Delete an item",
 			ArgsUsage: "<name> <username>",
-			Action:    pl.DeleteItem,
+			Action:    cli.DeleteItem,
 		},
 		{
 			Name:      "edit",
 			Aliases:   []string{"e"},
 			Usage:     "Edit an item",
 			ArgsUsage: "<name> <username>",
-			Action:    pl.EditItem,
+			Action:    cli.EditItem,
 		},
 		{
 			Name:      "generate",
 			Aliases:   []string{"g"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
-			Action:    pl.GenerateItem,
+			Action:    cli.GenerateItem,
 		},
 		{
 			Name:      "list",
 			Aliases:   []string{"ls"},
 			Usage:     "List all items",
 			ArgsUsage: "<name>",
-			Action:    pl.ListSites,
+			Action:    cli.ListItems,
 		},
 	}
 
-	sort.Sort(cli.FlagsByName(app.Flags))
-	sort.Sort(cli.CommandsByName(app.Commands))
+	sort.Sort(ucli.FlagsByName(app.Flags))
+	sort.Sort(ucli.CommandsByName(app.Commands))
 
 	return app
 }

@@ -14,14 +14,14 @@ type LocalStorage struct {
 	storageFile string
 }
 
-func (ls *LocalStorage) Init() error {
+func NewLocalStorage() (*LocalStorage, error) {
 	mainDir, _ := getMainDir()
 
-	ls.storageDir = path.Join(mainDir, "storage")
-	ls.storageFile = path.Join(ls.storageDir, "storage.json")
+	storageDir := path.Join(mainDir, "storage")
+	storageFile := path.Join(storageDir, "storage.json")
 
-	ls.ensureDirectories()
-	return nil
+	ensureDirectories(storageDir, storageFile)
+	return &LocalStorage{storageDir: storageDir, storageFile: storageFile}, nil
 }
 
 // Get item by name
@@ -133,12 +133,12 @@ func (ls *LocalStorage) GetAllItemNames() ([]string, error) {
 	return names, nil
 }
 
-func (ls LocalStorage) ensureDirectories() {
-	ls.ensureMainDir()
-	ls.ensureStorageDir()
+func ensureDirectories(storageDir, storageFile string) {
+	ensureMainDir()
+	ensureStorageDir(storageDir)
 }
 
-func (ls LocalStorage) ensureMainDir() error {
+func ensureMainDir() error {
 	mainDir, err := getMainDir()
 	if err != nil {
 		return err
@@ -155,10 +155,10 @@ func (ls LocalStorage) ensureMainDir() error {
 	return nil
 }
 
-func (ls LocalStorage) ensureStorageDir() {
-	_, err := os.Stat(ls.storageDir)
+func ensureStorageDir(storageDir string) {
+	_, err := os.Stat(storageDir)
 	if err != nil {
-		err := os.Mkdir(ls.storageDir, os.ModePerm)
+		err := os.Mkdir(storageDir, os.ModePerm)
 		if err != nil {
 			println("Cant create directory")
 		}
