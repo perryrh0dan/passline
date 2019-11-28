@@ -52,7 +52,7 @@ func (ls *LocalStorage) GetAllItems() ([]Item, error) {
 }
 
 // Add data
-func (ls *LocalStorage) AddItem(website Item) error {
+func (ls *LocalStorage) CreateItem(website Item) error {
 	data := ls.getData()
 	data.Items = append(data.Items, website)
 	ls.setData(data)
@@ -112,7 +112,7 @@ func (ls *LocalStorage) UpdateItem(item Item) error {
 		return err
 	}
 
-	err = ls.AddItem(item)
+	err = ls.CreateItem(item)
 	if err != nil {
 		return err
 	}

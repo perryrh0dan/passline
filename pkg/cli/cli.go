@@ -12,22 +12,27 @@ import (
 	"github.com/perryrh0dan/passline/pkg/storage"
 )
 
-var passline *core.Passline
+var passline *core.Core
 
 func init() {
-	passline = core.NewPassline()
+	var err error
+	passline, err = core.NewCore()
+	if err != nil {
+		renderer.CoreInstanceError()
+		os.Exit(1)
+	}
 }
 
-func AddItem(c *ucli.Context) error {
+func CreateItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.CreateMessage()
 
 	// User input name
-	name, err := ArgOrInput(args, 0, "URL", "")
+	name, err := argOrInput(args, 0, "URL", "")
 	handle(err)
 
 	// User input username
-	username, err := ArgOrInput(args, 1, "Username/Login", "")
+	username, err := argOrInput(args, 1, "Username/Login", "")
 	handle(err)
 
 	// Check if name, username combination exists
@@ -39,9 +44,13 @@ func AddItem(c *ucli.Context) error {
 	password, err := Input("Password", "")
 	handle(err)
 
-	globalPassword := GetPassword("Enter Global Password: ")
+	globalPassword := getPassword("Enter Global Password: ")
+	println()
 
-	credential, err := passline.AddItem(name, username, password, globalPassword)
+	credential, err := passline.CreateItem(name, username, password, globalPassword)
+	if err != nil {
+		return err
+	}
 
 	renderer.DisplayCredential(credential)
 
@@ -51,6 +60,9 @@ func AddItem(c *ucli.Context) error {
 func DeleteItem(c *ucli.Context) error {
 	// Get all Sites
 	names, err := passline.GetSiteNames()
+	if err != nil {
+		return err
+	}
 
 	// Check if site exists
 	if len(names) <= 0 {
@@ -76,6 +88,9 @@ func DeleteItem(c *ucli.Context) error {
 func DisplayItem(c *ucli.Context) error {
 	// Get all Sites
 	names, err := passline.GetSiteNames()
+	if err != nil {
+		return err
+	}
 
 	// Check if site exists
 	if len(names) <= 0 {
@@ -93,7 +108,8 @@ func DisplayItem(c *ucli.Context) error {
 	handle(err)
 
 	// Get global password.
-	globalPassword := GetPassword("Enter Global Password: ")
+	globalPassword := getPassword("Enter Global Password: ")
+	println()
 
 	// Check global password.
 	valid, err := passline.CheckPassword(globalPassword)
@@ -112,6 +128,9 @@ func DisplayItem(c *ucli.Context) error {
 func EditItem(c *ucli.Context) error {
 	// Get all Sites
 	names, err := passline.GetSiteNames()
+	if err != nil {
+		return err
+	}
 
 	// Check if site exists
 	if len(names) <= 0 {
@@ -149,11 +168,11 @@ func GenerateItem(c *ucli.Context) error {
 	renderer.GenerateMessage()
 
 	// User input name
-	name, err := ArgOrInput(args, 0, "URL", "")
+	name, err := argOrInput(args, 0, "URL", "")
 	handle(err)
 
 	// User input username
-	username, err := ArgOrInput(args, 1, "Username/Login", "")
+	username, err := argOrInput(args, 1, "Username/Login", "")
 	handle(err)
 
 	// Check if name, username combination exists
@@ -162,7 +181,8 @@ func GenerateItem(c *ucli.Context) error {
 		os.Exit(0)
 	}
 
-	globalPassword := GetPassword("Enter Global Password: ")
+	globalPassword := getPassword("Enter Global Password: ")
+	println()
 
 	credential, err := passline.GenerateItem(name, username, globalPassword)
 	handle(err)
@@ -203,7 +223,7 @@ func ListItems(c *ucli.Context) error {
 	return nil
 }
 
-func ArgOrInput(args []string, index int, message string, value string) (string, error) {
+func argOrInput(args []string, index int, message string, value string) (string, error) {
 	input := ""
 	if len(args)-1 >= index {
 		input = args[index]
@@ -220,7 +240,7 @@ func ArgOrInput(args []string, index int, message string, value string) (string,
 	return input, nil
 }
 
-func ArgOrSelect(args []string, index int, message string, items []string) (string, error) {
+func argOrSelect(args []string, index int, message string, items []string) (string, error) {
 	input := ""
 	if len(args)-1 >= index {
 		input = args[index]
@@ -251,7 +271,7 @@ func handle(err error) {
 }
 
 func selectItem(args, names []string) (storage.Item, error) {
-	name, err := ArgOrSelect(args, 0, "URL", names)
+	name, err := argOrSelect(args, 0, "URL", names)
 	handle(err)
 
 	// Get item
@@ -264,7 +284,7 @@ func selectItem(args, names []string) (storage.Item, error) {
 }
 
 func selectCredential(args []string, item storage.Item) (storage.Credential, error) {
-	username, err := ArgOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
+	username, err := argOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
 	handle(err)
 
 	// Check if name, username combination exists

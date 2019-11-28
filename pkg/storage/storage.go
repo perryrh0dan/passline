@@ -6,6 +6,19 @@ import (
 	"github.com/perryrh0dan/passline/pkg/config"
 )
 
+// Storage interface
+type Storage interface {
+	GetItemByName(string) (Item, error)
+	GetItemByIndex(int) (Item, error)
+	GetAllItems() ([]Item, error)
+	GetAllItemNames() ([]string, error)
+	CreateItem(Item) error
+	AddCredential(string, Credential) error
+	DeleteCredential(Item, Credential) error
+	UpdateItem(Item) error
+	deleteItem(Item) error
+}
+
 type Data struct {
 	Items []Item
 }
@@ -54,19 +67,6 @@ func (item *Item) GetUsernameArray() []string {
 type Credential struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-// Storage interface
-type Storage interface {
-	GetItemByName(string) (Item, error)
-	GetItemByIndex(int) (Item, error)
-	GetAllItems() ([]Item, error)
-	GetAllItemNames() ([]string, error)
-	AddItem(Item) error
-	AddCredential(string, Credential) error
-	DeleteCredential(Item, Credential) error
-	UpdateItem(Item) error
-	deleteItem(Item) error
 }
 
 func getMainDir() (string, error) {

@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func GetPassword(prompt string) []byte {
+func getPassword(prompt string) []byte {
 	// Get the initial state of the terminal.
 	initialTermState, e1 := terminal.GetState(int(syscall.Stdin))
 	if e1 != nil {

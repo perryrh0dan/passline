@@ -21,7 +21,7 @@ type FireStore struct {
 
 func NewFirestore() (*FireStore, error) {
 	mainDir, _ := getMainDir()
-	credentialsFile := path.Join(mainDir, "firebase.json")
+	credentialsFile := path.Join(mainDir, "firestore.json")
 
 	// Check for credentials file
 	_, err := os.Stat(credentialsFile)
@@ -33,8 +33,7 @@ func NewFirestore() (*FireStore, error) {
 	ctx := context.Background()
 
 	opt := option.WithCredentialsFile(credentialsFile)
-	config := &firebase.Config{ProjectID: "todo-83ef9"}
-	app, err := firebase.NewApp(ctx, config, opt)
+	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
 		return nil, err
@@ -94,7 +93,7 @@ func (fs *FireStore) GetAllItems() ([]Item, error) {
 	return items, nil
 }
 
-func (fs *FireStore) AddItem(item Item) error {
+func (fs *FireStore) CreateItem(item Item) error {
 	_, err := fs.client.Collection("passline").Doc(item.Name).Set(context.Background(), item)
 	if err != nil {
 		log.Fatalf("Failed adding item: %v", err)
@@ -110,7 +109,7 @@ func (fs *FireStore) AddCredential(name string, credential Credential) error {
 	}
 
 	item.Credentials = append(item.Credentials, credential)
-	err = fs.AddItem(item)
+	err = fs.CreateItem(item)
 	if err != nil {
 		log.Fatalf("Failed updating credentials: %v", err)
 	}
@@ -136,7 +135,7 @@ func (fs *FireStore) DeleteCredential(item Item, credential Credential) error {
 
 	if len(item.Credentials) > 1 {
 		item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
-		err := fs.AddItem(item)
+		err := fs.CreateItem(item)
 		if err != nil {
 			log.Fatalf("Failed updating credentials: %v", err)
 		}
@@ -153,7 +152,7 @@ func (fs *FireStore) UpdateItem(item Item) error {
 		return err
 	}
 
-	err = fs.AddItem(item)
+	err = fs.CreateItem(item)
 	if err != nil {
 		return err
 	}

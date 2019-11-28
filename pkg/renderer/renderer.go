@@ -53,6 +53,10 @@ func ClipboardError() {
 	fmt.Printf("Error occured while copying to clipboard\n")
 }
 
+func CoreInstanceError() {
+	fmt.Printf("Error occured while instantiating core\n")
+}
+
 func StorageError() {
 	d := color.New(color.FgRed)
 	d.Printf("error: unable to initialice storage\n")

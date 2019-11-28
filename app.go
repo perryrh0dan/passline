@@ -30,11 +30,11 @@ WEBSITE:
 
 	app.Commands = []ucli.Command{
 		{
-			Name:      "add",
-			Aliases:   []string{"a"},
+			Name:      "create",
+			Aliases:   []string{"c"},
 			Usage:     "Add an existing password for a website",
 			ArgsUsage: "<name> <username> <password>",
-			Action:    cli.AddItem,
+			Action:    cli.CreateItem,
 		},
 		{
 			Name:      "delete",
