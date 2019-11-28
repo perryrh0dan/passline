@@ -37,12 +37,19 @@ func CreateItem(c *ucli.Context) error {
 
 	// Check if name, username combination exists
 	exists, err := passline.Exists(name, username)
+	if err != nil {
+		return err
+	}
+
 	if exists {
-		os.Exit(0)
+		renderer.NameUsernameAlreadyExists()
+		return nil
 	}
 
 	password, err := Input("Password", "")
-	handle(err)
+	if err != nil {
+		return err
+	}
 
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
@@ -53,7 +60,6 @@ func CreateItem(c *ucli.Context) error {
 	}
 
 	renderer.DisplayCredential(credential)
-
 	return nil
 }
 
@@ -67,20 +73,28 @@ func DeleteItem(c *ucli.Context) error {
 	// Check if site exists
 	if len(names) <= 0 {
 		renderer.NoItemsMessage()
-		os.Exit(0)
+		return nil
 	}
 
 	args := c.Args()
 	renderer.DeleteMessage()
 
 	item, err := selectItem(args, names)
-	handle(err)
+	if err != nil {
+		return err
+	}
 
 	credential, err := selectCredential(args, item)
-	handle(err)
+	if err != nil {
+		return err
+	}
 
 	err = passline.DeleteItem(item.Name, credential.Username)
-	handle(err)
+	if err != nil {
+		return err
+	}
+
+	renderer.SuccessfulDeletedItem(item.Name, credential.Username)
 
 	return nil
 }
@@ -118,10 +132,11 @@ func DisplayItem(c *ucli.Context) error {
 	}
 
 	err = passline.DecryptPassword(&credential, globalPassword)
-	handle(err)
+	if err != nil {
+		return err
+	}
 
 	renderer.DisplayCredential(credential)
-
 	return nil
 }
 
@@ -158,7 +173,7 @@ func EditItem(c *ucli.Context) error {
 	err = passline.EditItem(item.Name, credential.Username, newUsername)
 	handle(err)
 
-	renderer.SuccessfulChangedItem()
+	renderer.SuccessfulChangedItem(item.Name, credential.Username)
 
 	return nil
 }

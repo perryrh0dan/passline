@@ -26,14 +26,21 @@ func DisplayItems(websites []storage.Item) {
 	}
 }
 
-func SuccessfulCopiedToClipboard(name string, username string) {
-	name = color.YellowString(name + "/" + username)
-	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", name)
+func SuccessfulCopiedToClipboard(name, username string) {
+	identifier := buildIdentifier(name, username)
+	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", identifier)
 }
 
-func SuccessfulChangedItem() {
+func SuccessfulChangedItem(name, username string) {
+	identifier := buildIdentifier(name, username)
 	d := color.New(color.FgGreen)
-	d.Printf("Successful changed item")
+	d.Printf("Successful changed item: %s\n", identifier)
+}
+
+func SuccessfulDeletedItem(name, username string) {
+	identifier := buildIdentifier(name, username)
+	d := color.New(color.FgGreen)
+	d.Printf("Successful deleted item: %s\n", identifier)
 }
 
 // InvalidName error message
@@ -99,4 +106,12 @@ func MissingArgument(arguments []string) {
 
 func NameAlreadyExists(name string) {
 	fmt.Printf("error: name already exists %s\n", name)
+}
+
+func NameUsernameAlreadyExists() {
+	fmt.Println("error: name & username combination already exists")
+}
+
+func buildIdentifier(name, username string) string {
+	return color.YellowString(name + "/" + username)
 }
