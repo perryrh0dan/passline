@@ -20,7 +20,7 @@ type Storage interface {
 }
 
 type Data struct {
-	Items []Item
+	Items []Item `json:"items"`
 }
 
 // Item structure

@@ -1,6 +1,8 @@
 package core
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 
 	"github.com/perryrh0dan/passline/pkg/config"
@@ -55,6 +57,21 @@ func (c *Core) CheckPassword(password []byte) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (c *Core) CreateBackup(path string) error {
+	items, err := c.storage.GetAllItems()
+	if err != nil {
+		return err
+	}
+
+	path = path + ".json"
+	data := storage.Data{Items: items}
+
+	file, _ := json.MarshalIndent(data, "", " ")
+	_ = ioutil.WriteFile(path, file, 0644)
+
+	return nil
 }
 
 func (c *Core) CreateItem(name, username, password string, globalPassword []byte) (storage.Credential, error) {

@@ -43,6 +43,11 @@ func SuccessfulDeletedItem(name, username string) {
 	d.Printf("Successful deleted item: %s\n", identifier)
 }
 
+func SuccessfulCreatedBackup(path string) {
+	d := color.New(color.FgGreen)
+	d.Printf("Successful created backup: %s", path)
+}
+
 // InvalidName error message
 func InvalidName(name string) {
 	fmt.Printf("Unable to find item with name: %s\n", name)
@@ -77,6 +82,11 @@ func NoItemsMessage() {
 func DisplayMessage() {
 	d := color.New(color.FgGreen)
 	d.Printf("Display item...\n")
+}
+
+func BackupMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Creating backup...\n")
 }
 
 func CreateMessage() {

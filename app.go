@@ -30,6 +30,13 @@ WEBSITE:
 
 	app.Commands = []ucli.Command{
 		{
+			Name:      "backup",
+			Aliases:   []string{"b"},
+			Usage:     "Create a backup",
+			ArgsUsage: "<path>",
+			Action:    cli.CreateBackup,
+		},
+		{
 			Name:      "create",
 			Aliases:   []string{"c"},
 			Usage:     "Add an existing password for a website",

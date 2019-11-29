@@ -23,6 +23,25 @@ func init() {
 	}
 }
 
+func CreateBackup(c *ucli.Context) error {
+	args := c.Args()
+	renderer.BackupMessage()
+
+	// User input path
+	path, err := argOrInput(args, 0, "Path", "")
+	if err != nil {
+		return err
+	}
+
+	err = passline.CreateBackup(path)
+	if err != nil {
+		return err
+	}
+
+	renderer.SuccessfulCreatedBackup(path)
+	return nil
+}
+
 func CreateItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.CreateMessage()
@@ -95,7 +114,6 @@ func DeleteItem(c *ucli.Context) error {
 	}
 
 	renderer.SuccessfulDeletedItem(item.Name, credential.Username)
-
 	return nil
 }
 
