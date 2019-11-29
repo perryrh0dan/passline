@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sort"
 
@@ -9,7 +10,9 @@ import (
 	"github.com/perryrh0dan/passline/pkg/cli"
 )
 
-func setupApp() *ucli.App {
+func setupApp(ctx context.Context) *ucli.App {
+	cli.Init(ctx)
+
 	app := ucli.NewApp()
 	app.Name = "Passline"
 	app.Usage = "Password manager"
@@ -26,7 +29,7 @@ WEBSITE:
 	`, ucli.AppHelpTemplate)
 
 	// default command to get password
-	app.Action = cli.DisplayItem
+	app.Action = func(c *ucli.Context) error { return cli.DisplayItem(ctx, c) }
 
 	app.Commands = []ucli.Command{
 		{
@@ -34,42 +37,49 @@ WEBSITE:
 			Aliases:   []string{"b"},
 			Usage:     "Create a backup",
 			ArgsUsage: "<path>",
-			Action:    cli.CreateBackup,
+			Action:    func(c *ucli.Context) error { return cli.CreateBackup(ctx, c) },
 		},
 		{
 			Name:      "create",
 			Aliases:   []string{"c"},
 			Usage:     "Add an existing password for a website",
 			ArgsUsage: "<name> <username> <password>",
-			Action:    cli.CreateItem,
+			Action:    func(c *ucli.Context) error { return cli.CreateItem(ctx, c) },
 		},
 		{
 			Name:      "delete",
 			Aliases:   []string{"d"},
 			Usage:     "Delete an item",
 			ArgsUsage: "<name> <username>",
-			Action:    cli.DeleteItem,
+			Action:    func(c *ucli.Context) error { return cli.DeleteItem(ctx, c) },
 		},
 		{
 			Name:      "edit",
 			Aliases:   []string{"e"},
 			Usage:     "Edit an item",
 			ArgsUsage: "<name> <username>",
-			Action:    cli.EditItem,
+			Action:    func(c *ucli.Context) error { return cli.EditItem(ctx, c) },
 		},
 		{
 			Name:      "generate",
 			Aliases:   []string{"g"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
-			Action:    cli.GenerateItem,
+			Action:    func(c *ucli.Context) error { return cli.GenerateItem(ctx, c) },
 		},
 		{
 			Name:      "list",
 			Aliases:   []string{"ls"},
 			Usage:     "List all items",
 			ArgsUsage: "<name>",
-			Action:    cli.ListItems,
+			Action:    func(c *ucli.Context) error { return cli.ListItems(ctx, c) },
+		},
+		{
+			Name:      "restore",
+			Aliases:   []string{"r"},
+			Usage:     "Restore backup",
+			ArgsUsage: "<path>",
+			Action:    func(c *ucli.Context) error { return cli.RestoreBackup(ctx, c) },
 		},
 	}
 

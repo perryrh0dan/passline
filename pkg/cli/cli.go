@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -14,16 +15,16 @@ import (
 
 var passline *core.Core
 
-func init() {
+func Init(ctx context.Context) {
 	var err error
-	passline, err = core.NewCore()
+	passline, err = core.NewCore(ctx)
 	if err != nil {
 		renderer.CoreInstanceError()
 		os.Exit(1)
 	}
 }
 
-func CreateBackup(c *ucli.Context) error {
+func CreateBackup(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 	renderer.BackupMessage()
 
@@ -33,7 +34,7 @@ func CreateBackup(c *ucli.Context) error {
 		return err
 	}
 
-	err = passline.CreateBackup(path)
+	err = passline.CreateBackup(ctx, path)
 	if err != nil {
 		return err
 	}
@@ -42,7 +43,7 @@ func CreateBackup(c *ucli.Context) error {
 	return nil
 }
 
-func CreateItem(c *ucli.Context) error {
+func CreateItem(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 	renderer.CreateMessage()
 
@@ -55,7 +56,7 @@ func CreateItem(c *ucli.Context) error {
 	handle(err)
 
 	// Check if name, username combination exists
-	exists, err := passline.Exists(name, username)
+	exists, err := passline.Exists(ctx, name, username)
 	if err != nil {
 		return err
 	}
@@ -73,7 +74,7 @@ func CreateItem(c *ucli.Context) error {
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
 
-	credential, err := passline.CreateItem(name, username, password, globalPassword)
+	credential, err := passline.CreateItem(ctx, name, username, password, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -82,9 +83,9 @@ func CreateItem(c *ucli.Context) error {
 	return nil
 }
 
-func DeleteItem(c *ucli.Context) error {
+func DeleteItem(ctx context.Context, c *ucli.Context) error {
 	// Get all Sites
-	names, err := passline.GetSiteNames()
+	names, err := passline.GetSiteNames(ctx)
 	if err != nil {
 		return err
 	}
@@ -98,7 +99,7 @@ func DeleteItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DeleteMessage()
 
-	item, err := selectItem(args, names)
+	item, err := selectItem(ctx, args, names)
 	if err != nil {
 		return err
 	}
@@ -108,7 +109,7 @@ func DeleteItem(c *ucli.Context) error {
 		return err
 	}
 
-	err = passline.DeleteItem(item.Name, credential.Username)
+	err = passline.DeleteItem(ctx, item.Name, credential.Username)
 	if err != nil {
 		return err
 	}
@@ -117,9 +118,9 @@ func DeleteItem(c *ucli.Context) error {
 	return nil
 }
 
-func DisplayItem(c *ucli.Context) error {
+func DisplayItem(ctx context.Context, c *ucli.Context) error {
 	// Get all Sites
-	names, err := passline.GetSiteNames()
+	names, err := passline.GetSiteNames(ctx)
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func DisplayItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DisplayMessage()
 
-	item, err := selectItem(args, names)
+	item, err := selectItem(ctx, args, names)
 	handle(err)
 
 	credential, err := selectCredential(args, item)
@@ -144,7 +145,7 @@ func DisplayItem(c *ucli.Context) error {
 	println()
 
 	// Check global password.
-	valid, err := passline.CheckPassword(globalPassword)
+	valid, err := passline.CheckPassword(ctx, globalPassword)
 	if err != nil || !valid {
 		handle(err)
 	}
@@ -158,9 +159,9 @@ func DisplayItem(c *ucli.Context) error {
 	return nil
 }
 
-func EditItem(c *ucli.Context) error {
+func EditItem(ctx context.Context, c *ucli.Context) error {
 	// Get all Sites
-	names, err := passline.GetSiteNames()
+	names, err := passline.GetSiteNames(ctx)
 	if err != nil {
 		return err
 	}
@@ -174,7 +175,7 @@ func EditItem(c *ucli.Context) error {
 	args := c.Args()
 	renderer.DeleteMessage()
 
-	item, err := selectItem(args, names)
+	item, err := selectItem(ctx, args, names)
 	handle(err)
 
 	credential, err := selectCredential(args, item)
@@ -188,7 +189,7 @@ func EditItem(c *ucli.Context) error {
 		newUsername = credential.Username
 	}
 
-	err = passline.EditItem(item.Name, credential.Username, newUsername)
+	err = passline.EditItem(ctx, item.Name, credential.Username, newUsername)
 	handle(err)
 
 	renderer.SuccessfulChangedItem(item.Name, credential.Username)
@@ -196,7 +197,7 @@ func EditItem(c *ucli.Context) error {
 	return nil
 }
 
-func GenerateItem(c *ucli.Context) error {
+func GenerateItem(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 	renderer.GenerateMessage()
 
@@ -209,7 +210,7 @@ func GenerateItem(c *ucli.Context) error {
 	handle(err)
 
 	// Check if name, username combination exists
-	exists, err := passline.Exists(name, username)
+	exists, err := passline.Exists(ctx, name, username)
 	if exists {
 		os.Exit(0)
 	}
@@ -217,7 +218,7 @@ func GenerateItem(c *ucli.Context) error {
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
 
-	credential, err := passline.GenerateItem(name, username, globalPassword)
+	credential, err := passline.GenerateItem(ctx, name, username, globalPassword)
 	handle(err)
 
 	err = clipboard.WriteAll(credential.Password)
@@ -230,11 +231,11 @@ func GenerateItem(c *ucli.Context) error {
 	return nil
 }
 
-func ListItems(c *ucli.Context) error {
+func ListItems(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 
 	if len(args) >= 1 {
-		item, err := passline.GetSite(args[0])
+		item, err := passline.GetSite(ctx, args[0])
 		if err != nil {
 			renderer.InvalidName(args[0])
 			os.Exit(0)
@@ -242,7 +243,7 @@ func ListItems(c *ucli.Context) error {
 
 		renderer.DisplayItem(item)
 	} else {
-		items, err := passline.GetSites()
+		items, err := passline.GetSites(ctx)
 		if err != nil {
 			return nil
 		}
@@ -253,6 +254,25 @@ func ListItems(c *ucli.Context) error {
 		renderer.DisplayItems(items)
 	}
 
+	return nil
+}
+
+func RestoreBackup(ctx context.Context, c *ucli.Context) error {
+	args := c.Args()
+	renderer.RestoreMessage()
+
+	// User input path
+	path, err := argOrInput(args, 0, "Path", "")
+	if err != nil {
+		return err
+	}
+
+	err = passline.RestoreBackup(ctx, path)
+	if err != nil {
+		return err
+	}
+
+	renderer.SuccessfulRestoredBackup(path)
 	return nil
 }
 
@@ -303,12 +323,12 @@ func handle(err error) {
 	}
 }
 
-func selectItem(args, names []string) (storage.Item, error) {
+func selectItem(ctx context.Context, args, names []string) (storage.Item, error) {
 	name, err := argOrSelect(args, 0, "URL", names)
 	handle(err)
 
 	// Get item
-	item, err := passline.GetSite(name)
+	item, err := passline.GetSite(ctx, name)
 	if err != nil {
 		os.Exit(0)
 	}

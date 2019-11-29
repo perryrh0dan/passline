@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -16,13 +17,13 @@ type Core struct {
 	storage storage.Storage
 }
 
-func NewCore() (*Core, error) {
+func NewCore(ctx context.Context) (*Core, error) {
 	c := new(Core)
 	c.config, _ = config.Get()
 	var err error
 	switch c.config.Storage {
 	case "firestore":
-		c.storage, err = storage.NewFirestore()
+		c.storage, err = storage.NewFirestore(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -35,8 +36,8 @@ func NewCore() (*Core, error) {
 	return c, nil
 }
 
-func (c *Core) CheckPassword(password []byte) (bool, error) {
-	data, err := c.storage.GetAllItems()
+func (c *Core) CheckPassword(ctx context.Context, password []byte) (bool, error) {
+	data, err := c.storage.GetAllItems(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -45,7 +46,7 @@ func (c *Core) CheckPassword(password []byte) (bool, error) {
 		return true, nil
 	}
 
-	item, err := c.storage.GetItemByIndex(0)
+	item, err := c.storage.GetItemByIndex(ctx, 0)
 	if err != nil {
 		return false, err
 	}
@@ -59,8 +60,8 @@ func (c *Core) CheckPassword(password []byte) (bool, error) {
 	return true, nil
 }
 
-func (c *Core) CreateBackup(path string) error {
-	items, err := c.storage.GetAllItems()
+func (c *Core) CreateBackup(ctx context.Context, path string) error {
+	items, err := c.storage.GetAllItems(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,10 +75,26 @@ func (c *Core) CreateBackup(path string) error {
 	return nil
 }
 
-func (c *Core) CreateItem(name, username, password string, globalPassword []byte) (storage.Credential, error) {
+func (c *Core) RestoreBackup(ctx context.Context, path string) error {
+	data := storage.Data{}
+
+	_, err := os.Stat(path)
+	if err != nil {
+		renderer.InvalidFilePath()
+	}
+
+	file, _ := ioutil.ReadFile(path)
+	_ = json.Unmarshal([]byte(file), &data)
+
+	c.storage.SetData(ctx, data)
+
+	return nil
+}
+
+func (c *Core) CreateItem(ctx context.Context, name, username, password string, globalPassword []byte) (storage.Credential, error) {
 
 	// Check global password.
-	valid, err := c.CheckPassword(globalPassword)
+	valid, err := c.CheckPassword(ctx, globalPassword)
 	if err != nil || !valid {
 		return storage.Credential{}, err
 	}
@@ -90,7 +107,7 @@ func (c *Core) CreateItem(name, username, password string, globalPassword []byte
 	// Create Credentials
 	credential := storage.Credential{Username: username, Password: cryptedPassword}
 
-	err = c.addCredential(name, credential)
+	err = c.addCredential(ctx, name, credential)
 	if err != nil {
 		return storage.Credential{}, err
 	}
@@ -99,20 +116,20 @@ func (c *Core) CreateItem(name, username, password string, globalPassword []byte
 	return credential, nil
 }
 
-func (c *Core) addCredential(name string, credential storage.Credential) error {
+func (c *Core) addCredential(ctx context.Context, name string, credential storage.Credential) error {
 	// Check if item already exists
-	_, err := c.storage.GetItemByName(name)
+	_, err := c.storage.GetItemByName(ctx, name)
 	if err != nil {
 		// Generate new item entry
 		item := storage.Item{Name: name, Credentials: []storage.Credential{credential}}
-		err = c.storage.CreateItem(item)
+		err = c.storage.CreateItem(ctx, item)
 		if err != nil {
 			os.Exit(0)
 		}
 	} else {
 		// TODO check if credential already exists
 		// Add to existing item
-		err := c.storage.AddCredential(name, credential)
+		err := c.storage.AddCredential(ctx, name, credential)
 		if err != nil {
 			os.Exit(0)
 		}
@@ -132,9 +149,9 @@ func (c *Core) DecryptPassword(credential *storage.Credential, globalPassword []
 	return nil
 }
 
-func (c *Core) GenerateItem(name, username string, globalPassword []byte) (storage.Credential, error) {
+func (c *Core) GenerateItem(ctx context.Context, name, username string, globalPassword []byte) (storage.Credential, error) {
 	// Check global password.
-	valid, err := c.CheckPassword(globalPassword)
+	valid, err := c.CheckPassword(ctx, globalPassword)
 	if err != nil || !valid {
 		return storage.Credential{}, err
 	}
@@ -150,7 +167,7 @@ func (c *Core) GenerateItem(name, username string, globalPassword []byte) (stora
 	// Create Credentials
 	credential := storage.Credential{Username: username, Password: cryptedPassword}
 
-	err = c.addCredential(name, credential)
+	err = c.addCredential(ctx, name, credential)
 	if err != nil {
 		return storage.Credential{}, err
 	}
@@ -159,8 +176,8 @@ func (c *Core) GenerateItem(name, username string, globalPassword []byte) (stora
 	return credential, nil
 }
 
-func (c *Core) DeleteItem(name, username string) error {
-	item, err := c.storage.GetItemByName(name)
+func (c *Core) DeleteItem(ctx context.Context, name, username string) error {
+	item, err := c.storage.GetItemByName(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -170,7 +187,7 @@ func (c *Core) DeleteItem(name, username string) error {
 		return err
 	}
 
-	err = c.storage.DeleteCredential(item, credential)
+	err = c.storage.DeleteCredential(ctx, item, credential)
 	if err != nil {
 		os.Exit(0)
 	}
@@ -178,8 +195,8 @@ func (c *Core) DeleteItem(name, username string) error {
 	return nil
 }
 
-func (c *Core) EditItem(name, username, newUsername string) error {
-	item, err := c.storage.GetItemByName(name)
+func (c *Core) EditItem(ctx context.Context, name, username, newUsername string) error {
+	item, err := c.storage.GetItemByName(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -190,7 +207,7 @@ func (c *Core) EditItem(name, username, newUsername string) error {
 		}
 	}
 
-	err = c.storage.UpdateItem(item)
+	err = c.storage.UpdateItem(ctx, item)
 	if err != nil {
 		return err
 	}
@@ -198,8 +215,8 @@ func (c *Core) EditItem(name, username, newUsername string) error {
 	return nil
 }
 
-func (c *Core) GetSites() ([]storage.Item, error) {
-	items, err := c.storage.GetAllItems()
+func (c *Core) GetSites(ctx context.Context) ([]storage.Item, error) {
+	items, err := c.storage.GetAllItems(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -207,8 +224,8 @@ func (c *Core) GetSites() ([]storage.Item, error) {
 	return items, nil
 }
 
-func (c *Core) GetSiteNames() ([]string, error) {
-	items, err := c.GetSites()
+func (c *Core) GetSiteNames(ctx context.Context) ([]string, error) {
+	items, err := c.GetSites(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -221,8 +238,8 @@ func (c *Core) GetSiteNames() ([]string, error) {
 	return names, nil
 }
 
-func (c *Core) GetSite(name string) (storage.Item, error) {
-	item, err := c.storage.GetItemByName(name)
+func (c *Core) GetSite(ctx context.Context, name string) (storage.Item, error) {
+	item, err := c.storage.GetItemByName(ctx, name)
 	if err != nil {
 		return storage.Item{}, err
 	}
@@ -230,8 +247,8 @@ func (c *Core) GetSite(name string) (storage.Item, error) {
 	return item, nil
 }
 
-func (c *Core) Exists(name, username string) (bool, error) {
-	item, err := c.storage.GetItemByName(name)
+func (c *Core) Exists(ctx context.Context, name, username string) (bool, error) {
+	item, err := c.storage.GetItemByName(ctx, name)
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {

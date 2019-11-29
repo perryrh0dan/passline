@@ -45,7 +45,12 @@ func SuccessfulDeletedItem(name, username string) {
 
 func SuccessfulCreatedBackup(path string) {
 	d := color.New(color.FgGreen)
-	d.Printf("Successful created backup: %s", path)
+	d.Printf("Successful created backup: %s\n", path)
+}
+
+func SuccessfulRestoredBackup(path string) {
+	d := color.New(color.FgGreen)
+	d.Printf("Successful restored backup: %s\n", path)
 }
 
 // InvalidName error message
@@ -59,6 +64,10 @@ func InvalidUsername(name string, username string) {
 
 func InvalidPassword() {
 	fmt.Printf("Invalid Password\n")
+}
+
+func InvalidFilePath() {
+	fmt.Printf("Invalid file path\n")
 }
 
 func ClipboardError() {
@@ -107,6 +116,11 @@ func ChangeMessage() {
 func DeleteMessage() {
 	d := color.New(color.FgGreen)
 	d.Printf("Deleting item...\n")
+}
+
+func RestoreMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Restoring backup...\n")
 }
 
 func MissingArgument(arguments []string) {

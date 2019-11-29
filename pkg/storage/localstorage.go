@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -25,7 +26,7 @@ func NewLocalStorage() (*LocalStorage, error) {
 }
 
 // Get item by name
-func (ls *LocalStorage) GetItemByName(name string) (Item, error) {
+func (ls *LocalStorage) GetItemByName(ctx context.Context, name string) (Item, error) {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -36,7 +37,7 @@ func (ls *LocalStorage) GetItemByName(name string) (Item, error) {
 	return Item{}, errors.New("Item not found")
 }
 
-func (ls *LocalStorage) GetItemByIndex(index int) (Item, error) {
+func (ls *LocalStorage) GetItemByIndex(ctx context.Context, index int) (Item, error) {
 	data := ls.getData()
 	if index < 0 && index > len(data.Items) {
 		return Item{}, errors.New("Out of index")
@@ -45,21 +46,21 @@ func (ls *LocalStorage) GetItemByIndex(index int) (Item, error) {
 	return data.Items[index], nil
 }
 
-func (ls *LocalStorage) GetAllItems() ([]Item, error) {
+func (ls *LocalStorage) GetAllItems(ctx context.Context) ([]Item, error) {
 	data := ls.getData()
 	sort.Sort(ByName(data.Items))
 	return data.Items, nil
 }
 
 // Add data
-func (ls *LocalStorage) CreateItem(website Item) error {
+func (ls *LocalStorage) CreateItem(ctx context.Context, website Item) error {
 	data := ls.getData()
 	data.Items = append(data.Items, website)
 	ls.setData(data)
 	return nil
 }
 
-func (ls *LocalStorage) AddCredential(name string, credential Credential) error {
+func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credential Credential) error {
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -85,7 +86,7 @@ func (ls *LocalStorage) deleteItem(item Item) error {
 	return nil
 }
 
-func (ls *LocalStorage) DeleteCredential(item Item, credential Credential) error {
+func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, credential Credential) error {
 	data := ls.getData()
 	indexItem := getIndexOfItem(data.Items, item)
 	if indexItem == -1 {
@@ -106,13 +107,13 @@ func (ls *LocalStorage) DeleteCredential(item Item, credential Credential) error
 	return nil
 }
 
-func (ls *LocalStorage) UpdateItem(item Item) error {
+func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 	err := ls.deleteItem(item)
 	if err != nil {
 		return err
 	}
 
-	err = ls.CreateItem(item)
+	err = ls.CreateItem(ctx, item)
 	if err != nil {
 		return err
 	}
@@ -120,17 +121,8 @@ func (ls *LocalStorage) UpdateItem(item Item) error {
 	return nil
 }
 
-func (ls *LocalStorage) GetAllItemNames() ([]string, error) {
-	var names []string
-	items, err := ls.GetAllItems()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, item := range items {
-		names = append(names, item.Name)
-	}
-	return names, nil
+func (ls *LocalStorage) SetData(ctx context.Context, data Data) error {
+	return ls.setData(data)
 }
 
 func ensureDirectories(storageDir, storageFile string) {
@@ -177,10 +169,12 @@ func (ls LocalStorage) getData() Data {
 	return data
 }
 
-func (ls LocalStorage) setData(data Data) {
+func (ls LocalStorage) setData(data Data) error {
 	_, err := os.Stat(ls.storageDir)
 	if err == nil {
 		file, _ := json.MarshalIndent(data, "", " ")
 		_ = ioutil.WriteFile(ls.storageFile, file, 0644)
 	}
+
+	return nil
 }

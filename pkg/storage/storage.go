@@ -4,19 +4,19 @@ import (
 	"errors"
 
 	"github.com/perryrh0dan/passline/pkg/config"
+	"golang.org/x/net/context"
 )
 
 // Storage interface
 type Storage interface {
-	GetItemByName(string) (Item, error)
-	GetItemByIndex(int) (Item, error)
-	GetAllItems() ([]Item, error)
-	GetAllItemNames() ([]string, error)
-	CreateItem(Item) error
-	AddCredential(string, Credential) error
-	DeleteCredential(Item, Credential) error
-	UpdateItem(Item) error
-	deleteItem(Item) error
+	GetItemByName(context.Context, string) (Item, error)
+	GetItemByIndex(context.Context, int) (Item, error)
+	GetAllItems(context.Context) ([]Item, error)
+	CreateItem(context.Context, Item) error
+	AddCredential(context.Context, string, Credential) error
+	DeleteCredential(context.Context, Item, Credential) error
+	UpdateItem(context.Context, Item) error
+	SetData(context.Context, Data) error
 }
 
 type Data struct {
