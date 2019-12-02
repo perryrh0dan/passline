@@ -21,11 +21,15 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ## Contents
 
-* [Description](#description)
-* [Highlights](#highlights)
-* [Install](#install)
-* [Usage](#usage)
-* [Development](#Development)
+- [Description](#description)
+- [Highlights](#highlights)
+- [Contents](#contents)
+- [Install](#install)
+  - [Binary](#binary)
+  - [Snapcraft](#snapcraft)
+- [Usage](#usage)
+- [Development](#development)
+  - [Linter](#linter)
 
 ## Install
 ### Binary
@@ -58,10 +62,13 @@ DESCRIPTION:
    Password manager for the command line
 
 COMMANDS:
-   add, a       Add an existing password for a website
+   backup, b    Create a backup
+   create, a    Add an existing password for a website
    generate, g  Generate a password for an item
    delete, d    Delete an item
+   edit, e      Edit an item
    list, ls     List all items
+   restore, r   Restore a backup
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
