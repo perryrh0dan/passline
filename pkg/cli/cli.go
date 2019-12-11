@@ -330,6 +330,7 @@ func selectItem(ctx context.Context, args, names []string) (storage.Item, error)
 	// Get item
 	item, err := passline.GetSite(ctx, name)
 	if err != nil {
+		renderer.InvalidName(name)
 		os.Exit(0)
 	}
 

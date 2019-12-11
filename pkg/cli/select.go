@@ -27,7 +27,7 @@ func Select(message string, items []string) (int, error) {
 		_, key, _ := keyboard.GetKey()
 		update := false
 		switch key {
-		case 3:
+		case keyboard.KeyEsc:
 			return -1, errors.New("Canceled")
 		case 13:
 			clearLines(len(items) + 1)
