@@ -17,9 +17,14 @@ func Select(message string, items []string) (int, error) {
 	// Print Initial Selection
 	printSelect(items, selected)
 
-	// Open keyboard and Hide Cursor
-	keyboard.Open()
+	// Open keyboard
+	err := keyboard.Open()
+	if err != nil {
+		return -1, err
+	}
 	defer keyboard.Close()
+
+	// Hide Cursor
 	hideCursor()
 	defer showCursor()
 
@@ -29,15 +34,17 @@ func Select(message string, items []string) (int, error) {
 		switch key {
 		case keyboard.KeyEsc:
 			return -1, errors.New("Canceled")
-		case 13:
+		case keyboard.KeyCtrlC:
+			return -1, errors.New("Canceled")
+		case keyboard.KeyEnter:
 			clearLines(len(items) + 1)
 			return selected, nil
-		case 65517:
+		case keyboard.KeyArrowUp:
 			if selected > 0 {
 				selected--
 				update = true
 			}
-		case 65516:
+		case keyboard.KeyArrowDown:
 			if selected < len(items)-1 {
 				selected++
 				update = true
