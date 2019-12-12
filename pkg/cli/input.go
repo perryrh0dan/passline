@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-func Input(message string, value string) (string, error) {
+func Input(message string, defaultValue string) (string, error) {
 	// Print message
 
-	if value != "" {
-		fmt.Printf(message, value)
+	if defaultValue != "" {
+		fmt.Printf(message, defaultValue)
 	} else {
 		fmt.Print(message)
 	}
@@ -24,5 +24,10 @@ func Input(message string, value string) (string, error) {
 	text = strings.TrimSuffix(text, "\n")
 	// TODO Test if working for Linux
 	text = strings.TrimSuffix(text, "\r")
+
+	// If input empty assign default value also valid if defaultValue is empty
+	if text == "" {
+		text = defaultValue
+	}
 	return text, nil
 }

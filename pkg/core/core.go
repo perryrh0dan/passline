@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/perryrh0dan/passline/pkg/config"
 	"github.com/perryrh0dan/passline/pkg/crypt"
@@ -66,7 +67,10 @@ func (c *Core) CreateBackup(ctx context.Context, path string) error {
 		return err
 	}
 
-	path = path + ".json"
+	if !strings.HasSuffix(path, ".json") {
+		path = path + ".json"
+	}
+
 	data := storage.Data{Items: items}
 
 	file, _ := json.MarshalIndent(data, "", " ")

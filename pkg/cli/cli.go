@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/atotto/clipboard"
 	ucli "github.com/urfave/cli"
@@ -29,7 +30,14 @@ func CreateBackup(ctx context.Context, c *ucli.Context) error {
 	renderer.BackupMessage()
 
 	// User input path
-	path, err := argOrInput(args, 0, "Path", "")
+	path, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	path = filepath.Join(path, "backup.json")
+
+	path, err = argOrInput(args, 0, "Path", path)
 	if err != nil {
 		return err
 	}
@@ -185,10 +193,6 @@ func EditItem(ctx context.Context, c *ucli.Context) error {
 	newUsername, err := Input("Please enter a new Username/Login []: (%s) ", credential.Username)
 	handle(err)
 
-	if newUsername == "" {
-		newUsername = credential.Username
-	}
-
 	err = passline.EditItem(ctx, item.Name, credential.Username, newUsername)
 	handle(err)
 
@@ -276,15 +280,19 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 	return nil
 }
 
-func argOrInput(args []string, index int, message string, value string) (string, error) {
+func argOrInput(args []string, index int, message string, defaultValue string) (string, error) {
 	input := ""
 	if len(args)-1 >= index {
 		input = args[index]
 	}
 	if input == "" {
 		message := fmt.Sprintf("Please enter a %s []: ", message)
+		if defaultValue != "" {
+			message += "(%s)"
+		}
+
 		var err error
-		input, err = Input(message, value)
+		input, err = Input(message, defaultValue)
 		if err != nil {
 			return "", err
 		}

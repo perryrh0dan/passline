@@ -1,0 +1,22 @@
+{
+ "items": [
+  {
+   "name": "twitter.com",
+   "credentials": [
+    {
+     "username": "thomaspoehlmann96@googlemail.com",
+     "password": "rtQv8AKn0zL324fdufC74J3_m6jy0pab7Ya1wFNxjU8S4SouupPNFVB1wVcsn1Ql"
+    }
+   ]
+  },
+  {
+   "name": "unitymedia.de",
+   "credentials": [
+    {
+     "username": "thomaspoehlmann96@googlemail.com",
+     "password": "4kFySne5r4b_Y-o8zfH9IMU5e7Fez1_Cscg6aTloacLvfs5MV3WvIozsQDo6hZer"
+    }
+   ]
+  }
+ ]
+}
