@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/atotto/clipboard"
-	ucli "github.com/urfave/cli"
+	ucli "github.com/urfave/cli/v2"
 
 	"github.com/perryrh0dan/passline/pkg/core"
 	"github.com/perryrh0dan/passline/pkg/renderer"
@@ -219,6 +219,14 @@ func GenerateItem(ctx context.Context, c *ucli.Context) error {
 		os.Exit(0)
 	}
 
+	// Check if advanced mode is active
+	if c.String("mode") == "advanced" {
+		err := getAdvancedParamters(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
 
@@ -238,10 +246,10 @@ func GenerateItem(ctx context.Context, c *ucli.Context) error {
 func ListItems(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 
-	if len(args) >= 1 {
-		item, err := passline.GetSite(ctx, args[0])
+	if args.Len() >= 1 {
+		item, err := passline.GetSite(ctx, args.Get(0))
 		if err != nil {
-			renderer.InvalidName(args[0])
+			renderer.InvalidName(args.Get(0))
 			os.Exit(0)
 		}
 
@@ -280,10 +288,20 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 	return nil
 }
 
-func argOrInput(args []string, index int, message string, defaultValue string) (string, error) {
+func getAdvancedParamters(ctx context.Context) error {
+	length, err := Input("Please enter the length of the password []: (%s)", "20")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(length)
+	return nil
+}
+
+func argOrInput(args ucli.Args, index int, message string, defaultValue string) (string, error) {
 	input := ""
-	if len(args)-1 >= index {
-		input = args[index]
+	if args.Len()-1 >= index {
+		input = args.Get(index)
 	}
 	if input == "" {
 		message := fmt.Sprintf("Please enter a %s []: ", message)
@@ -301,10 +319,10 @@ func argOrInput(args []string, index int, message string, defaultValue string) (
 	return input, nil
 }
 
-func argOrSelect(args []string, index int, message string, items []string) (string, error) {
+func argOrSelect(args ucli.Args, index int, message string, items []string) (string, error) {
 	input := ""
-	if len(args)-1 >= index {
-		input = args[index]
+	if args.Len()-1 >= index {
+		input = args.Get(index)
 	}
 	if input == "" {
 		if len(items) > 1 {
@@ -331,7 +349,7 @@ func handle(err error) {
 	}
 }
 
-func selectItem(ctx context.Context, args, names []string) (storage.Item, error) {
+func selectItem(ctx context.Context, args ucli.Args, names []string) (storage.Item, error) {
 	name, err := argOrSelect(args, 0, "URL", names)
 	handle(err)
 
@@ -345,7 +363,7 @@ func selectItem(ctx context.Context, args, names []string) (storage.Item, error)
 	return item, nil
 }
 
-func selectCredential(args []string, item storage.Item) (storage.Credential, error) {
+func selectCredential(args ucli.Args, item storage.Item) (storage.Credential, error) {
 	username, err := argOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
 	handle(err)
 

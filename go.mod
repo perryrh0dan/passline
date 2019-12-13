@@ -19,6 +19,7 @@ require (
 	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942
 	github.com/rthornton128/goncurses v0.0.0-20190619232326-514c399d6652
 	github.com/urfave/cli v1.22.1
+	github.com/urfave/cli/v2 v2.0.0
 	github.com/zetamatta/go-getch v0.0.0-20181223074817-31a2298565de
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859

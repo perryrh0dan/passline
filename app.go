@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	ucli "github.com/urfave/cli"
+	ucli "github.com/urfave/cli/v2"
 
 	"github.com/perryrh0dan/passline/pkg/cli"
 )
@@ -31,7 +31,7 @@ WEBSITE:
 	// default command to get password
 	app.Action = func(c *ucli.Context) error { return cli.DisplayItem(ctx, c) }
 
-	app.Commands = []ucli.Command{
+	app.Commands = []*ucli.Command{
 		{
 			Name:      "backup",
 			Aliases:   []string{"b"},
@@ -65,7 +65,15 @@ WEBSITE:
 			Aliases:   []string{"g"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
-			Action:    func(c *ucli.Context) error { return cli.GenerateItem(ctx, c) },
+			Flags: []ucli.Flag{
+				&ucli.StringFlag{
+					Name:    "mode",
+					Aliases: []string{"m"},
+					Value:   "default",
+					Usage:   "Change between default and advanced mode",
+				},
+			},
+			Action: func(c *ucli.Context) error { return cli.GenerateItem(ctx, c) },
 		},
 		{
 			Name:      "list",
