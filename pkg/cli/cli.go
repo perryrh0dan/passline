@@ -51,7 +51,7 @@ func CreateBackup(ctx context.Context, c *ucli.Context) error {
 	return nil
 }
 
-func CreateItem(ctx context.Context, c *ucli.Context) error {
+func AddItem(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 	renderer.CreateMessage()
 
@@ -74,7 +74,7 @@ func CreateItem(ctx context.Context, c *ucli.Context) error {
 		return nil
 	}
 
-	password, err := Input("Password", "")
+	password, err := Input("Please enter the existing Password []: ", "")
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func CreateItem(ctx context.Context, c *ucli.Context) error {
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
 
-	credential, err := passline.CreateItem(ctx, name, username, password, globalPassword)
+	credential, err := passline.AddItem(ctx, name, username, password, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -164,6 +164,15 @@ func DisplayItem(ctx context.Context, c *ucli.Context) error {
 	}
 
 	renderer.DisplayCredential(credential)
+
+	err = clipboard.WriteAll(credential.Password)
+	if err != nil {
+		renderer.ClipboardError()
+		os.Exit(0)
+	}
+
+	renderer.SuccessfulCopiedToClipboard(item.Name, credential.Username)
+
 	return nil
 }
 

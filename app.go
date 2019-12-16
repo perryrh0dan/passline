@@ -40,11 +40,11 @@ WEBSITE:
 			Action:    func(c *ucli.Context) error { return cli.CreateBackup(ctx, c) },
 		},
 		{
-			Name:      "create",
-			Aliases:   []string{"c"},
+			Name:      "add",
+			Aliases:   []string{"a"},
 			Usage:     "Add an existing password for a website",
 			ArgsUsage: "<name> <username> <password>",
-			Action:    func(c *ucli.Context) error { return cli.CreateItem(ctx, c) },
+			Action:    func(c *ucli.Context) error { return cli.AddItem(ctx, c) },
 		},
 		{
 			Name:      "delete",

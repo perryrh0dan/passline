@@ -95,7 +95,7 @@ func (c *Core) RestoreBackup(ctx context.Context, path string) error {
 	return nil
 }
 
-func (c *Core) CreateItem(ctx context.Context, name, username, password string, globalPassword []byte) (storage.Credential, error) {
+func (c *Core) AddItem(ctx context.Context, name, username, password string, globalPassword []byte) (storage.Credential, error) {
 
 	// Check global password.
 	valid, err := c.CheckPassword(ctx, globalPassword)
@@ -154,30 +154,13 @@ func (c *Core) DecryptPassword(credential *storage.Credential, globalPassword []
 }
 
 func (c *Core) GenerateItem(ctx context.Context, name, username string, globalPassword []byte) (storage.Credential, error) {
-	// Check global password.
-	valid, err := c.CheckPassword(ctx, globalPassword)
-	if err != nil || !valid {
-		return storage.Credential{}, err
-	}
-
 	// Generate password and crypt password
 	password, err := crypt.GeneratePassword(20)
 	if err != nil {
 		return storage.Credential{}, err
 	}
 
-	cryptedPassword, err := crypt.AesGcmEncrypt(globalPassword, password)
-
-	// Create Credentials
-	credential := storage.Credential{Username: username, Password: cryptedPassword}
-
-	err = c.addCredential(ctx, name, credential)
-	if err != nil {
-		return storage.Credential{}, err
-	}
-
-	credential.Password = password
-	return credential, nil
+	return c.AddItem(ctx, name, username, password, globalPassword)
 }
 
 func (c *Core) DeleteItem(ctx context.Context, name, username string) error {
