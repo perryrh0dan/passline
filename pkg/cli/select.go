@@ -53,7 +53,7 @@ func Select(message string, items []string) (int, error) {
 
 		if update {
 			moveCursorUp(len(items))
-			printSelect(items, selected)
+			// printSelect(items, selected)
 		}
 	}
 }

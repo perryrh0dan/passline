@@ -49,7 +49,12 @@ func moveCursorUp(n int) {
 	if runtime.GOOS == "windows" {
 		ansi.CursorUp(n)
 	} else {
+		// Move cursor
 		fmt.Fprintf(os.Stdout, "\033[%dA", n)
+		// Scroll up
+		// fmt.Fprintf(os.Stdout, "\033[M")
+		// Clear down
+		fmt.Fprintf(os.Stdout, "\033[J")
 	}
 }
 
@@ -63,6 +68,10 @@ func clearLines(lines int) {
 		moveCursorUp(lines)
 		fmt.Fprintf(os.Stdout, "\u001b[0J")
 	}
+}
+
+func getCursor() {
+	fmt.Fprintf(os.Stdout, "\033[6n")
 }
 
 func hideCursor() {
