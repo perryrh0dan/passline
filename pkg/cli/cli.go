@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/atotto/clipboard"
 	ucli "github.com/urfave/cli/v2"
@@ -338,7 +337,7 @@ func argOrSelect(args ucli.Args, index int, message string, items []string) (str
 
 		// if input is no item name use as filter
 		if !util.ArrayContains(items, input) {
-			items = filter(items, input)
+			items = util.FilterArray(items, input)
 			if len(items) == 0 {
 				fmt.Printf("No items with filter: %v found\n", input)
 				return "", errors.New("No items found")
@@ -383,16 +382,6 @@ func selectItem(ctx context.Context, args ucli.Args, names []string) (storage.It
 	}
 
 	return item, nil
-}
-
-func filter(names []string, filter string) []string {
-	filteredNames := make([]string, 0)
-	for _, v := range names {
-		if strings.Contains(v, filter) {
-			filteredNames = append(filteredNames, v)
-		}
-	}
-	return filteredNames
 }
 
 func selectCredential(args ucli.Args, item storage.Item) (storage.Credential, error) {
