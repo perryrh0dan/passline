@@ -2,9 +2,11 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/atotto/clipboard"
 	ucli "github.com/urfave/cli/v2"
@@ -12,6 +14,7 @@ import (
 	"github.com/perryrh0dan/passline/pkg/core"
 	"github.com/perryrh0dan/passline/pkg/renderer"
 	"github.com/perryrh0dan/passline/pkg/storage"
+	"github.com/perryrh0dan/passline/pkg/util"
 )
 
 var passline *core.Core
@@ -133,7 +136,7 @@ func DisplayItem(ctx context.Context, c *ucli.Context) error {
 		return err
 	}
 
-	// Check if site exists
+	// Check if sites exists
 	if len(names) <= 0 {
 		renderer.NoItemsMessage()
 		os.Exit(0)
@@ -332,6 +335,16 @@ func argOrSelect(args ucli.Args, index int, message string, items []string) (str
 	input := ""
 	if args.Len()-1 >= index {
 		input = args.Get(index)
+
+		// if input is no item name use as filter
+		if !util.ArrayContains(items, input) {
+			items = filter(items, input)
+			if len(items) == 0 {
+				fmt.Printf("No items with filter: %v found\n", input)
+				return "", errors.New("No items found")
+			}
+			input = ""
+		}
 	}
 	if input == "" {
 		if len(items) > 1 {
@@ -370,6 +383,16 @@ func selectItem(ctx context.Context, args ucli.Args, names []string) (storage.It
 	}
 
 	return item, nil
+}
+
+func filter(names []string, filter string) []string {
+	filteredNames := make([]string, 0)
+	for _, v := range names {
+		if strings.Contains(v, filter) {
+			filteredNames = append(filteredNames, v)
+		}
+	}
+	return filteredNames
 }
 
 func selectCredential(args ucli.Args, item storage.Item) (storage.Credential, error) {
