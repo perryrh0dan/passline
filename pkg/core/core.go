@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/perryrh0dan/passline/pkg/config"
 	"github.com/perryrh0dan/passline/pkg/crypt"
@@ -71,7 +72,8 @@ func (c *Core) CreateBackup(ctx context.Context, path string) error {
 		path = path + ".json"
 	}
 
-	data := storage.Data{Items: items}
+	time := time.Now()
+	data := storage.Backup{Date: time, Items: items}
 
 	file, _ := json.MarshalIndent(data, "", " ")
 	_ = ioutil.WriteFile(path, file, 0644)

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"time"
 
 	"github.com/perryrh0dan/passline/pkg/config"
 	"golang.org/x/net/context"
@@ -21,6 +22,11 @@ type Storage interface {
 
 type Data struct {
 	Items []Item `json:"items"`
+}
+
+type Backup struct {
+	Date  time.Time `json:"date"`
+	Items []Item    `json:"items"`
 }
 
 // Item structure
