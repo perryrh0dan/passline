@@ -19,21 +19,23 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ## Highlights
 
+- Multiple storage modules (local, firestore)
+- Passwords and recovery codes are aes-256 encryped
+- Intuitive and fast command line interface 
+- Filtering allows fast selection of credentials
+
 ## Contents
 
 - [Description](#description)
 - [Highlights](#highlights)
 - [Contents](#contents)
 - [Install](#install)
-  - [Binary](#binary)
-  - [Snapcraft](#snapcraft)
 - [Usage](#usage)
 - [Development](#development)
-  - [Linter](#linter)
 
 ## Install
 ### Binary
-1. Download the altest release for your platform
+1. Download the latest release for your platform
 2. Run it
 
 ### Snapcraft
@@ -56,14 +58,14 @@ USAGE:
    passline [global options] command [command options] [arguments...]
 
 VERSION:
-   0.2.0
+   0.4.0
 
 DESCRIPTION:
    Password manager for the command line
 
 COMMANDS:
+   add, a    Add an existing password for a website
    backup, b    Create a backup
-   create, a    Add an existing password for a website
    generate, g  Generate a password for an item
    delete, d    Delete an item
    edit, e      Edit an item

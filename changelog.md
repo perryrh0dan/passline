@@ -2,6 +2,9 @@
 
 Changelog for passline
 
+## Version 0.4.0
+- add functionality to store recovery codes
+
 ## Version 0.3.3
 - add timestamp to backup.
 

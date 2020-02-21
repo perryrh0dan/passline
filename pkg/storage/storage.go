@@ -20,10 +20,12 @@ type Storage interface {
 	SetData(context.Context, Data) error
 }
 
+// Data structure
 type Data struct {
 	Items []Item `json:"items"`
 }
 
+// Backup structure
 type Backup struct {
 	Date  time.Time `json:"date"`
 	Items []Item    `json:"items"`
@@ -35,6 +37,7 @@ type Item struct {
 	Credentials []Credential `json:"credentials"`
 }
 
+// For sorting items
 type ByName []Item
 
 func (a ByName) Len() int           { return len(a) }
@@ -71,8 +74,9 @@ func (item *Item) GetUsernameArray() []string {
 }
 
 type Credential struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username      string   `json:"username"`
+	Password      string   `json:"password"`
+	RecoveryCodes []string `json:"recoveryCodes"`
 }
 
 func getMainDir() (string, error) {
@@ -105,7 +109,7 @@ func getIndexOfItem(slice []Item, item Item) int {
 
 func getIndexOfCredential(slice []Credential, credential Credential) int {
 	for p, v := range slice {
-		if v == credential {
+		if v.Username == credential.Username {
 			return p
 		}
 	}

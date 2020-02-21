@@ -4,16 +4,20 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 )
 
 func Input(message string, defaultValue string) (string, error) {
-	// Print message
+	// find if %s is in string
+	rgx := regexp.MustCompile("%s")
+	matches := rgx.FindAllStringIndex(message, -1)
 
-	if defaultValue != "" {
-		fmt.Printf(message, defaultValue)
-	} else {
+	// print message
+	if len(matches) == 0 {
 		fmt.Print(message)
+	} else {
+		fmt.Printf(message, defaultValue)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -25,7 +29,7 @@ func Input(message string, defaultValue string) (string, error) {
 	// TODO Test if working for Linux
 	text = strings.TrimSuffix(text, "\r")
 
-	// If input empty assign default value also valid if defaultValue is empty
+	// if input empty assign default value also valid if defaultValue is empty
 	if text == "" {
 		text = defaultValue
 	}

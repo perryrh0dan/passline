@@ -6,6 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/perryrh0dan/passline/pkg/storage"
+	"github.com/perryrh0dan/passline/pkg/util"
 )
 
 // DisplayItem single item
@@ -18,6 +19,9 @@ func DisplayItem(item storage.Item) {
 func DisplayCredential(credential storage.Credential) {
 	fmt.Printf("Username: %s\n", credential.Username)
 	fmt.Printf("Password: %s\n", credential.Password)
+
+	// TODO check if recovery codes exist
+	fmt.Printf("Recovery codes: %s\n", util.ArrayToString(credential.RecoveryCodes))
 }
 
 func DisplayItems(websites []storage.Item) {
