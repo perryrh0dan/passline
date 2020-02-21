@@ -19,10 +19,10 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ## Highlights
 
-- multiple storage modules (local, firestore)
-- passwords and recovery codes are aes-256 encryped
+- Multiple storage modules (local, firestore)
+- Passwords and recovery codes are aes-256 encryped
 - Intuitive and fast command line interface 
-- filtering allows fast selection of credentials
+- Filtering allows fast selection of credentials
 
 ## Contents
 
@@ -58,14 +58,14 @@ USAGE:
    passline [global options] command [command options] [arguments...]
 
 VERSION:
-   0.2.0
+   0.4.0
 
 DESCRIPTION:
    Password manager for the command line
 
 COMMANDS:
+   add, a    Add an existing password for a website
    backup, b    Create a backup
-   create, a    Add an existing password for a website
    generate, g  Generate a password for an item
    delete, d    Delete an item
    edit, e      Edit an item
