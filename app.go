@@ -17,7 +17,7 @@ func setupApp(ctx context.Context) *ucli.App {
 	app.Name = "Passline"
 	app.Usage = "Password manager"
 	app.HelpName = "passline"
-	app.Version = "0.3.1"
+	app.Version = "0.4.0"
 	app.Description = "Password manager for the command line"
 	app.EnableBashCompletion = true
 

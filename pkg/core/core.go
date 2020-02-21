@@ -97,7 +97,7 @@ func (c *Core) RestoreBackup(ctx context.Context, path string) error {
 	return nil
 }
 
-func (c *Core) AddItem(ctx context.Context, name, username, password string, globalPassword []byte) (storage.Credential, error) {
+func (c *Core) AddItem(ctx context.Context, name, username, password string, recoveryCodes []string, globalPassword []byte) (storage.Credential, error) {
 
 	// Check global password.
 	valid, err := c.CheckPassword(ctx, globalPassword)
@@ -105,13 +105,13 @@ func (c *Core) AddItem(ctx context.Context, name, username, password string, glo
 		return storage.Credential{}, err
 	}
 
-	cryptedPassword, err := crypt.AesGcmEncrypt(globalPassword, password)
+	// Create Credentials
+	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes}
+
+	err = c.EncryptCredential(&credential, globalPassword)
 	if err != nil {
 		return storage.Credential{}, err
 	}
-
-	// Create Credentials
-	credential := storage.Credential{Username: username, Password: cryptedPassword}
 
 	err = c.addCredential(ctx, name, credential)
 	if err != nil {
@@ -144,6 +144,20 @@ func (c *Core) addCredential(ctx context.Context, name string, credential storag
 	return nil
 }
 
+func (c *Core) DecryptCredential(credential *storage.Credential, globalPassword []byte) error {
+	err := c.DecryptPassword(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	err = c.DecryptRecoveryCodes(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Core) DecryptPassword(credential *storage.Credential, globalPassword []byte) error {
 	// Decrypt passwords
 	var err error
@@ -155,14 +169,67 @@ func (c *Core) DecryptPassword(credential *storage.Credential, globalPassword []
 	return nil
 }
 
-func (c *Core) GenerateItem(ctx context.Context, name, username string, globalPassword []byte) (storage.Credential, error) {
+func (c *Core) DecryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
+	var decryptedRecoveryCodes = make([]string, 0)
+	for _, c := range credential.RecoveryCodes {
+		decryptedRecoveryCode, err := crypt.AesGcmDecrypt(globalPassword, c)
+		if err != nil {
+			return err
+		}
+		decryptedRecoveryCodes = append(decryptedRecoveryCodes, decryptedRecoveryCode)
+	}
+
+	credential.RecoveryCodes = decryptedRecoveryCodes
+	return nil
+}
+
+func (c *Core) EncryptCredential(credential *storage.Credential, globalPassword []byte) error {
+	err := c.EncryptPassword(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	err = c.EncryptRecoveryCodes(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Core) EncryptPassword(credential *storage.Credential, globalPassword []byte) error {
+	var err error
+	credential.Password, err = crypt.AesGcmEncrypt(globalPassword, credential.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Core) EncryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
+	var encryptedRecoveryCodes = make([]string, 0)
+
+	for _, c := range credential.RecoveryCodes {
+		encryptedRecoveryCode, err := crypt.AesGcmEncrypt(globalPassword, c)
+		if err != nil {
+			return err
+		}
+		encryptedRecoveryCodes = append(encryptedRecoveryCodes, encryptedRecoveryCode)
+	}
+
+	credential.RecoveryCodes = encryptedRecoveryCodes
+	return nil
+}
+
+func (c *Core) GenerateItem(ctx context.Context, name, username string, recoveryCodes []string, globalPassword []byte) (storage.Credential, error) {
 	// Generate password and crypt password
 	password, err := crypt.GeneratePassword(20)
 	if err != nil {
 		return storage.Credential{}, err
 	}
 
-	return c.AddItem(ctx, name, username, password, globalPassword)
+	return c.AddItem(ctx, name, username, password, recoveryCodes, globalPassword)
 }
 
 func (c *Core) DeleteItem(ctx context.Context, name, username string) error {
@@ -184,16 +251,27 @@ func (c *Core) DeleteItem(ctx context.Context, name, username string) error {
 	return nil
 }
 
-func (c *Core) EditItem(ctx context.Context, name, username, newUsername string) error {
+func (c *Core) EditItem(ctx context.Context, name, username string, updatedCredential storage.Credential, globalPassword []byte) error {
 	item, err := c.storage.GetItemByName(ctx, name)
 	if err != nil {
 		return err
 	}
 
+	// find credential in item
+	var credential *storage.Credential
+
 	for i := 0; i < len(item.Credentials); i++ {
 		if item.Credentials[i].Username == username {
-			item.Credentials[i].Username = newUsername
+			credential = &item.Credentials[i]
+			break
 		}
+	}
+
+	*credential = updatedCredential
+
+	err = c.EncryptCredential(credential, globalPassword)
+	if err != nil {
+		return err
 	}
 
 	err = c.storage.UpdateItem(ctx, item)

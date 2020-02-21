@@ -21,3 +21,11 @@ func FilterArray(l []string, filter string) []string {
 	}
 	return filteredNames
 }
+
+func ArrayToString(l []string) string {
+	return strings.Join(l, ",")
+}
+
+func StringToArray(s string) []string {
+	return strings.Split(s, ",")
+}
