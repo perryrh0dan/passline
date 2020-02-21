@@ -243,6 +243,8 @@ func EditItem(ctx context.Context, c *ucli.Context) error {
 
 	// TODO remove spaces
 	credential.RecoveryCodes = make([]string, 0)
+
+	// use one space to clear recovery codes
 	if newRecoveryCodes != " " {
 		credential.RecoveryCodes = util.StringToArray(newRecoveryCodes)
 	}
