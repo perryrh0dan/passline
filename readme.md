@@ -10,18 +10,26 @@
   <img alt="List" width="70%" src="media/passline.gif">
 </div>
 
+<div align="center">
+   <a href="https://travis-ci.org/perryrh0dan/passline">
+    <img alt="Build Status" src="https://travis-ci.org/perryrh0dan/passline.svg?branch=master" />
+  </a>
+    <a href="https://gitter.im/perryrh0danpassline/community">
+    <img alt="Build Status" src="https://badges.gitter.im/taskline/community.svg" />
+  </a>
+</div>
+
 ## Description
 
 By utilizing a simple and minimal usage syntax, that requires a flat leaning curve, Passline enables you to effectively manage you password accross multiple devices within your terminal. All Password are stored AES-256 encrypted and can only be encrypted with a your global password. Currently data can be stored localy on your computer or in your own firebase database.
 
 Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob/master/contributing.md#translating-documentation) to learn more on how to translate this document into more languages.
 
-
 ## Highlights
 
 - Multiple storage modules (local, firestore)
 - Passwords and recovery codes are aes-256 encryped
-- Intuitive and fast command line interface 
+- Intuitive and fast command line interface
 - Filtering allows fast selection of credentials
 
 ## Contents
@@ -34,13 +42,15 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 - [Development](#development)
 
 ## Install
+
 ### Binary
+
 1. Download the latest release for your platform
 2. Run it
 
 ### Snapcraft
 
-``` bash
+```bash
 snap install passline
 snap alias passline pl # set alias
 ```
@@ -82,10 +92,13 @@ WEBSITE:
 ```
 
 ## Development
+
 ### Linter
+
 golangci-lint
 VS-Code settings
-``` json
+
+```json
 "go.lintTool":"golangci-lint",
 "go.lintFlags": [
   "--fast"
