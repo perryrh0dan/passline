@@ -19,21 +19,23 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 
 ## Highlights
 
+- multiple storage modules (local, firestore)
+- passwords and recovery codes are aes-256 encryped
+- Intuitive and fast command line interface 
+- filtering allows fast selection of credentials
+
 ## Contents
 
 - [Description](#description)
 - [Highlights](#highlights)
 - [Contents](#contents)
 - [Install](#install)
-  - [Binary](#binary)
-  - [Snapcraft](#snapcraft)
 - [Usage](#usage)
 - [Development](#development)
-  - [Linter](#linter)
 
 ## Install
 ### Binary
-1. Download the altest release for your platform
+1. Download the latest release for your platform
 2. Run it
 
 ### Snapcraft
