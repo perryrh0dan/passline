@@ -108,6 +108,8 @@ func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, credent
 }
 
 func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
+	// TODO check if username is valid
+
 	err := ls.deleteItem(item)
 	if err != nil {
 		return err

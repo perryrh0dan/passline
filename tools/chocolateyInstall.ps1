@@ -1,0 +1,1 @@
+Install-ChocolateyPackage 'MyApp' 'msi' '/quiet' 'http://myapp.tld/myapp-0.1.0-x86.msi' 'http://myapp.tld/myapp-0.1.0-x64.msi' # The 64 bit package URL can be omitted.

@@ -81,10 +81,20 @@ func AddItem(ctx context.Context, c *ucli.Context) error {
 		return err
 	}
 
+	recoveryCodesString, err := Input("Please enter your recovery codes if exists []: ", "")
+	if err != nil {
+		return err
+	}
+
+	recoveryCodes := make([]string, 0)
+	if recoveryCodesString != "" {
+		recoveryCodes = util.StringToArray(recoveryCodesString)
+	}
+
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
 
-	credential, err := passline.AddItem(ctx, name, username, password, globalPassword)
+	credential, err := passline.AddItem(ctx, name, username, password, recoveryCodes, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -160,7 +170,9 @@ func DisplayItem(ctx context.Context, c *ucli.Context) error {
 		handle(err)
 	}
 
-	err = passline.DecryptPassword(&credential, globalPassword)
+	// globalPassword := []byte("test")
+
+	err = passline.DecryptCredential(&credential, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -200,11 +212,42 @@ func EditItem(ctx context.Context, c *ucli.Context) error {
 	credential, err := selectCredential(args, item)
 	handle(err)
 
+	selectedUsername := credential.Username
+
+	// Get global password.
+	globalPassword := getPassword("Enter Global Password: ")
+	println()
+
+	// Check global password.
+	valid, err := passline.CheckPassword(ctx, globalPassword)
+	if err != nil || !valid {
+		handle(err)
+	}
+
+	// Decrypt Credentials to display secrets
+	passline.DecryptCredential(&credential, globalPassword)
+	if err != nil {
+		handle(err)
+	}
+
 	// Get new username
 	newUsername, err := Input("Please enter a new Username/Login []: (%s) ", credential.Username)
 	handle(err)
 
-	err = passline.EditItem(ctx, item.Name, credential.Username, newUsername)
+	credential.Username = newUsername
+
+	// Get new recoveryCodes
+	recoveryCodes := util.ArrayToString(credential.RecoveryCodes)
+	newRecoveryCodes, err := Input("Please enter your recovery codes []: (%s) ", recoveryCodes)
+	handle(err)
+
+	// TODO remove spaces
+	credential.RecoveryCodes = make([]string, 0)
+	if newRecoveryCodes != " " {
+		credential.RecoveryCodes = util.StringToArray(newRecoveryCodes)
+	}
+
+	err = passline.EditItem(ctx, item.Name, selectedUsername, credential, globalPassword)
 	handle(err)
 
 	renderer.SuccessfulChangedItem(item.Name, credential.Username)
@@ -238,10 +281,20 @@ func GenerateItem(ctx context.Context, c *ucli.Context) error {
 		}
 	}
 
+	recoveryCodesString, err := Input("Please enter your recovery codes if exists []: ", "")
+	if err != nil {
+		return err
+	}
+
+	recoveryCodes := make([]string, 0)
+	if recoveryCodesString != "" {
+		recoveryCodes = util.StringToArray(recoveryCodesString)
+	}
+
 	globalPassword := getPassword("Enter Global Password: ")
 	println()
 
-	credential, err := passline.GenerateItem(ctx, name, username, globalPassword)
+	credential, err := passline.GenerateItem(ctx, name, username, recoveryCodes, globalPassword)
 	handle(err)
 
 	err = clipboard.WriteAll(credential.Password)
