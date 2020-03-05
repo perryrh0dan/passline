@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/perryrh0dan/passline/pkg/config"
-	"github.com/perryrh0dan/passline/pkg/crypt"
-	"github.com/perryrh0dan/passline/pkg/renderer"
-	"github.com/perryrh0dan/passline/pkg/storage"
+	"passline/pkg/config"
+	"passline/pkg/crypt"
+	"passline/pkg/renderer"
+	"passline/pkg/storage"
 )
 
 type Core struct {
@@ -87,12 +87,16 @@ func (c *Core) RestoreBackup(ctx context.Context, path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
 		renderer.InvalidFilePath()
+		return err
 	}
 
 	file, _ := ioutil.ReadFile(path)
 	_ = json.Unmarshal([]byte(file), &data)
 
-	c.storage.SetData(ctx, data)
+	err = c.storage.SetData(ctx, data)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

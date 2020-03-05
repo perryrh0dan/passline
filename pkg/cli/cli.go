@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/atotto/clipboard"
 	ucli "github.com/urfave/cli/v2"
 
-	"github.com/perryrh0dan/passline/pkg/core"
-	"github.com/perryrh0dan/passline/pkg/renderer"
-	"github.com/perryrh0dan/passline/pkg/storage"
-	"github.com/perryrh0dan/passline/pkg/util"
+	"passline/pkg/core"
+	"passline/pkg/renderer"
+	"passline/pkg/storage"
+	"passline/pkg/util"
 )
 
 var passline *core.Core
@@ -37,7 +38,8 @@ func CreateBackup(ctx context.Context, c *ucli.Context) error {
 		return err
 	}
 
-	path = filepath.Join(path, "backup.json")
+	now := time.Now().Format("2006-01-02:15:04:05.backup")
+	path = filepath.Join(path, now)
 
 	path, err = argOrInput(args, 0, "Path", path)
 	if err != nil {
@@ -344,6 +346,8 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// TODO Are you sure
 
 	err = passline.RestoreBackup(ctx, path)
 	if err != nil {

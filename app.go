@@ -7,7 +7,7 @@ import (
 
 	ucli "github.com/urfave/cli/v2"
 
-	"github.com/perryrh0dan/passline/pkg/cli"
+	"passline/pkg/cli"
 )
 
 func setupApp(ctx context.Context) *ucli.App {

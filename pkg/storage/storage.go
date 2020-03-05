@@ -4,7 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/perryrh0dan/passline/pkg/config"
+	"passline/pkg/config"
+
 	"golang.org/x/net/context"
 )
 

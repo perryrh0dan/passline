@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"passline/pkg/storage"
+	"passline/pkg/util"
+
 	"github.com/fatih/color"
-	"github.com/perryrh0dan/passline/pkg/storage"
-	"github.com/perryrh0dan/passline/pkg/util"
 )
 
 // DisplayItem single item
