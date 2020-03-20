@@ -89,6 +89,12 @@ WEBSITE:
 			ArgsUsage: "<path>",
 			Action:    func(c *ucli.Context) error { return cli.RestoreBackup(ctx, c) },
 		},
+		{
+			Name:    "update",
+			Aliases: []string{"u"},
+			Usage:   "Update to the newest release",
+			Action:  func(c *ucli.Context) error { return cli.Update(ctx, c) },
+		},
 	}
 
 	sort.Sort(ucli.FlagsByName(app.Flags))

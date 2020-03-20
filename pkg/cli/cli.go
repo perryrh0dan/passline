@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/atotto/clipboard"
+	"github.com/blang/semver"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	ucli "github.com/urfave/cli/v2"
 
 	"passline/pkg/core"
@@ -16,6 +19,9 @@ import (
 	"passline/pkg/storage"
 	"passline/pkg/util"
 )
+
+const repo = "perryrh0dan/passline"
+const version = "0.3.2"
 
 var passline *core.Core
 
@@ -355,6 +361,24 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 	}
 
 	renderer.SuccessfulRestoredBackup(path)
+	return nil
+}
+
+func Update(ctx context.Context, c *ucli.Context) error {
+	v := semver.MustParse(version)
+	latest, err := selfupdate.UpdateSelf(v, repo)
+	if err != nil {
+		log.Println("Binary update failed:", err)
+		return err
+	}
+	if latest.Version.Equals(v) {
+		// latest version is the same as current version. It means current binary is up to date.
+		log.Println("Current binary is the latest version", version)
+	} else {
+		log.Println("Successfully updated to version", latest.Version)
+		log.Println("Release note:\n", latest.ReleaseNotes)
+	}
+
 	return nil
 }
 

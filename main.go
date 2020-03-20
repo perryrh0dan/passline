@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	ctx := context.Background()
 
 	//trap Ctrl+C and call cancel on the context

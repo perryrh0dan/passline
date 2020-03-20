@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.0.0
 	firebase.google.com/go v3.9.0+incompatible
 	github.com/atotto/clipboard v0.1.2
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/eiannone/keyboard v0.0.0-20190314115158-7169d0afeb4f
 	github.com/fatih/color v1.7.0
 	github.com/gbin/goncurses v0.0.0-20141106211150-34d9399fcea5
@@ -15,6 +16,7 @@ require (
 	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317
 	github.com/pborman/ansi v0.0.0-20160920233902-86f499584b0a
 	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942
+	github.com/rhysd/go-github-selfupdate v1.2.1
 	github.com/rthornton128/goncurses v0.0.0-20190619232326-514c399d6652
 	github.com/urfave/cli v1.22.1
 	github.com/urfave/cli/v2 v2.0.0
