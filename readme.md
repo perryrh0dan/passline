@@ -31,6 +31,7 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 - Passwords and recovery codes are aes-256 encryped
 - Intuitive and fast command line interface
 - Filtering allows fast selection of credentials
+- Build in update functionality
 
 ## Contents
 
@@ -39,6 +40,7 @@ Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob
 - [Contents](#contents)
 - [Install](#install)
 - [Usage](#usage)
+- [Flight Manual](#flight-manual)
 - [Development](#development)
 
 ## Install
@@ -68,19 +70,20 @@ USAGE:
    passline [global options] command [command options] [arguments...]
 
 VERSION:
-   0.4.0
+   0.5.3
 
 DESCRIPTION:
    Password manager for the command line
 
 COMMANDS:
-   add, a    Add an existing password for a website
+   add, a       Add an existing password for a website
    backup, b    Create a backup
    generate, g  Generate a password for an item
    delete, d    Delete an item
    edit, e      Edit an item
    list, ls     List all items
    restore, r   Restore a backup
+   update, u    Update to the newest release
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
@@ -90,6 +93,40 @@ GLOBAL OPTIONS:
 WEBSITE:
    https://github.com/perryrh0dan/passline
 ```
+
+### Flight Manual
+
+#### Add
+
+Add an existing username, password pair.
+
+#### Backup
+
+Create a backup. 
+
+#### Generate
+
+Generate a password for a website
+
+#### Delete
+
+Delete an existing username, password pair.
+
+#### Edit
+
+Edit an entry
+
+#### List
+
+List all websites
+
+#### Restore
+
+Restore a backup file.
+
+#### Update
+
+Update passline to the latest release on github.
 
 ## Development
 
