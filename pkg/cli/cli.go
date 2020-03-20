@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -371,15 +370,14 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 	v := semver.MustParse(version)
 	latest, err := selfupdate.UpdateSelf(v, repo)
 	if err != nil {
-		log.Println("Binary update failed:", err)
+		fmt.Println("Binary update failed:", err)
 		return err
 	}
 	if latest.Version.Equals(v) {
-		// latest version is the same as current version. It means current binary is up to date.
-		log.Println("Current binary is the latest version", version)
+		fmt.Println("Current binary is the latest version", version)
 	} else {
-		log.Println("Successfully updated to version", latest.Version)
-		log.Println("Release note:\n", latest.ReleaseNotes)
+		renderer.SuccessfulUpdated(latest.Version.String())
+		fmt.Println("Release note:\n", latest.ReleaseNotes)
 	}
 
 	return nil

@@ -58,6 +58,11 @@ func SuccessfulRestoredBackup(path string) {
 	d.Printf("Successful restored backup: %s\n", path)
 }
 
+func SuccessfulUpdated(version string) {
+	d := color.New(color.FgGreen)
+	d.Printf("Successfully updated to version: %v\n", version)
+}
+
 // InvalidName error message
 func InvalidName(name string) {
 	fmt.Printf("Unable to find item with name: %s\n", name)
