@@ -21,7 +21,6 @@ import (
 )
 
 const repo = "perryrh0dan/passline"
-const version = "0.3.2"
 
 var passline *core.Core
 
@@ -279,6 +278,10 @@ func GenerateItem(ctx context.Context, c *ucli.Context) error {
 
 	// Check if name, username combination exists
 	exists, err := passline.Exists(ctx, name, username)
+	if err != nil {
+		return err
+	}
+
 	if exists {
 		os.Exit(0)
 	}
@@ -364,7 +367,7 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 	return nil
 }
 
-func Update(ctx context.Context, c *ucli.Context) error {
+func Update(ctx context.Context, c *ucli.Context, version string) error {
 	v := semver.MustParse(version)
 	latest, err := selfupdate.UpdateSelf(v, repo)
 	if err != nil {

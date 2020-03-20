@@ -10,6 +10,8 @@ import (
 	"passline/pkg/cli"
 )
 
+const version = "0.5.0"
+
 func setupApp(ctx context.Context) *ucli.App {
 	cli.Init(ctx)
 
@@ -17,7 +19,7 @@ func setupApp(ctx context.Context) *ucli.App {
 	app.Name = "Passline"
 	app.Usage = "Password manager"
 	app.HelpName = "passline"
-	app.Version = "0.4.0"
+	app.Version = version
 	app.Description = "Password manager for the command line"
 	app.EnableBashCompletion = true
 
@@ -93,7 +95,7 @@ WEBSITE:
 			Name:    "update",
 			Aliases: []string{"u"},
 			Usage:   "Update to the newest release",
-			Action:  func(c *ucli.Context) error { return cli.Update(ctx, c) },
+			Action:  func(c *ucli.Context) error { return cli.Update(ctx, c, version) },
 		},
 	}
 
