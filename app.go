@@ -94,7 +94,7 @@ WEBSITE:
 		{
 			Name:    "update",
 			Aliases: []string{"u"},
-			Usage:   "Update to the newest release",
+			Usage:   "Update to the latest release",
 			Action:  func(c *ucli.Context) error { return cli.Update(ctx, c, version) },
 		},
 	}
