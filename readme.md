@@ -12,11 +12,17 @@
 
 <div align="center">
    <a href="https://travis-ci.org/perryrh0dan/passline">
-    <img alt="Build Status" src="https://travis-ci.org/perryrh0dan/passline.svg?branch=master" />
-  </a>
-    <a href="https://gitter.im/perryrh0danpassline/community">
-    <img alt="Build Status" src="https://badges.gitter.im/taskline/community.svg" />
-  </a>
+      <img alt="Build Status" src="https://travis-ci.org/perryrh0dan/passline.svg?branch=master" />
+   </a>
+   <a href="https://codecov.io/gh/perryrh0dan/passline">
+      <img src="https://codecov.io/gh/perryrh0dan/passline/branch/master/graph/badge.svg" />
+   </a>
+   <a href="https://codeclimate.com/github/perryrh0dan/passline/maintainability">
+      <img src="https://api.codeclimate.com/v1/badges/83561b59422e2492f9db/maintainability" />
+   </a>
+   <a href="https://gitter.im/perryrh0danpassline/community">
+      <img alt="Build Status" src="https://badges.gitter.im/taskline/community.svg" />
+   </a>
 </div>
 
 ## Description

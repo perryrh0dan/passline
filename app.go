@@ -10,7 +10,7 @@ import (
 	"passline/pkg/cli"
 )
 
-const version = "0.5.5"
+const version = "0.5.6"
 
 func setupApp(ctx context.Context) *ucli.App {
 	cli.Init(ctx)

@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -367,18 +369,40 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 }
 
 func Update(ctx context.Context, c *ucli.Context, version string) error {
-	v := semver.MustParse(version)
-	latest, err := selfupdate.UpdateSelf(v, repo)
+	latest, found, err := selfupdate.DetectLatest(repo)
 	if err != nil {
-		fmt.Println("Binary update failed:", err)
+		log.Println("Error occurred while detecting version:", err)
 		return err
 	}
-	if latest.Version.Equals(v) {
-		fmt.Println("Current binary is the latest version", version)
-	} else {
-		renderer.SuccessfulUpdated(latest.Version.String())
-		fmt.Println("Release note:\n", latest.ReleaseNotes)
+
+	v := semver.MustParse(version)
+	if !found || latest.Version.LTE(v) {
+		log.Println("Current version is the latest")
+		return nil
 	}
+
+	fmt.Print("Do you want to update to: ", latest.Version, "? (y/n): ")
+	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil || (input != "y\n" && input != "n\n") {
+		log.Println("Invalid input")
+		return err
+	}
+	if input == "n\n" {
+		return nil
+	}
+
+	exe, err := os.Executable()
+	if err != nil {
+		log.Println("Could not locate executable path")
+		return err
+	}
+	if err := selfupdate.UpdateTo(latest.AssetURL, exe); err != nil {
+		log.Println("Error occurred while updating binary:", err)
+		return err
+	}
+
+	renderer.SuccessfulUpdated(latest.Version.String())
+	fmt.Println("Release note:\n", latest.ReleaseNotes)
 
 	return nil
 }
