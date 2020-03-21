@@ -1,0 +1,28 @@
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod download
+builds:
+- binary: "{{ .ProjectName }}" 
+  env:
+  - CGO_ENABLED=0
+  goos:
+  - linux
+  - windows
+  goarch:
+  - amd64
+  - arm
+  - arm64
+  - 386
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}"
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'

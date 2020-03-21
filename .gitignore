@@ -21,3 +21,6 @@
 *.snap
 
 __debug_bin
+
+# Coverage
+coverage.txt
