@@ -27,3 +27,6 @@ coverage.txt
 
 # builds
 dist/
+
+# travis
+bin/
