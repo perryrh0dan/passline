@@ -7,6 +7,5 @@ jobs:
     - stage: test
       script: bash scripts/test.sh
     - stage: deploy
+      if: tag IS present
       script: bash scripts/deploy.sh
-      on:
-        tags: true
