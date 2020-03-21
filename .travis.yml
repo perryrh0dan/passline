@@ -5,4 +5,8 @@ go_import_path: github.com/passline
 jobs:
   include:
     - stage: test
-      script: go test ./...
+      script: bash scripts/test.sh
+    - stage: deploy
+      script: bash scripts/deploy.sh
+      on:
+        tags: true
