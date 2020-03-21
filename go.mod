@@ -9,20 +9,12 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/eiannone/keyboard v0.0.0-20190314115158-7169d0afeb4f
 	github.com/fatih/color v1.7.0
-	github.com/gbin/goncurses v0.0.0-20141106211150-34d9399fcea5
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
-	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317
-	github.com/pborman/ansi v0.0.0-20160920233902-86f499584b0a
-	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942
 	github.com/rhysd/go-github-selfupdate v1.2.1
-	github.com/rthornton128/goncurses v0.0.0-20190619232326-514c399d6652
-	github.com/urfave/cli v1.22.1
 	github.com/urfave/cli/v2 v2.0.0
-	github.com/zetamatta/go-getch v0.0.0-20181223074817-31a2298565de
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
-	golang.org/x/sys v0.0.0-20200116001909-b77594299b42
 	google.golang.org/api v0.11.0
 )
