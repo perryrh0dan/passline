@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -381,13 +380,14 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 		return nil
 	}
 
-	fmt.Print("Do you want to update to: ", latest.Version, "? (y/n): ")
-	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
-	if err != nil || (input != "y\n" && input != "n\n") {
-		log.Println("Invalid input")
+	message := "Do you want to update to: " + latest.Version.String() + "? (y/n): "
+	input, err := Input(message, "")
+	if err != nil || (input != "y" && input != "n") {
+		renderer.InvalidInput()
 		return err
 	}
-	if input == "n\n" {
+
+	if input == "n" {
 		return nil
 	}
 
@@ -402,7 +402,7 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 	}
 
 	renderer.SuccessfulUpdated(latest.Version.String())
-	fmt.Println("Release note:\n", latest.ReleaseNotes)
+	renderer.DisplayReleaseNotes(latest.ReleaseNotes)
 
 	return nil
 }

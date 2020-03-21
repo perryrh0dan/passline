@@ -31,6 +31,10 @@ func DisplayItems(websites []storage.Item) {
 	}
 }
 
+func DisplayReleaseNotes(releaseNotes string) {
+	fmt.Println("Release note:\n", releaseNotes)
+}
+
 func SuccessfulCopiedToClipboard(name, username string) {
 	identifier := buildIdentifier(name, username)
 	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", identifier)
@@ -78,6 +82,10 @@ func InvalidPassword() {
 
 func InvalidFilePath() {
 	fmt.Printf("Invalid file path\n")
+}
+
+func InvalidInput() {
+	fmt.Printf("Invalid input\n")
 }
 
 func ClipboardError() {

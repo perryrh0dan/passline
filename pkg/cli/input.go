@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"regexp"
 	"strings"
 )
@@ -19,6 +20,14 @@ func Input(message string, defaultValue string) (string, error) {
 	} else {
 		fmt.Printf(message, defaultValue)
 	}
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, os.Kill)
+	go func() {
+		<-c
+		fmt.Println()
+		os.Exit(1)
+	}()
 
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')

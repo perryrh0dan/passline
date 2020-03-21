@@ -11,7 +11,7 @@
 </div>
 
 <div align="center">
-   <a href="https://travis-ci.org/perryrh0dan/passline">
+   <a href="https://travis-ci.com/perryrh0dan/passline">
       <img alt="Build Status" src="https://travis-ci.org/perryrh0dan/passline.svg?branch=master" />
    </a>
    <a href="https://codecov.io/gh/perryrh0dan/passline">
