@@ -370,13 +370,13 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 func Update(ctx context.Context, c *ucli.Context, version string) error {
 	latest, found, err := selfupdate.DetectLatest(repo)
 	if err != nil {
-		log.Println("Error occurred while detecting version:", err)
+		renderer.DetectVersionError(err)
 		return err
 	}
 
 	v := semver.MustParse(version)
 	if !found || latest.Version.LTE(v) {
-		log.Println("Current version is the latest")
+		renderer.NoUpdatesFound()
 		return nil
 	}
 
@@ -397,7 +397,7 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 		return err
 	}
 	if err := selfupdate.UpdateTo(latest.AssetURL, exe); err != nil {
-		log.Println("Error occurred while updating binary:", err)
+		renderer.UpdateError(err)
 		return err
 	}
 

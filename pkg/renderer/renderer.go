@@ -101,6 +101,21 @@ func StorageError() {
 	d.Printf("error: unable to initialice storage\n")
 }
 
+func DetectVersionError(err error) {
+	d := color.New(color.FgRed)
+	d.Printf("Error occurred while detecting version: %v\n", err)
+}
+
+func UpdateError(err error) {
+	d := color.New(color.FgRed)
+	d.Printf("Error occurred while updating binary: %v\n", err)
+}
+
+func NoUpdatesFound() {
+	d := color.New(color.FgGreen)
+	d.Printf("Current version is the latest\n")
+}
+
 func NoItemsMessage() {
 	d := color.New(color.FgYellow)
 	d.Printf("No items yet\n")
