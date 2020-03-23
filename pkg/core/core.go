@@ -15,15 +15,15 @@ import (
 )
 
 type Core struct {
-	config  *config.Config
+	Config  *config.Config
 	storage storage.Storage
 }
 
 func NewCore(ctx context.Context) (*Core, error) {
 	c := new(Core)
-	c.config, _ = config.Get()
+	c.Config, _ = config.Get()
 	var err error
-	switch c.config.Storage {
+	switch c.Config.Storage {
 	case "firestore":
 		c.storage, err = storage.NewFirestore(ctx)
 		if err != nil {
