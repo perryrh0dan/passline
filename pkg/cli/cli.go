@@ -381,7 +381,7 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 	}
 
 	message := "Do you want to update to: " + latest.Version.String() + "? (y/n): "
-	input, err := Input(message, "")
+	input, err := Input(message, "n")
 	if err != nil || (input != "y" && input != "n") {
 		renderer.InvalidInput()
 		return err
