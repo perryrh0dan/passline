@@ -27,6 +27,7 @@ coverage.txt
 
 # builds
 dist/
+passline*
 
 # travis
 bin/

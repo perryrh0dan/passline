@@ -23,6 +23,10 @@ func Input(message string, defaultValue string) (string, error) {
 
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, os.Kill)
+	defer func() {
+		signal.Stop(c)
+	}()
+
 	go func() {
 		<-c
 		fmt.Println()

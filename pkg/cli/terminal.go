@@ -21,6 +21,10 @@ func getPassword(prompt string) []byte {
 	// Restore it in the event of an interrupt.
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, os.Kill)
+	defer func() {
+		signal.Stop(c)
+	}()
+
 	go func() {
 		<-c
 		_ = terminal.Restore(int(syscall.Stdin), initialTermState)

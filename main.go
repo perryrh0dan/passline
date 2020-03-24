@@ -12,16 +12,17 @@ func main() {
 
 	//trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt)
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, os.Kill)
 	defer func() {
-		signal.Stop(sigChan)
+		signal.Stop(c)
 		cancel()
+		os.Exit(1)
 	}()
 
 	go func() {
 		select {
-		case <-sigChan:
+		case <-c:
 			cancel()
 		case <-ctx.Done():
 		}
