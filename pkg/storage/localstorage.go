@@ -128,25 +128,7 @@ func (ls *LocalStorage) SetData(ctx context.Context, data Data) error {
 }
 
 func ensureDirectories(storageDir, storageFile string) {
-	ensureMainDir()
 	ensureStorageDir(storageDir)
-}
-
-func ensureMainDir() error {
-	mainDir, err := getMainDir()
-	if err != nil {
-		return err
-	}
-
-	_, err = os.Stat(mainDir)
-	if err != nil {
-		err := os.MkdirAll(mainDir, os.ModePerm)
-		if err != nil {
-			println("Cant create directory")
-		}
-	}
-
-	return nil
 }
 
 func ensureStorageDir(storageDir string) {

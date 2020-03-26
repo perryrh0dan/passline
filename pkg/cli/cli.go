@@ -37,9 +37,10 @@ func CreateBackup(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 	renderer.BackupMessage()
 
-	path := passline.Config.Directory
+	//TODO this should happen in config
+	path := passline.Config.Directory + "/backup"
 
-	now := time.Now().Format("2006-01-02:15:04:05.backup")
+	now := time.Now().Format("2006-01-02-15-04-05")
 	path = filepath.Join(path, now)
 
 	path, err := argOrInput(args, 0, "Path", path)

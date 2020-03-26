@@ -25,6 +25,9 @@ func init() {
 	}
 
 	ensureConfigFile()
+	config, _ := Get()
+	_ = ensureMainDir(config)
+	_ = ensureBackupDir(config)
 }
 
 func ensureConfigFile() {
@@ -36,6 +39,32 @@ func ensureConfigFile() {
 	config := new()
 	file, _ := json.MarshalIndent(config, "", " ")
 	_ = ioutil.WriteFile(configFile, file, 0644)
+}
+
+func ensureMainDir(config *Config) error {
+	mainDir := config.Directory
+	_, err := os.Stat(mainDir)
+	if err != nil {
+		err := os.MkdirAll(mainDir, os.ModePerm)
+		if err != nil {
+			println("Cant create directory")
+		}
+	}
+
+	return nil
+}
+
+func ensureBackupDir(config *Config) error {
+	backupDir := config.Directory + "/backup"
+	_, err := os.Stat(backupDir)
+	if err != nil {
+		err := os.Mkdir(backupDir, os.ModePerm)
+		if err != nil {
+			print("Cant create backup directory")
+		}
+	}
+
+	return nil
 }
 
 func formatPasslineDir(dirPath string) (string, error) {
