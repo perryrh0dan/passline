@@ -114,7 +114,7 @@ Create a backup.
 
 #### Generate
 
-Generate a password for a website
+Generate and store a password for a website/username combination.
 
 #### Delete
 

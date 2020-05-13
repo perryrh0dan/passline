@@ -68,11 +68,10 @@ WEBSITE:
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
 			Flags: []ucli.Flag{
-				&ucli.StringFlag{
-					Name:    "mode",
-					Aliases: []string{"m"},
-					Value:   "default",
-					Usage:   "Change between default and advanced mode",
+				&ucli.BoolFlag{
+					Name:    "advanced",
+					Aliases: []string{"a"},
+					Usage:   "Enable advanced mode",
 				},
 			},
 			Action: func(c *ucli.Context) error { return cli.GenerateItem(ctx, c) },
