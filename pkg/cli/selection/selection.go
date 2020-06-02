@@ -63,8 +63,9 @@ func Default(message string, items []string) (int, error) {
 		}
 	}
 
+	sb.Reset()
+	sb.Clear()
 	sb.Flush()
-	terminal.MoveCursorUp(10)
 	return selected, nil
 }
 
