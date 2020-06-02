@@ -84,6 +84,12 @@ WEBSITE:
 			Action:    func(c *ucli.Context) error { return cli.ListItems(ctx, c) },
 		},
 		{
+			Name:    "password",
+			Aliases: []string{"r"},
+			Usage:   "Change global password",
+			Action:  func(c *ucli.Context) error { return cli.ChangePassword(ctx, c) },
+		},
+		{
 			Name:      "restore",
 			Aliases:   []string{"r"},
 			Usage:     "Restore backup",
