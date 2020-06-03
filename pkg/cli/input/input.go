@@ -75,6 +75,7 @@ func Password(message string) []byte {
 	go func() {
 		<-c
 		_ = terminal.Restore(int(syscall.Stdin), initialTermState)
+		fmt.Println()
 		os.Exit(1)
 	}()
 
