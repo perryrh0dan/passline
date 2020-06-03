@@ -14,6 +14,9 @@ import (
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	ucli "github.com/urfave/cli/v2"
 
+	"passline/pkg/cli/input"
+	"passline/pkg/cli/selection"
+	"passline/pkg/cli/terminal"
 	"passline/pkg/core"
 	"passline/pkg/renderer"
 	"passline/pkg/storage"
@@ -80,12 +83,12 @@ func AddItem(ctx context.Context, c *ucli.Context) error {
 		return nil
 	}
 
-	password, err := Input("Please enter the existing Password []: ", "")
+	password, err := input.Default("Please enter the existing Password []: ", "")
 	if err != nil {
 		return err
 	}
 
-	recoveryCodesString, err := Input("Please enter your recovery codes if exists []: ", "")
+	recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
 	if err != nil {
 		return err
 	}
@@ -95,7 +98,7 @@ func AddItem(ctx context.Context, c *ucli.Context) error {
 		recoveryCodes = util.StringToArray(recoveryCodesString)
 	}
 
-	globalPassword := getPassword("Enter Global Password: ")
+	globalPassword := getGlobalPassword(ctx)
 	println()
 
 	credential, err := passline.AddItem(ctx, name, username, password, recoveryCodes, globalPassword)
@@ -108,13 +111,13 @@ func AddItem(ctx context.Context, c *ucli.Context) error {
 }
 
 func DeleteItem(ctx context.Context, c *ucli.Context) error {
-	// Get all Sites
+	// Get all Items
 	names, err := passline.GetSiteNames(ctx)
 	if err != nil {
 		return err
 	}
 
-	// Check if site exists
+	// Check if any item exists
 	if len(names) <= 0 {
 		renderer.NoItemsMessage()
 		return nil
@@ -128,9 +131,17 @@ func DeleteItem(ctx context.Context, c *ucli.Context) error {
 		return err
 	}
 
-	credential, err := selectCredential(args, item)
+	credential, err := selectCredential(ctx, args, item)
 	if err != nil {
 		return err
+	}
+
+	message := fmt.Sprintf("Are you sure you want to delete this item: %s (y/n): ", credential.Username)
+	confirm, err := input.Confirmation(message)
+	handle(err)
+
+	if !confirm {
+		return nil
 	}
 
 	err = passline.DeleteItem(ctx, item.Name, credential.Username)
@@ -161,18 +172,12 @@ func DisplayItem(ctx context.Context, c *ucli.Context) error {
 	item, err := selectItem(ctx, args, names)
 	handle(err)
 
-	credential, err := selectCredential(args, item)
+	credential, err := selectCredential(ctx, args, item)
 	handle(err)
 
 	// Get global password.
-	globalPassword := getPassword("Enter Global Password: ")
+	globalPassword := getGlobalPassword(ctx)
 	println()
-
-	// Check global password.
-	valid, err := passline.CheckPassword(ctx, globalPassword)
-	if err != nil || !valid {
-		handle(err)
-	}
 
 	// globalPassword := []byte("test")
 
@@ -213,36 +218,28 @@ func EditItem(ctx context.Context, c *ucli.Context) error {
 	item, err := selectItem(ctx, args, names)
 	handle(err)
 
-	credential, err := selectCredential(args, item)
+	credential, err := selectCredential(ctx, args, item)
 	handle(err)
 
 	selectedUsername := credential.Username
 
 	// Get global password.
-	globalPassword := getPassword("Enter Global Password: ")
+	globalPassword := getGlobalPassword(ctx)
 	println()
 
-	// Check global password.
-	valid, err := passline.CheckPassword(ctx, globalPassword)
-	if err != nil || !valid {
-		handle(err)
-	}
-
 	// Decrypt Credentials to display secrets
-	passline.DecryptCredential(&credential, globalPassword)
-	if err != nil {
-		handle(err)
-	}
+	err = passline.DecryptCredential(&credential, globalPassword)
+	handle(err)
 
 	// Get new username
-	newUsername, err := Input("Please enter a new Username/Login []: (%s) ", credential.Username)
+	newUsername, err := input.Default("Please enter a new Username/Login []: (%s) ", credential.Username)
 	handle(err)
 
 	credential.Username = newUsername
 
 	// Get new recoveryCodes
 	recoveryCodes := util.ArrayToString(credential.RecoveryCodes)
-	newRecoveryCodes, err := Input("Please enter your recovery codes []: (%s) ", recoveryCodes)
+	newRecoveryCodes, err := input.Default("Please enter your recovery codes []: (%s) ", recoveryCodes)
 	handle(err)
 
 	// TODO remove spaces
@@ -291,7 +288,7 @@ func GenerateItem(ctx context.Context, c *ucli.Context) error {
 		}
 	}
 
-	recoveryCodesString, err := Input("Please enter your recovery codes if exists []: ", "")
+	recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
 	if err != nil {
 		return err
 	}
@@ -301,7 +298,7 @@ func GenerateItem(ctx context.Context, c *ucli.Context) error {
 		recoveryCodes = util.StringToArray(recoveryCodesString)
 	}
 
-	globalPassword := getPassword("Enter Global Password: ")
+	globalPassword := getGlobalPassword(ctx)
 	println()
 
 	credential, err := passline.GenerateItem(ctx, name, username, recoveryCodes, globalPassword)
@@ -343,6 +340,11 @@ func ListItems(ctx context.Context, c *ucli.Context) error {
 	return nil
 }
 
+func ChangePassword(ctx context.Context, c *ucli.Context) error {
+	println("Change Password")
+	return nil
+}
+
 func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 	args := c.Args()
 	renderer.RestoreMessage()
@@ -353,7 +355,13 @@ func RestoreBackup(ctx context.Context, c *ucli.Context) error {
 		return err
 	}
 
-	// TODO Are you sure
+	message := fmt.Sprintf("Are you sure you want to restore this  backup: %s (y/n): ", path)
+	confirm, err := input.Confirmation(message)
+	handle(err)
+
+	if !confirm {
+		return nil
+	}
 
 	err = passline.RestoreBackup(ctx, path)
 	if err != nil {
@@ -378,13 +386,9 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 	}
 
 	message := "Do you want to update to: " + latest.Version.String() + "? (y/n): "
-	input, err := Input(message, "n")
-	if err != nil || (input != "y" && input != "n") {
-		renderer.InvalidInput()
-		return err
-	}
+	confirm, err := input.Confirmation(message)
 
-	if input == "n" {
+	if !confirm {
 		return nil
 	}
 
@@ -405,7 +409,7 @@ func Update(ctx context.Context, c *ucli.Context, version string) error {
 }
 
 func getAdvancedParamters(ctx context.Context) error {
-	length, err := Input("Please enter the length of the password []: (%s)", "20")
+	length, err := input.Default("Please enter the length of the password []: (%s)", "20")
 	if err != nil {
 		return err
 	}
@@ -415,58 +419,63 @@ func getAdvancedParamters(ctx context.Context) error {
 }
 
 func argOrInput(args ucli.Args, index int, message string, defaultValue string) (string, error) {
-	input := ""
+	userInput := ""
 	if args.Len()-1 >= index {
-		input = args.Get(index)
+		userInput = args.Get(index)
 	}
-	if input == "" {
+	if userInput == "" {
 		message := fmt.Sprintf("Please enter a %s []: ", message)
 		if defaultValue != "" {
 			message += "(%s)"
 		}
 
 		var err error
-		input, err = Input(message, defaultValue)
+		userInput, err = input.Default(message, defaultValue)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	return input, nil
+	return userInput, nil
 }
 
-func argOrSelect(args ucli.Args, index int, message string, items []string) (string, error) {
-	input := ""
+func argOrSelect(ctx context.Context, args ucli.Args, index int, message string, items []string) (string, error) {
+	userInput := ""
 	if args.Len()-1 >= index {
-		input = args.Get(index)
+		userInput = args.Get(index)
 
 		// if input is no item name use as filter
-		if !util.ArrayContains(items, input) {
-			items = util.FilterArray(items, input)
+		if !util.ArrayContains(items, userInput) {
+			items = util.FilterArray(items, userInput)
 			if len(items) == 0 {
-				fmt.Printf("No items with filter: %v found\n", input)
+				fmt.Printf("No items with filter: %v found\n", userInput)
 				return "", errors.New("No items found")
 			}
-			input = ""
+			userInput = ""
 		}
 	}
-	if input == "" {
+	if userInput == "" {
 		if len(items) > 1 {
 			message := fmt.Sprintf("Please select a %s: ", message)
-			selection, err := Select(message, items)
+			selection, err := selection.Default(message, items)
 			if err != nil {
 				return "", err
 			}
+			if selection == -1 {
+				os.Exit(1)
+			}
 
-			input = items[selection]
-			fmt.Printf("%s%s\n", message, input)
+			userInput = items[selection]
+			terminal.MoveCursorUp(1)
+			terminal.ClearLines(1)
+			fmt.Printf("%s%s\n", message, userInput)
 		} else if len(items) == 1 {
 			fmt.Printf("Selected %s: %s\n", message, items[0])
 			return items[0], nil
 		}
 	}
 
-	return input, nil
+	return userInput, nil
 }
 
 func handle(err error) {
@@ -475,8 +484,25 @@ func handle(err error) {
 	}
 }
 
+func getGlobalPassword(ctx context.Context) []byte {
+	valid := false
+	var globalPassword []byte
+	for !valid {
+		globalPassword = input.Password("Enter Global Password: ")
+
+		// Check global password
+		var err error
+		valid, err = passline.CheckPassword(ctx, globalPassword)
+		if err != nil || !valid {
+			handle(err)
+		}
+	}
+
+	return globalPassword
+}
+
 func selectItem(ctx context.Context, args ucli.Args, names []string) (storage.Item, error) {
-	name, err := argOrSelect(args, 0, "URL", names)
+	name, err := argOrSelect(ctx, args, 0, "URL", names)
 	handle(err)
 
 	// Get item
@@ -489,8 +515,8 @@ func selectItem(ctx context.Context, args ucli.Args, names []string) (storage.It
 	return item, nil
 }
 
-func selectCredential(args ucli.Args, item storage.Item) (storage.Credential, error) {
-	username, err := argOrSelect(args, 1, "Username/Login", item.GetUsernameArray())
+func selectCredential(ctx context.Context, args ucli.Args, item storage.Item) (storage.Credential, error) {
+	username, err := argOrSelect(ctx, args, 1, "Username/Login", item.GetUsernameArray())
 	handle(err)
 
 	// Check if name, username combination exists

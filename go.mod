@@ -13,6 +13,7 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/rhysd/go-github-selfupdate v1.2.1
+	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
 	github.com/urfave/cli/v2 v2.0.0
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859

@@ -56,7 +56,7 @@ func (c *Core) CheckPassword(ctx context.Context, password []byte) (bool, error)
 	_, err = crypt.AesGcmDecrypt(password, item.Credentials[0].Password)
 	if err != nil {
 		renderer.InvalidPassword()
-		return false, err
+		return false, nil
 	}
 
 	return true, nil

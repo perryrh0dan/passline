@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -13,7 +15,7 @@ func main() {
 	//trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
 	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, os.Kill)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, os.Kill)
 	defer func() {
 		signal.Stop(c)
 		cancel()
@@ -23,8 +25,11 @@ func main() {
 		select {
 		case <-c:
 			cancel()
+			fmt.Println()
 			os.Exit(1)
 		case <-ctx.Done():
+			cancel()
+			fmt.Println()
 			os.Exit(1)
 		}
 	}()
