@@ -14,28 +14,16 @@ const (
 	ctxKeyInteractive
 	ctxKeyStdin
 	ctxKeyClipTimeout
-	ctxKeyConcurrency
 	ctxKeyConfirm
-	ctxKeyNoPager
 	ctxKeyShowSafeContent
-	ctxKeyGitCommit
 	ctxKeyAlwaysYes
-	ctxKeyNoColor
-	ctxKeyFuzzySearch
 	ctxKeyVerbose
 	ctxKeyAutoClip
 	ctxKeyNotifications
-	ctxKeyEditRecipients
-	ctxKeyProgressCallback
-	ctxKeyAlias
-	ctxKeyGitInit
 	ctxKeyForce
-	ctxKeyCommitMessage
-	ctxKeyNoNetwork
 	ctxKeyUsername
 	ctxKeyEmail
-	ctxKeyImportFunc
-	ctxKeyExportKeys
+	ctxKeyAdvanced
 )
 
 // WithGlobalFlags parses any global flags from the cli context and returns
@@ -167,26 +155,6 @@ func IsConfirm(ctx context.Context) bool {
 	return bv
 }
 
-// WithNoPager returns a context with the value for ask for more set
-func WithNoPager(ctx context.Context, bv bool) context.Context {
-	return context.WithValue(ctx, ctxKeyNoPager, bv)
-}
-
-// HasNoPager returns true if a value for NoPager has been set in this context
-func HasNoPager(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxKeyNoPager).(bool)
-	return ok
-}
-
-// IsNoPager returns the value of ask for more or the default (false)
-func IsNoPager(ctx context.Context) bool {
-	bv, ok := ctx.Value(ctxKeyNoPager).(bool)
-	if !ok {
-		return false
-	}
-	return bv
-}
-
 // WithShowSafeContent returns a context with the value for ShowSafeContent set
 func WithShowSafeContent(ctx context.Context, bv bool) context.Context {
 	return context.WithValue(ctx, ctxKeyShowSafeContent, bv)
@@ -201,42 +169,6 @@ func HasShowSafeContent(ctx context.Context) bool {
 // IsShowSafeContent returns the value of ShowSafeContent or the default (false)
 func IsShowSafeContent(ctx context.Context) bool {
 	bv, ok := ctx.Value(ctxKeyShowSafeContent).(bool)
-	if !ok {
-		return false
-	}
-	return bv
-}
-
-// WithGitCommit returns a context with the value of git commit set
-func WithGitCommit(ctx context.Context, bv bool) context.Context {
-	return context.WithValue(ctx, ctxKeyGitCommit, bv)
-}
-
-// HasGitCommit returns true if a value for GitCommit has been set in this context
-func HasGitCommit(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxKeyGitCommit).(bool)
-	return ok
-}
-
-// IsGitCommit returns the value of git commit or the default (true)
-func IsGitCommit(ctx context.Context) bool {
-	return is(ctx, ctxKeyGitCommit, true)
-}
-
-// WithNoColor returns a context with the value for ask for more set
-func WithNoColor(ctx context.Context, bv bool) context.Context {
-	return context.WithValue(ctx, ctxKeyNoColor, bv)
-}
-
-// HasNoColor returns true if a value for NoColor has been set in this context
-func HasNoColor(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxKeyNoColor).(bool)
-	return ok
-}
-
-// IsNoColor returns the value of ask for more or the default (false)
-func IsNoColor(ctx context.Context) bool {
-	bv, ok := ctx.Value(ctxKeyNoColor).(bool)
 	if !ok {
 		return false
 	}
@@ -259,26 +191,6 @@ func IsAlwaysYes(ctx context.Context) bool {
 	bv, ok := ctx.Value(ctxKeyAlwaysYes).(bool)
 	if !ok {
 		return false
-	}
-	return bv
-}
-
-// WithFuzzySearch returns a context with the value for fuzzy search set
-func WithFuzzySearch(ctx context.Context, fuzzy bool) context.Context {
-	return context.WithValue(ctx, ctxKeyFuzzySearch, fuzzy)
-}
-
-// HasFuzzySearch returns true if a value for FuzzySearch has been set in this context
-func HasFuzzySearch(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxKeyFuzzySearch).(bool)
-	return ok
-}
-
-// IsFuzzySearch return the value of fuzzy search or the default (true)
-func IsFuzzySearch(ctx context.Context) bool {
-	bv, ok := ctx.Value(ctxKeyFuzzySearch).(bool)
-	if !ok {
-		return true
 	}
 	return bv
 }
@@ -314,6 +226,21 @@ func IsNotifications(ctx context.Context) bool {
 	return is(ctx, ctxKeyNotifications, true)
 }
 
+// withAdvanced returns a context with the value for Advanced set
+func WithAdvanced(ctx context.Context, advanced bool) context.Context {
+	return context.WithValue(ctx, ctxKeyAdvanced, advanced)
+}
+
+// HasAdvanced returns true if a value for Advanced has been set in this context
+func HasAdvanced(ctx context.Context) bool {
+	return hasBool(ctx, ctxKeyAdvanced)
+}
+
+// IsAdvanced returns the value of Advanced or the default (true)
+func IsAdvanced(ctx context.Context) bool {
+	return is(ctx, ctxKeyAdvanced, false)
+}
+
 // WithAutoClip returns a context with the value for AutoClip set
 func WithAutoClip(ctx context.Context, bv bool) context.Context {
 	return context.WithValue(ctx, ctxKeyAutoClip, bv)
@@ -329,100 +256,6 @@ func IsAutoClip(ctx context.Context) bool {
 	return is(ctx, ctxKeyAutoClip, true)
 }
 
-// WithEditRecipients returns a context with the value for EditRecipients set
-func WithEditRecipients(ctx context.Context, bv bool) context.Context {
-	return context.WithValue(ctx, ctxKeyEditRecipients, bv)
-}
-
-// HasEditRecipients returns true if a value for EditRecipients has been set in this context
-func HasEditRecipients(ctx context.Context) bool {
-	return hasBool(ctx, ctxKeyEditRecipients)
-}
-
-// IsEditRecipients returns the value of EditRecipients or the default (false)
-func IsEditRecipients(ctx context.Context) bool {
-	bv, ok := ctx.Value(ctxKeyEditRecipients).(bool)
-	if !ok {
-		return false
-	}
-	return bv
-}
-
-// WithConcurrency returns a context with the value for clip timeout set
-func WithConcurrency(ctx context.Context, to int) context.Context {
-	return context.WithValue(ctx, ctxKeyConcurrency, to)
-}
-
-// HasConcurrency returns true if a value for Concurrency has been set in this context and is bigger than 1
-// since if it is equal to 1, we are not working concurrently.
-func HasConcurrency(ctx context.Context) bool {
-	return hasInt(ctx, ctxKeyConcurrency)
-}
-
-// GetConcurrency returns the value of concurrent threads or the default (1)
-func GetConcurrency(ctx context.Context) int {
-	iv, ok := ctx.Value(ctxKeyConcurrency).(int)
-	if !ok || iv < 1 {
-		return 1
-	}
-	return iv
-}
-
-// WithProgressCallback returns a context with the value of ProgressCallback set
-func WithProgressCallback(ctx context.Context, cb ProgressCallback) context.Context {
-	return context.WithValue(ctx, ctxKeyProgressCallback, cb)
-}
-
-// HasProgressCallback returns true if a ProgressCallback has been set
-func HasProgressCallback(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxKeyProgressCallback).(ProgressCallback)
-	return ok
-}
-
-// GetProgressCallback return the set progress callback or a default one.
-// It never returns nil
-func GetProgressCallback(ctx context.Context) ProgressCallback {
-	cb, ok := ctx.Value(ctxKeyProgressCallback).(ProgressCallback)
-	if !ok || cb == nil {
-		return func() {}
-	}
-	return cb
-}
-
-// WithAlias returns an context with the alias set.
-func WithAlias(ctx context.Context, alias string) context.Context {
-	return context.WithValue(ctx, ctxKeyAlias, alias)
-}
-
-// HasAlias returns true if a value for alias has been set.
-func HasAlias(ctx context.Context) bool {
-	return hasString(ctx, ctxKeyAlias)
-}
-
-// GetAlias returns an alias if it has been set or an empty string otherwise.
-func GetAlias(ctx context.Context) string {
-	a, ok := ctx.Value(ctxKeyAlias).(string)
-	if !ok {
-		return ""
-	}
-	return a
-}
-
-// WithGitInit returns a context with the value for the git init flag set.
-func WithGitInit(ctx context.Context, bv bool) context.Context {
-	return context.WithValue(ctx, ctxKeyGitInit, bv)
-}
-
-// HasGitInit returns true if the git init flag was set.
-func HasGitInit(ctx context.Context) bool {
-	return hasBool(ctx, ctxKeyGitInit)
-}
-
-// IsGitInit returns the value of the git init flag or ture if none was set.
-func IsGitInit(ctx context.Context) bool {
-	return is(ctx, ctxKeyGitInit, true)
-}
-
 // WithForce returns a context with the force flag set
 func WithForce(ctx context.Context, bv bool) context.Context {
 	return context.WithValue(ctx, ctxKeyForce, bv)
@@ -436,40 +269,6 @@ func HasForce(ctx context.Context) bool {
 // IsForce returns the force flag value of the default (false)
 func IsForce(ctx context.Context) bool {
 	return is(ctx, ctxKeyForce, false)
-}
-
-// WithCommitMessage returns a context with a commit message set
-func WithCommitMessage(ctx context.Context, sv string) context.Context {
-	return context.WithValue(ctx, ctxKeyCommitMessage, sv)
-}
-
-// HasCommitMessage returns true if the commit message was set
-func HasCommitMessage(ctx context.Context) bool {
-	return hasString(ctx, ctxKeyCommitMessage)
-}
-
-// GetCommitMessage returns the set commit message or an empty string
-func GetCommitMessage(ctx context.Context) string {
-	sv, ok := ctx.Value(ctxKeyCommitMessage).(string)
-	if !ok {
-		return ""
-	}
-	return sv
-}
-
-// WithNoNetwork returns a context with the value of no network set
-func WithNoNetwork(ctx context.Context, bv bool) context.Context {
-	return context.WithValue(ctx, ctxKeyNoNetwork, bv)
-}
-
-// HasNoNetwork returns true if no network was set
-func HasNoNetwork(ctx context.Context) bool {
-	return hasBool(ctx, ctxKeyNoNetwork)
-}
-
-// IsNoNetwork returns the value of no network or false
-func IsNoNetwork(ctx context.Context) bool {
-	return is(ctx, ctxKeyNoNetwork, false)
 }
 
 // WithUsername returns a context with the username set in the context

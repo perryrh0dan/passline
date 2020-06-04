@@ -9,7 +9,7 @@ import (
 	"passline/pkg/cli/selection"
 	"passline/pkg/config"
 	"passline/pkg/crypt"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 	"passline/pkg/storage"
 
 	"github.com/blang/semver"
@@ -53,7 +53,7 @@ func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item stor
 	// Check if name, username combination exists
 	credential, err := item.GetCredentialByUsername(username)
 	if err != nil {
-		renderer.InvalidUsername(item.Name, username)
+		out.InvalidUsername(item.Name, username)
 		os.Exit(0)
 	}
 
@@ -94,7 +94,7 @@ func (s *Action) checkPassword(ctx context.Context, password []byte) (bool, erro
 
 	_, err = crypt.AesGcmDecrypt(password, item.Credentials[0].Password)
 	if err != nil {
-		renderer.InvalidPassword()
+		out.InvalidPassword()
 		return false, nil
 	}
 
@@ -138,7 +138,7 @@ func (s *Action) exists(ctx context.Context, name, username string) (bool, error
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
-			renderer.InvalidUsername(name, username)
+			out.InvalidUsername(name, username)
 			return true, nil
 		}
 	}

@@ -72,6 +72,9 @@ func (s *Action) GetCommands() []*cli.Command {
 				&cli.IntFlag{
 					Name:  "timeout",
 					Usage: "Time to wait",
+				}, &cli.BoolFlag{
+					Name:  "force",
+					Usage: "Clear clipboard even if checksum mismatches",
 				},
 			},
 			Action: s.Unclip,

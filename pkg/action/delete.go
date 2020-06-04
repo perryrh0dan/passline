@@ -8,7 +8,7 @@ import (
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 
 	ucli "github.com/urfave/cli/v2"
 )
@@ -24,12 +24,12 @@ func (s *Action) Delete(c *ucli.Context) error {
 
 	// Check if any item exists
 	if len(names) <= 0 {
-		renderer.NoItemsMessage()
+		out.NoItemsMessage()
 		return nil
 	}
 
 	args := c.Args()
-	renderer.DeleteMessage()
+	out.DeleteMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 
 	item, err := s.getSite(ctx, name)
 	if err != nil {
-		renderer.InvalidName(name)
+		out.InvalidName(name)
 		os.Exit(0)
 	}
 
@@ -48,11 +48,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 	}
 
 	message := fmt.Sprintf("Are you sure you want to delete this item: %s (y/n): ", credential.Username)
-	confirm, err := input.Confirmation(message)
-	if err != nil {
-		return err
-	}
-
+	confirm := input.Confirmation(message)
 	if !confirm {
 		return nil
 	}
@@ -62,7 +58,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 		return err
 	}
 
-	renderer.SuccessfulDeletedItem(item.Name, credential.Username)
+	out.SuccessfulDeletedItem(item.Name, credential.Username)
 	return nil
 }
 

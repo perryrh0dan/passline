@@ -19,10 +19,11 @@ var (
 )
 
 type Config struct {
-	Directory string `yaml:"directory"`
-	Storage   string `yaml:"storage"`
-	AutoClip  bool   `yaml:"autoclip"`
-	NoColor   bool   `yaml:"nocolor"`
+	Directory     string `yaml:"directory"`
+	Storage       string `yaml:"storage"`
+	AutoClip      bool   `yaml:"autoclip"`
+	Notifications bool   `yaml:"notifications"`
+	NoColor       bool   `yaml:"nocolor"`
 }
 
 var configFile string

@@ -7,7 +7,7 @@ import (
 	"passline/pkg/cli/selection"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 	"passline/pkg/storage"
 	"passline/pkg/util"
 
@@ -25,12 +25,12 @@ func (s *Action) Edit(c *ucli.Context) error {
 
 	// Check if site exists
 	if len(names) <= 0 {
-		renderer.NoItemsMessage()
+		out.NoItemsMessage()
 		os.Exit(0)
 	}
 
 	args := c.Args()
-	renderer.DeleteMessage()
+	out.DeleteMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 
 	item, err := s.getSite(ctx, name)
 	if err != nil {
-		renderer.InvalidName(name)
+		out.InvalidName(name)
 		os.Exit(0)
 	}
 
@@ -87,7 +87,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return err
 	}
 
-	renderer.SuccessfulChangedItem(item.Name, credential.Username)
+	out.SuccessfulChangedItem(item.Name, credential.Username)
 
 	return nil
 }

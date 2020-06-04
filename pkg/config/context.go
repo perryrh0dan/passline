@@ -11,6 +11,9 @@ func (c *Config) WithContext(ctx context.Context) context.Context {
 	if !ctxutil.HasAutoClip(ctx) {
 		ctx = ctxutil.WithAutoClip(ctx, c.AutoClip)
 	}
+	if !ctxutil.HasNotifications(ctx) {
+		ctx = ctxutil.WithNotifications(ctx, c.Notifications)
+	}
 
 	return ctx
 }

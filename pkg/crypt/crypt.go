@@ -16,6 +16,10 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
+type GeneratorOptions struct {
+	Length int
+}
+
 func DecryptCredential(credential *storage.Credential, globalPassword []byte) error {
 	err := DecryptPassword(credential, globalPassword)
 	if err != nil {
@@ -158,7 +162,7 @@ func GenerateKey(password []byte) []byte {
 	return dk
 }
 
-func GeneratePassword(length int) (string, error) {
+func GeneratePassword(options *GeneratorOptions) (string, error) {
 	lowercase := []rune("abcdefghijklmnopqrstuvwxyz")
 	uppercase := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	numbers := []rune("0123456789")
@@ -176,13 +180,13 @@ func GeneratePassword(length int) (string, error) {
 	a = append(a, symbols[random.Intn(len(symbols))])
 
 	// populate the rest with random chars
-	for i := 0; i < length-4; i++ {
+	for i := 0; i < options.Length-4; i++ {
 		a = append(a, all[random.Intn(len(all))])
 	}
 
 	// shuffle up
-	for i := 0; i < length; i++ {
-		randomPosition := random.Intn(length)
+	for i := 0; i < options.Length; i++ {
+		randomPosition := random.Intn(options.Length)
 		temp := a[i]
 		a[i] = a[randomPosition]
 		a[randomPosition] = temp

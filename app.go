@@ -49,6 +49,18 @@ WEBSITE:
 		return action.Default(c)
 	}
 
+	app.Flags = []ucli.Flag{
+		&ucli.BoolFlag{
+			Name:  "yes",
+			Usage: "Assume yes on all yes/no questions or use the default on all others",
+		},
+		&ucli.BoolFlag{
+			Name:    "force",
+			Aliases: []string{"f"},
+			Usage:   "Force displaying content",
+		},
+	}
+
 	app.Commands = action.GetCommands()
 
 	sort.Sort(ucli.FlagsByName(app.Flags))
@@ -60,12 +72,6 @@ WEBSITE:
 func initContext(ctx context.Context, cfg *config.Config) context.Context {
 	// initialize from config, may be overridden by env vars
 	ctx = cfg.WithContext(ctx)
-
-	// need this override for our integration tests
-	if nc := os.Getenv("PASSLINE_NOCOLOR"); nc == "true" || ctxutil.IsNoColor(ctx) {
-		color.NoColor = true
-		ctx = ctxutil.WithColor(ctx, false)
-	}
 
 	// support for no-color.org
 	if nc := os.Getenv("NO_COLOR"); nc != "" {

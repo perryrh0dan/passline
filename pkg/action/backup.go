@@ -11,7 +11,7 @@ import (
 	"passline/pkg/cli/input"
 	"passline/pkg/config"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 	"passline/pkg/storage"
 
 	ucli "github.com/urfave/cli/v2"
@@ -21,7 +21,7 @@ func (s *Action) Backup(c *ucli.Context) error {
 	ctx := ctxutil.WithGlobalFlags(c)
 
 	args := c.Args()
-	renderer.BackupMessage()
+	out.BackupMessage()
 
 	//TODO this should happen in config
 	path := config.Directory() + "/backup"
@@ -39,7 +39,7 @@ func (s *Action) Backup(c *ucli.Context) error {
 		return err
 	}
 
-	renderer.SuccessfulCreatedBackup(path)
+	out.SuccessfulCreatedBackup(path)
 	return nil
 }
 

@@ -9,7 +9,7 @@ import (
 
 	"passline/pkg/cli/input"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 	"passline/pkg/storage"
 
 	ucli "github.com/urfave/cli/v2"
@@ -19,7 +19,7 @@ func (s *Action) Restore(c *ucli.Context) error {
 	ctx := ctxutil.WithGlobalFlags(c)
 
 	args := c.Args()
-	renderer.RestoreMessage()
+	out.RestoreMessage()
 
 	// User input path
 	path, err := input.ArgOrInput(args, 0, "Path", "")
@@ -28,10 +28,7 @@ func (s *Action) Restore(c *ucli.Context) error {
 	}
 
 	message := fmt.Sprintf("Are you sure you want to restore this  backup: %s (y/n): ", path)
-	confirm, err := input.Confirmation(message)
-	if err != nil {
-		return err
-	}
+	confirm := input.Confirmation(message)
 
 	if !confirm {
 		return nil
@@ -42,7 +39,7 @@ func (s *Action) Restore(c *ucli.Context) error {
 		return err
 	}
 
-	renderer.SuccessfulRestoredBackup(path)
+	out.SuccessfulRestoredBackup(path)
 	return nil
 }
 
@@ -51,7 +48,7 @@ func (s *Action) restore(ctx context.Context, path string) error {
 
 	_, err := os.Stat(path)
 	if err != nil {
-		renderer.InvalidFilePath()
+		out.InvalidFilePath()
 		return err
 	}
 

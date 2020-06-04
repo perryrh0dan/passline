@@ -2,7 +2,6 @@ package notify
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -13,7 +12,6 @@ import (
 
 func iconURI() string {
 	iconFN := filepath.Join(config.Directory(), "passline-logo-small.png")
-	fmt.Println(iconFN)
 	if !fsutil.IsFile(iconFN) {
 		fh, err := os.OpenFile(iconFN, os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {

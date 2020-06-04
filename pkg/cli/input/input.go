@@ -63,21 +63,17 @@ func Default(message string, defaultValue string) (string, error) {
 	return text, nil
 }
 
-func Confirmation(message string) (bool, error) {
+func Confirmation(message string) bool {
 	result := ""
 	for result != "y" && result != "n" {
 		var err error
 		result, err = Default(message, "")
 		if err != nil {
-			return false, err
+			return false
 		}
 	}
 
-	if result == "y" {
-		return true, nil
-	}
-
-	return false, nil
+	return result == "y"
 }
 
 func Password(message string) []byte {

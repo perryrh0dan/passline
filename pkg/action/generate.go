@@ -2,25 +2,41 @@ package action
 
 import (
 	"context"
-	"fmt"
 	"os"
+	"strconv"
 
 	"passline/pkg/cli/input"
 	"passline/pkg/clipboard"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
-	"passline/pkg/storage"
+	"passline/pkg/out"
 	"passline/pkg/util"
 
 	ucli "github.com/urfave/cli/v2"
 )
 
-func (s *Action) Generate(c *ucli.Context) error {
+func generateParseArgs(c *ucli.Context) context.Context {
 	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, c.Bool("clip"))
+	}
+	if c.IsSet("force") {
+		ctx = ctxutil.WithForce(ctx, c.Bool("force"))
+	}
+
+	return ctx
+}
+
+func (s *Action) Generate(c *ucli.Context) error {
+	ctx := generateParseArgs(c)
+	// force := c.Bool("force")
 
 	args := c.Args()
-	renderer.GenerateMessage()
+	out.GenerateMessage()
+
+	options := crypt.GeneratorOptions{
+		Length: 20,
+	}
 
 	// User input name
 	name, err := input.ArgOrInput(args, 0, "URL", "")
@@ -31,42 +47,49 @@ func (s *Action) Generate(c *ucli.Context) error {
 	// User input username
 	username, err := input.ArgOrInput(args, 1, "Username/Login", "")
 	if err != nil {
-		return err
+		return ExitError(1, err, "")
 	}
+
 	// Check if name, username combination exists
 	exists, err := s.exists(ctx, name, username)
 	if err != nil {
-		return err
+		return ExitError(1, err, "")
 	}
 
 	if exists {
-		os.Exit(0)
+		return ExitError(1, err, "Item/Username already exists")
 	}
 
-	// Check if advanced mode is active
-	if c.String("mode") == "advanced" {
-		err := getAdvancedParamters(ctx)
+	// Get advanced parameters
+	recoveryCodes := make([]string, 0)
+	if c.Bool("advanced") {
+		length, err := input.Default("Please enter the length of the password []: (%s) ", "20")
 		if err != nil {
 			return err
 		}
+		options.Length, _ = strconv.Atoi(length)
+
+		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
+		if err != nil {
+			return err
+		}
+
+		if recoveryCodesString != "" {
+			recoveryCodes = util.StringToArray(recoveryCodesString)
+		}
 	}
 
-	recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
+	password, err := crypt.GeneratePassword(&options)
 	if err != nil {
 		return err
-	}
-
-	recoveryCodes := make([]string, 0)
-	if recoveryCodesString != "" {
-		recoveryCodes = util.StringToArray(recoveryCodesString)
 	}
 
 	globalPassword := s.getGlobalPassword(ctx)
 	println()
 
-	credential, err := s.generate(ctx, name, username, recoveryCodes, globalPassword)
+	credential, err := s.AddItem(ctx, name, username, password, recoveryCodes, globalPassword)
 	if err != nil {
-		return err
+		os.Exit(1)
 	}
 
 	if ctxutil.IsAutoClip(ctx) || IsClip(ctx) {
@@ -78,26 +101,6 @@ func (s *Action) Generate(c *ucli.Context) error {
 		}
 	}
 
-	renderer.SuccessfulCopiedToClipboard(name, credential.Username)
+	out.SuccessfulCopiedToClipboard(name, credential.Username)
 	return nil
-}
-
-func getAdvancedParamters(ctx context.Context) error {
-	length, err := input.Default("Please enter the length of the password []: (%s)", "20")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(length)
-	return nil
-}
-
-func (s *Action) generate(ctx context.Context, name, username string, recoveryCodes []string, globalPassword []byte) (storage.Credential, error) {
-	// Generate password and crypt password
-	password, err := crypt.GeneratePassword(20)
-	if err != nil {
-		return storage.Credential{}, err
-	}
-
-	return s.AddItem(ctx, name, username, password, recoveryCodes, globalPassword)
 }

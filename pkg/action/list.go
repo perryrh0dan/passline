@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 
 	ucli "github.com/urfave/cli/v2"
 )
@@ -17,11 +17,11 @@ func (s *Action) List(c *ucli.Context) error {
 	if args.Len() >= 1 {
 		item, err := s.getSite(ctx, args.Get(0))
 		if err != nil {
-			renderer.InvalidName(args.Get(0))
+			out.InvalidName(args.Get(0))
 			os.Exit(0)
 		}
 
-		renderer.DisplayItem(item)
+		out.DisplayItem(item)
 	} else {
 		items, err := s.getSites(ctx)
 		if err != nil {
@@ -29,9 +29,9 @@ func (s *Action) List(c *ucli.Context) error {
 		}
 
 		if len(items) == 0 {
-			renderer.NoItemsMessage()
+			out.NoItemsMessage()
 		}
-		renderer.DisplayItems(items)
+		out.DisplayItems(items)
 	}
 
 	return nil

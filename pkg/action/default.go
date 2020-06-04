@@ -7,7 +7,7 @@ import (
 	"passline/pkg/clipboard"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 
 	ucli "github.com/urfave/cli/v2"
 )
@@ -23,12 +23,12 @@ func (s *Action) Default(c *ucli.Context) error {
 
 	// Check if sites exists
 	if len(names) <= 0 {
-		renderer.NoItemsMessage()
+		out.NoItemsMessage()
 		os.Exit(0)
 	}
 
 	args := c.Args()
-	renderer.DisplayMessage()
+	out.DisplayMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
@@ -37,7 +37,7 @@ func (s *Action) Default(c *ucli.Context) error {
 
 	item, err := s.getSite(ctx, name)
 	if err != nil {
-		renderer.InvalidName(name)
+		out.InvalidName(name)
 		os.Exit(0)
 	}
 
@@ -57,15 +57,16 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
-	renderer.DisplayCredential(credential)
+	out.DisplayCredential(credential)
 
-	err = clipboard.CopyTo(ctx, credential.Username, []byte(credential.Password))
+	identifier := out.BuildIdentifier(name, credential.Username)
+	err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password))
 	if err != nil {
-		renderer.ClipboardError()
+		out.ClipboardError()
 		os.Exit(0)
 	}
 
-	renderer.SuccessfulCopiedToClipboard(item.Name, credential.Username)
+	out.SuccessfulCopiedToClipboard(item.Name, credential.Username)
 
 	return nil
 }

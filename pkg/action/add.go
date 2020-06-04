@@ -7,7 +7,7 @@ import (
 	"passline/pkg/cli/input"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
-	"passline/pkg/renderer"
+	"passline/pkg/out"
 	"passline/pkg/storage"
 	"passline/pkg/util"
 
@@ -18,7 +18,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	ctx := ctxutil.WithGlobalFlags(c)
 
 	args := c.Args()
-	renderer.CreateMessage()
+	out.CreateMessage()
 
 	// User input name
 	name, err := input.ArgOrInput(args, 0, "URL", "")
@@ -39,7 +39,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	}
 
 	if exists {
-		renderer.NameUsernameAlreadyExists()
+		out.NameUsernameAlreadyExists()
 		return nil
 	}
 
@@ -66,7 +66,7 @@ func (s *Action) Add(c *ucli.Context) error {
 		return err
 	}
 
-	renderer.DisplayCredential(credential)
+	out.DisplayCredential(credential)
 	return nil
 }
 

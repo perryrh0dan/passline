@@ -12,6 +12,7 @@ import (
 	// "github.com/perryrh0dan/passline/pkg/out"
 
 	"github.com/atotto/clipboard"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -30,12 +31,12 @@ func CopyTo(ctx context.Context, name string, content []byte) error {
 
 	if err := clipboard.WriteAll(string(content)); err != nil {
 		_ = notify.Notify(ctx, "passline - clipboard", "failed to write to clipboard")
-		// return errors.Wrapf(err, "failed to write to clipboard")
+		return errors.Wrapf(err, "failed to write to clipboard")
 	}
 
 	if err := clear(ctx, content, 45); err != nil {
 		_ = notify.Notify(ctx, "passline - clipboard", "failed to clear clipboard")
-		// return errors.Wrapf(err, "failed to clear clipboard")
+		return errors.Wrapf(err, "failed to clear clipboard")
 	}
 
 	// out.Print(ctx, "✔ Copied %s to clipboard. Will clear in %d seconds.", color.YellowString(name), ctxutil.GetClipTimeout(ctx))
