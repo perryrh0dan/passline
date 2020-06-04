@@ -19,9 +19,11 @@ type FireStore struct {
 	client *firestore.Client
 }
 
-func NewFirestore(ctx context.Context) (*FireStore, error) {
+func NewFirestore() (*FireStore, error) {
 	mainDir, _ := getMainDir()
 	credentialsFile := path.Join(mainDir, "firestore.json")
+
+	ctx := context.TODO()
 
 	// Check for credentials file
 	_, err := os.Stat(credentialsFile)

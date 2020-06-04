@@ -10,8 +10,30 @@ import (
 	"strings"
 	"syscall"
 
+	ucli "github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 )
+
+func ArgOrInput(args ucli.Args, index int, message string, defaultValue string) (string, error) {
+	userInput := ""
+	if args.Len()-1 >= index {
+		userInput = args.Get(index)
+	}
+	if userInput == "" {
+		message := fmt.Sprintf("Please enter a %s []: ", message)
+		if defaultValue != "" {
+			message += "(%s)"
+		}
+
+		var err error
+		userInput, err = Default(message, defaultValue)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return userInput, nil
+}
 
 func Default(message string, defaultValue string) (string, error) {
 	// find if %s is in string

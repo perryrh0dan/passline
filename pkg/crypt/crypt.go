@@ -11,8 +11,88 @@ import (
 	random "math/rand"
 	"time"
 
+	"passline/pkg/storage"
+
 	"golang.org/x/crypto/pbkdf2"
 )
+
+func DecryptCredential(credential *storage.Credential, globalPassword []byte) error {
+	err := DecryptPassword(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	err = DecryptRecoveryCodes(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DecryptPassword(credential *storage.Credential, globalPassword []byte) error {
+	// Decrypt passwords
+	var err error
+	credential.Password, err = AesGcmDecrypt(globalPassword, credential.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DecryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
+	var decryptedRecoveryCodes = make([]string, 0)
+	for _, c := range credential.RecoveryCodes {
+		decryptedRecoveryCode, err := AesGcmDecrypt(globalPassword, c)
+		if err != nil {
+			return err
+		}
+		decryptedRecoveryCodes = append(decryptedRecoveryCodes, decryptedRecoveryCode)
+	}
+
+	credential.RecoveryCodes = decryptedRecoveryCodes
+	return nil
+}
+
+func EncryptCredential(credential *storage.Credential, globalPassword []byte) error {
+	err := EncryptPassword(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	err = EncryptRecoveryCodes(credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func EncryptPassword(credential *storage.Credential, globalPassword []byte) error {
+	var err error
+	credential.Password, err = AesGcmEncrypt(globalPassword, credential.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func EncryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
+	var encryptedRecoveryCodes = make([]string, 0)
+
+	for _, c := range credential.RecoveryCodes {
+		encryptedRecoveryCode, err := AesGcmEncrypt(globalPassword, c)
+		if err != nil {
+			return err
+		}
+		encryptedRecoveryCodes = append(encryptedRecoveryCodes, encryptedRecoveryCode)
+	}
+
+	credential.RecoveryCodes = encryptedRecoveryCodes
+	return nil
+}
 
 // AesGcmEncrypt takes an encryption key and a plaintext string and encrypts it with AES256 in GCM mode, which provides authenticated encryption. Returns the ciphertext and the used nonce.
 func AesGcmEncrypt(password []byte, text string) (string, error) {

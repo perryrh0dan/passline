@@ -8,14 +8,17 @@ require (
 	github.com/atotto/clipboard v0.1.2
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/eiannone/keyboard v0.0.0-20190314115158-7169d0afeb4f
-	github.com/fatih/color v1.7.0
+	github.com/fatih/color v1.9.0
+	github.com/godbus/dbus v0.0.0-20190623212516-8a1682060722
+	github.com/gopasspw/gopass v1.9.2 // indirect
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
-	github.com/mattn/go-colorable v0.1.4 // indirect
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mitchellh/go-ps v1.0.0
+	github.com/pkg/errors v0.9.1
 	github.com/rhysd/go-github-selfupdate v1.2.1
-	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518
-	github.com/urfave/cli/v2 v2.0.0
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+	github.com/sqs/goreturns v0.0.0-20181028201513-538ac6014518 // indirect
+	github.com/urfave/cli v1.22.4
+	github.com/urfave/cli/v2 v2.2.0
+	golang.org/x/crypto v0.0.0-20200423211502-4bdfaf469ed5
+	golang.org/x/net v0.0.0-20200421231249-e086a090c8fd
 	google.golang.org/api v0.11.0
 )

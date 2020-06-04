@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"passline/pkg/config"
@@ -78,6 +79,25 @@ type Credential struct {
 	Username      string   `json:"username"`
 	Password      string   `json:"password"`
 	RecoveryCodes []string `json:"recoveryCodes"`
+}
+
+func New(cfg *config.Config) Storage {
+	var store Storage
+	var err error
+	switch cfg.Storage {
+	case "firestore":
+		store, err = NewFirestore()
+		if err != nil {
+			os.Exit(1)
+		}
+	default:
+		store, err = NewLocalStorage()
+		if err != nil {
+			os.Exit(1)
+		}
+	}
+
+	return store
 }
 
 func getMainDir() (string, error) {

@@ -1,16 +1,59 @@
 package selection
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 
 	"passline/pkg/cli/list"
 	"passline/pkg/cli/screenbuf"
 	"passline/pkg/cli/terminal"
+	"passline/pkg/util"
 
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
+	ucli "github.com/urfave/cli/v2"
 )
+
+func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string, items []string) (string, error) {
+	userInput := ""
+	if args.Len()-1 >= index {
+		userInput = args.Get(index)
+
+		// if input is no item name use as filter
+		if !util.ArrayContains(items, userInput) {
+			items = util.FilterArray(items, userInput)
+			if len(items) == 0 {
+				fmt.Printf("No items with filter: %v found\n", userInput)
+				return "", errors.New("No items found")
+			}
+			userInput = ""
+		}
+	}
+	if userInput == "" {
+		if len(items) > 1 {
+			message := fmt.Sprintf("Please select a %s: ", message)
+			selection, err := Default(message, items)
+			if err != nil {
+				return "", err
+			}
+			if selection == -1 {
+				os.Exit(1)
+			}
+
+			userInput = items[selection]
+			terminal.MoveCursorUp(1)
+			terminal.ClearLines(1)
+			fmt.Printf("%s%s\n", message, userInput)
+		} else if len(items) == 1 {
+			fmt.Printf("Selected %s: %s\n", message, items[0])
+			return items[0], nil
+		}
+	}
+
+	return userInput, nil
+}
 
 func Default(message string, items []string) (int, error) {
 	// Print Message

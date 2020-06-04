@@ -6,7 +6,7 @@
   "files": {
     "guid": "378896D8-6749-4821-870A-44CBBB791D0C",
     "items": [
-      "passline.exe"
+      "core.exe"
     ]
   },
   "directories": [
@@ -31,7 +31,7 @@
       {
         "name": "go-msi",
         "description": "Password manager for the command line",
-        "target": "[INSTALLDIR]\\passline.exe",
+        "target": "[INSTALLDIR]\\core.exe",
         "wdir": "INSTALLDIR",
         "arguments": "",
         "icon": ""
