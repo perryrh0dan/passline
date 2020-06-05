@@ -23,12 +23,23 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestGeneratePassword(t *testing.T) {
-	password, err := GeneratePassword(20)
+	password, err := GeneratePassword(&GeneratorOptions{Length: 20})
 	if err != nil {
 		t.Error(err)
 	}
 
 	if len(password) != 20 {
+		t.Errorf("GeneratePassword() = %s; wanted length %v", password, len(password))
+	}
+}
+
+func TestGeneratePasswordWithCustomLength(t *testing.T) {
+	password, err := GeneratePassword(&GeneratorOptions{Length: 10})
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(password) != 10 {
 		t.Errorf("GeneratePassword() = %s; wanted length %v", password, len(password))
 	}
 }
