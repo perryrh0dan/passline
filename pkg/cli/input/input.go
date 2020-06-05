@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/signal"
 	"regexp"
 	"runtime"
 	"strings"
@@ -15,10 +14,8 @@ import (
 )
 
 func ArgOrInput(args ucli.Args, index int, message string, defaultValue string) (string, error) {
-	userInput := ""
-	if args.Len()-1 >= index {
-		userInput = args.Get(index)
-	}
+	userInput := args.Get(index)
+
 	if userInput == "" {
 		message := fmt.Sprintf("Please enter a %s []: ", message)
 		if defaultValue != "" {
@@ -77,26 +74,6 @@ func Confirmation(message string) bool {
 }
 
 func Password(message string) []byte {
-	// Get the initial state of the terminal.
-	initialTermState, e1 := terminal.GetState(int(syscall.Stdin))
-	if e1 != nil {
-		panic(e1)
-	}
-
-	// Restore it in the event of an interrupt.
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, os.Kill)
-	defer func() {
-		signal.Stop(c)
-	}()
-
-	go func() {
-		<-c
-		_ = terminal.Restore(int(syscall.Stdin), initialTermState)
-		fmt.Println()
-		os.Exit(1)
-	}()
-
 	// Now get the password.
 	fmt.Print(message)
 	p, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -105,9 +82,6 @@ func Password(message string) []byte {
 			panic(err)
 		}
 	}
-
-	// Stop looking for ^C on the channel.
-	signal.Stop(c)
 
 	// Return the password as a string.
 	return p

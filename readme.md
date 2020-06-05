@@ -150,6 +150,10 @@ VS-Code settings
 ]
 ```
 
+### Build
+
+GOOS=windows GOARCH=amd64 go build
+
 ## Team
 
 - Thomas Pöhlmann [(@perryrh0dan)](https://github.com/perryrh0dan)

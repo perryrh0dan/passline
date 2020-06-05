@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/blang/semver"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
@@ -26,6 +27,9 @@ var (
 func main() {
 	ctx := context.Background()
 
+	// Get the initial state of the terminal.
+	initialTermState, _ := terminal.GetState(int(syscall.Stdin))
+
 	//trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
 	c := make(chan os.Signal)
@@ -39,12 +43,10 @@ func main() {
 		select {
 		case <-c:
 			cancel()
-			fmt.Println()
-			os.Exit(1)
+			exit(initialTermState)
 		case <-ctx.Done():
 			cancel()
-			fmt.Println()
-			os.Exit(1)
+			exit(initialTermState)
 		}
 	}()
 
@@ -54,6 +56,12 @@ func main() {
 	if err := app.RunContext(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func exit(initialTermState *terminal.State) {
+	_ = terminal.Restore(int(syscall.Stdin), initialTermState)
+	fmt.Println()
+	os.Exit(1)
 }
 
 func getVersion() semver.Version {

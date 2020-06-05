@@ -23,8 +23,7 @@ func (s *Action) Default(c *ucli.Context) error {
 
 	// Check if sites exists
 	if len(names) <= 0 {
-		out.NoItemsMessage()
-		os.Exit(0)
+		return ExitError(ExitNotFound, err, "No sites found")
 	}
 
 	args := c.Args()
@@ -32,7 +31,7 @@ func (s *Action) Default(c *ucli.Context) error {
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
-		return err
+		return ExitError(ExitNotFound, err, "No sites found with filter: %s", args.Get(0))
 	}
 
 	item, err := s.getSite(ctx, name)
