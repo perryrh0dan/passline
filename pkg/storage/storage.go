@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"passline/pkg/config"
@@ -14,7 +15,6 @@ type Storage interface {
 	GetItemByName(context.Context, string) (Item, error)
 	GetItemByIndex(context.Context, int) (Item, error)
 	GetAllItems(context.Context) ([]Item, error)
-	CreateItem(context.Context, Item) error
 	AddCredential(context.Context, string, Credential) error
 	DeleteCredential(context.Context, Item, Credential) error
 	UpdateItem(context.Context, Item) error
@@ -78,6 +78,25 @@ type Credential struct {
 	Username      string   `json:"username"`
 	Password      string   `json:"password"`
 	RecoveryCodes []string `json:"recoveryCodes"`
+}
+
+func New(cfg *config.Config) Storage {
+	var store Storage
+	var err error
+	switch cfg.Storage {
+	case "firestore":
+		store, err = NewFirestore()
+		if err != nil {
+			os.Exit(1)
+		}
+	default:
+		store, err = NewLocalStorage()
+		if err != nil {
+			os.Exit(1)
+		}
+	}
+
+	return store
 }
 
 func getMainDir() (string, error) {

@@ -5,24 +5,31 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
+)
+
+var (
+	// ErrConfigNotFound is returned on load if the config was not found
+	ErrConfigNotFound = errors.Errorf("config not found")
+	// ErrConfigNotParsed is returned on load if the config could not be decoded
+	ErrConfigNotParsed = errors.Errorf("config not parseable")
 )
 
 type Config struct {
-	Directory string
-	Storage   string
-	AutoClip  bool
-	NoColor   bool
-	NoSymbols bool
+	Directory     string `yaml:"directory"`
+	Storage       string `yaml:"storage"`
+	AutoClip      bool   `yaml:"autoclip"`
+	Notifications bool   `yaml:"notifications"`
+	NoColor       bool   `yaml:"nocolor"`
 }
 
 var configFile string
 
 func init() {
-	homeDir, err := os.UserHomeDir()
-	if err == nil {
-		configFile = path.Join(homeDir, ".passline.json")
-	}
+	configFile = configLocation()
 
 	ensureConfigFile()
 	config, _ := Get()
@@ -81,7 +88,6 @@ func new() Config {
 		Storage:   "local",
 		AutoClip:  true,
 		NoColor:   false,
-		NoSymbols: false,
 	}
 }
 
@@ -100,4 +106,21 @@ func Get() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+// configLocation returns the location of the config file
+// (a YAML file that contains values such as the path to the password store)
+func configLocation() string {
+	// First, check for the "PASSLINE_CONFIG" environment variable
+	if cf := os.Getenv("PASSLINE_CONFIG"); cf != "" {
+		return cf
+	}
+
+	homeDir, _ := os.UserHomeDir()
+	return path.Join(homeDir, ".passline", "config.json")
+}
+
+// Directory returns the configuration directory for the gopass config file
+func Directory() string {
+	return filepath.Dir(configLocation())
 }

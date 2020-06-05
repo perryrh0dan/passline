@@ -52,15 +52,20 @@ func (ls *LocalStorage) GetAllItems(ctx context.Context) ([]Item, error) {
 	return data.Items, nil
 }
 
-// Add data
-func (ls *LocalStorage) CreateItem(ctx context.Context, website Item) error {
-	data := ls.getData()
-	data.Items = append(data.Items, website)
-	ls.setData(data)
-	return nil
-}
-
 func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credential Credential) error {
+	// Check if item already exists
+	_, err := ls.GetItemByName(ctx, name)
+	if err != nil {
+		// Generate new item entry
+		item := Item{Name: name, Credentials: []Credential{credential}}
+		err = ls.createItem(ctx, item)
+		if err != nil {
+			os.Exit(0)
+		}
+
+		return nil
+	}
+
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -74,15 +79,10 @@ func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credenti
 		}
 	}
 
-	ls.setData(data)
-	return nil
-}
-
-func (ls *LocalStorage) deleteItem(item Item) error {
-	data := ls.getData()
-	index := getIndexOfItem(data.Items, item)
-	data.Items = removeFromItems(data.Items, index)
-	ls.setData(data)
+	err = ls.setData(data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -115,7 +115,7 @@ func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 		return err
 	}
 
-	err = ls.CreateItem(ctx, item)
+	err = ls.createItem(ctx, item)
 	if err != nil {
 		return err
 	}
@@ -125,6 +125,21 @@ func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 
 func (ls *LocalStorage) SetData(ctx context.Context, data Data) error {
 	return ls.setData(data)
+}
+
+func (ls *LocalStorage) createItem(ctx context.Context, item Item) error {
+	data := ls.getData()
+	data.Items = append(data.Items, item)
+	ls.setData(data)
+	return nil
+}
+
+func (ls *LocalStorage) deleteItem(item Item) error {
+	data := ls.getData()
+	index := getIndexOfItem(data.Items, item)
+	data.Items = removeFromItems(data.Items, index)
+	ls.setData(data)
+	return nil
 }
 
 func ensureDirectories(storageDir, storageFile string) {

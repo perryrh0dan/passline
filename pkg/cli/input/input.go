@@ -4,14 +4,33 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/signal"
 	"regexp"
 	"runtime"
 	"strings"
 	"syscall"
 
+	ucli "github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 )
+
+func ArgOrInput(args ucli.Args, index int, message string, defaultValue string) (string, error) {
+	userInput := args.Get(index)
+
+	if userInput == "" {
+		message := fmt.Sprintf("Please enter a %s []: ", message)
+		if defaultValue != "" {
+			message += "(%s)"
+		}
+
+		var err error
+		userInput, err = Default(message, defaultValue)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return userInput, nil
+}
 
 func Default(message string, defaultValue string) (string, error) {
 	// find if %s is in string
@@ -41,43 +60,20 @@ func Default(message string, defaultValue string) (string, error) {
 	return text, nil
 }
 
-func Confirmation(message string) (bool, error) {
+func Confirmation(message string) bool {
 	result := ""
 	for result != "y" && result != "n" {
 		var err error
 		result, err = Default(message, "")
 		if err != nil {
-			return false, err
+			return false
 		}
 	}
 
-	if result == "y" {
-		return true, nil
-	}
-
-	return false, nil
+	return result == "y"
 }
 
 func Password(message string) []byte {
-	// Get the initial state of the terminal.
-	initialTermState, e1 := terminal.GetState(int(syscall.Stdin))
-	if e1 != nil {
-		panic(e1)
-	}
-
-	// Restore it in the event of an interrupt.
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, os.Kill)
-	defer func() {
-		signal.Stop(c)
-	}()
-
-	go func() {
-		<-c
-		_ = terminal.Restore(int(syscall.Stdin), initialTermState)
-		os.Exit(1)
-	}()
-
 	// Now get the password.
 	fmt.Print(message)
 	p, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -86,9 +82,6 @@ func Password(message string) []byte {
 			panic(err)
 		}
 	}
-
-	// Stop looking for ^C on the channel.
-	signal.Stop(c)
 
 	// Return the password as a string.
 	return p

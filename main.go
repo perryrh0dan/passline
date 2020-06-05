@@ -6,11 +6,29 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+
+	"github.com/blang/semver"
+	"golang.org/x/crypto/ssh/terminal"
+)
+
+const (
+	name = "passline"
+)
+
+var (
+	// Version is the released version of passline
+	version string = "0.7.0"
+	// BuildTime is the time the binary was built
+	date string
 )
 
 func main() {
 	ctx := context.Background()
+
+	// Get the initial state of the terminal.
+	initialTermState, _ := terminal.GetState(int(syscall.Stdin))
 
 	//trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
@@ -25,19 +43,40 @@ func main() {
 		select {
 		case <-c:
 			cancel()
-			fmt.Println()
-			os.Exit(1)
+			exit(initialTermState)
 		case <-ctx.Done():
 			cancel()
-			fmt.Println()
-			os.Exit(1)
+			exit(initialTermState)
 		}
 	}()
 
-	app := setupApp(ctx)
+	sv := getVersion()
 
-	err := app.Run(os.Args)
-	if err != nil {
+	ctx, app := setupApp(ctx, sv)
+	if err := app.RunContext(ctx, os.Args); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func exit(initialTermState *terminal.State) {
+	_ = terminal.Restore(int(syscall.Stdin), initialTermState)
+	fmt.Println()
+	os.Exit(1)
+}
+
+func getVersion() semver.Version {
+	sv, err := semver.Parse(strings.TrimPrefix(version, "v"))
+	if err == nil {
+		return sv
+	}
+
+	return semver.Version{
+		Major: 1,
+		Minor: 9,
+		Patch: 2,
+		Pre: []semver.PRVersion{
+			{VersionStr: "git"},
+		},
+		Build: []string{"HEAD"},
 	}
 }

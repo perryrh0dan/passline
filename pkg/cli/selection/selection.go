@@ -1,98 +1,46 @@
 package selection
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 
-	"passline/pkg/cli/list"
-	"passline/pkg/cli/screenbuf"
 	"passline/pkg/cli/terminal"
+	"passline/pkg/util"
 
-	"github.com/eiannone/keyboard"
-	"github.com/fatih/color"
+	ucli "github.com/urfave/cli/v2"
 )
 
-func Default(message string, items []string) (int, error) {
-	// Print Message
-	fmt.Println(message)
+func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string, items []string) (string, error) {
+	userInput := args.Get(index)
 
-	sb := screenbuf.New(os.Stdout)
-
-	list, err := list.New(items, 10)
-	if err != nil {
-		return 0, err
-	}
-
-	selected := -1
-
-	// Open keyboard
-	err = keyboard.Open()
-	if err != nil {
-		return selected, err
-	}
-	defer keyboard.Close()
-
-	printList(list, sb)
-
-	// Hide Cursor
-	terminal.HideCursor()
-	defer terminal.ShowCursor()
-	var open = true
-
-	for open {
-		_, key, _ := keyboard.GetKey()
-		update := false
-		switch key {
-		case keyboard.KeyEsc:
-			open = false
-		case keyboard.KeyCtrlC:
-			open = false
-		case keyboard.KeyEnter:
-			selected = list.Index()
-			open = false
-		case keyboard.KeyArrowUp:
-			list.Prev()
-			update = true
-		case keyboard.KeyArrowDown:
-			list.Next()
-			update = true
-		}
-
-		if update {
-			printList(list, sb)
+	// if input is no item name use as filter
+	if util.ArrayContains(items, userInput) {
+		return userInput, nil
+	} else {
+		items = util.FilterArray(items, userInput)
+		if len(items) == 0 {
+			return "", errors.New("Not found")
 		}
 	}
 
-	sb.Reset()
-	sb.Clear()
-	sb.Flush()
-	return selected, nil
-}
-
-func printList(list *list.List, sb *screenbuf.ScreenBuf) {
-	values, selected := list.Items()
-
-	items := make([]string, len(values))
-	for i, v := range values {
-		items[i] = fmt.Sprint(v)
-	}
-
-	for index, item := range items {
-		if index != selected {
-			text := fmt.Sprintf("[ ] %s", item)
-			sb.WriteString(text)
-		} else {
-			d := color.New(color.FgGreen)
-			text := d.Sprintf("[x] %s", item)
-			sb.WriteString(text)
+	if len(items) == 1 {
+		fmt.Printf("Selected %s: %s\n", message, items[0])
+		return items[0], nil
+	} else {
+		message := fmt.Sprintf("Please select a %s: ", message)
+		selection, err := Default(message, items)
+		if err != nil {
+			return "", err
 		}
+		if selection == -1 {
+			os.Exit(1)
+		}
+
+		terminal.MoveCursorUp(1)
+		terminal.ClearLines(1)
+		fmt.Printf("%s%s\n", message, items[selection])
+		return items[selection], nil
 	}
-
-	sb.Flush()
-}
-
-func clearScreen(sb *screenbuf.ScreenBuf) {
-	sb.Reset()
-	sb.Clear()
-	sb.Flush()
 }

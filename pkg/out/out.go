@@ -1,4 +1,4 @@
-package renderer
+package out
 
 import (
 	"fmt"
@@ -22,7 +22,9 @@ func DisplayCredential(credential storage.Credential) {
 	fmt.Printf("Password: %s\n", credential.Password)
 
 	// TODO check if recovery codes exist
-	fmt.Printf("Recovery codes: %s\n", util.ArrayToString(credential.RecoveryCodes))
+	if len(credential.RecoveryCodes) > 0 {
+		fmt.Printf("Recovery codes: %s\n", util.ArrayToString(credential.RecoveryCodes))
+	}
 }
 
 func DisplayItems(websites []storage.Item) {
@@ -36,18 +38,18 @@ func DisplayReleaseNotes(releaseNotes string) {
 }
 
 func SuccessfulCopiedToClipboard(name, username string) {
-	identifier := buildIdentifier(name, username)
+	identifier := color.YellowString(BuildIdentifier(name, username))
 	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", identifier)
 }
 
 func SuccessfulChangedItem(name, username string) {
-	identifier := buildIdentifier(name, username)
+	identifier := color.YellowString(BuildIdentifier(name, username))
 	d := color.New(color.FgGreen)
 	d.Printf("Successful changed item: %s\n", identifier)
 }
 
 func SuccessfulDeletedItem(name, username string) {
-	identifier := buildIdentifier(name, username)
+	identifier := color.YellowString(BuildIdentifier(name, username))
 	d := color.New(color.FgGreen)
 	d.Printf("Successful deleted item: %s\n", identifier)
 }
@@ -169,6 +171,6 @@ func NameUsernameAlreadyExists() {
 	fmt.Println("error: name & username combination already exists")
 }
 
-func buildIdentifier(name, username string) string {
-	return color.YellowString(name + "/" + username)
+func BuildIdentifier(name, username string) string {
+	return name + "/" + username
 }
