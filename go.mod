@@ -10,7 +10,7 @@ require (
 	github.com/eiannone/keyboard v0.0.0-20190314115158-7169d0afeb4f
 	github.com/fatih/color v1.9.0
 	github.com/godbus/dbus v0.0.0-20190623212516-8a1682060722
-	github.com/gopasspw/gopass v1.9.2 // indirect
+	github.com/gopasspw/gopass v1.9.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1
@@ -21,4 +21,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200423211502-4bdfaf469ed5
 	golang.org/x/net v0.0.0-20200421231249-e086a090c8fd
 	google.golang.org/api v0.11.0
+	google.golang.org/grpc v1.21.1
 )

@@ -18,11 +18,9 @@ const (
 
 var (
 	// Version is the released version of passline
-	version string = "0.6.0"
+	version string = "0.7.0"
 	// BuildTime is the time the binary was built
 	date string
-	// Commit is the git hash the binary was built from
-	commit string
 )
 
 func main() {
@@ -61,11 +59,9 @@ func main() {
 func getVersion() semver.Version {
 	sv, err := semver.Parse(strings.TrimPrefix(version, "v"))
 	if err == nil {
-		if commit != "" {
-			sv.Build = []string{commit}
-		}
 		return sv
 	}
+
 	return semver.Version{
 		Major: 1,
 		Minor: 9,

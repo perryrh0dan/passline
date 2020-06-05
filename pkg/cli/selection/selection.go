@@ -2,7 +2,6 @@ package selection
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
@@ -13,6 +12,7 @@ import (
 
 	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
+	"github.com/gopasspw/gopass/pkg/action"
 	ucli "github.com/urfave/cli/v2"
 )
 
@@ -25,8 +25,7 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 		if !util.ArrayContains(items, userInput) {
 			items = util.FilterArray(items, userInput)
 			if len(items) == 0 {
-				fmt.Printf("No items with filter: %v found\n", userInput)
-				return "", errors.New("No items found")
+				return "", action.ExitError(ctx, action.ExitNotFound, nil, "No items with filter: %s found", userInput)
 			}
 			userInput = ""
 		}

@@ -13,6 +13,8 @@ import (
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type FireStore struct {
@@ -93,35 +95,19 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
-func (fs *FireStore) CreateItem(ctx context.Context, item Item) error {
-	_, err := fs.client.Collection("passline").Doc(item.Name).Set(ctx, item)
-	if err != nil {
-		log.Fatalf("Failed adding item: %v", err)
-	}
-
-	return nil
-}
-
 func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential) error {
 	item, err := fs.GetItemByName(ctx, name)
-	if err != nil {
+	if status.Code(err) == codes.NotFound {
+		item = Item{Name: name, Credentials: []Credential{credential}}
+	} else if err != nil {
 		return err
+	} else {
+		item.Credentials = append(item.Credentials, credential)
 	}
 
-	item.Credentials = append(item.Credentials, credential)
-	err = fs.CreateItem(ctx, item)
+	err = fs.createItem(ctx, item)
 	if err != nil {
 		log.Fatalf("Failed updating credentials: %v", err)
-	}
-
-	return nil
-}
-
-func (fs *FireStore) deleteItem(ctx context.Context, item Item) error {
-	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(ctx)
-	if err != nil {
-		log.Printf("An error has occured: %s", err)
-		return err
 	}
 
 	return nil
@@ -135,7 +121,7 @@ func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, credential
 
 	if len(item.Credentials) > 1 {
 		item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
-		err := fs.CreateItem(ctx, item)
+		err := fs.createItem(ctx, item)
 		if err != nil {
 			log.Fatalf("Failed updating credentials: %v", err)
 		}
@@ -152,7 +138,7 @@ func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
 		return err
 	}
 
-	err = fs.CreateItem(ctx, item)
+	err = fs.createItem(ctx, item)
 	if err != nil {
 		return err
 	}
@@ -171,6 +157,25 @@ func (fs *FireStore) SetData(ctx context.Context, data Data) error {
 
 	_, err := batch.Commit(ctx)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (fs *FireStore) createItem(ctx context.Context, item Item) error {
+	_, err := fs.client.Collection("passline").Doc(item.Name).Set(ctx, item)
+	if err != nil {
+		log.Fatalf("Failed adding item: %v", err)
+	}
+
+	return nil
+}
+
+func (fs *FireStore) deleteItem(ctx context.Context, item Item) error {
+	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(ctx)
+	if err != nil {
+		log.Printf("An error has occured: %s", err)
 		return err
 	}
 

@@ -1,9 +1,6 @@
 package action
 
 import (
-	"context"
-	"os"
-
 	"passline/pkg/cli/input"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
@@ -23,24 +20,20 @@ func (s *Action) Add(c *ucli.Context) error {
 	// User input name
 	name, err := input.ArgOrInput(args, 0, "URL", "")
 	if err != nil {
-		ExitError(1, err, "Failed to enter name")
+		return ExitError(1, err, "Failed to enter name")
 	}
 
 	// User input username
 	username, err := input.ArgOrInput(args, 1, "Username/Login", "")
 	if err != nil {
-		ExitError(1, err, "Failed to enter username/login")
+		return ExitError(1, err, "Failed to enter username/login")
 	}
 
 	// Check if name, username combination exists
-	exists, err := s.exists(ctx, name, username)
-	if err != nil {
-		return err
-	}
-
+	exists := s.exists(ctx, name, username)
 	if exists {
-		out.NameUsernameAlreadyExists()
-		return nil
+		identifier := out.BuildIdentifier(name, username)
+		return ExitError(ExitDuplicated, err, "Item/Username already exists: %s", identifier)
 	}
 
 	password, err := input.Default("Please enter the existing Password []: ", "")
@@ -61,21 +54,10 @@ func (s *Action) Add(c *ucli.Context) error {
 	globalPassword := s.getGlobalPassword(ctx)
 	println()
 
-	credential, err := s.AddItem(ctx, name, username, password, recoveryCodes, globalPassword)
-	if err != nil {
-		return err
-	}
-
-	out.DisplayCredential(credential)
-	return nil
-}
-
-func (s *Action) AddItem(ctx context.Context, name, username, password string, recoveryCodes []string, globalPassword []byte) (storage.Credential, error) {
-
-	// Check global password.
+	// check global password
 	valid, err := s.checkPassword(ctx, globalPassword)
 	if err != nil || !valid {
-		return storage.Credential{}, err
+		return ExitError(ExitPassword, err, "Wrong Password")
 	}
 
 	// Create Credentials
@@ -83,27 +65,16 @@ func (s *Action) AddItem(ctx context.Context, name, username, password string, r
 
 	err = crypt.EncryptCredential(&credential, globalPassword)
 	if err != nil {
-		return storage.Credential{}, err
+		return ExitError(ExitEncrypt, err, "Error Encrypting credentials")
 	}
 
-	// Check if item already exists
-	_, err = s.Store.GetItemByName(ctx, name)
+	err = s.Store.AddCredential(ctx, name, credential)
 	if err != nil {
-		// Generate new item entry
-		item := storage.Item{Name: name, Credentials: []storage.Credential{credential}}
-		err = s.Store.CreateItem(ctx, item)
-		if err != nil {
-			os.Exit(0)
-		}
-	} else {
-		// TODO check if credential already exists
-		// Add to existing item
-		err := s.Store.AddCredential(ctx, name, credential)
-		if err != nil {
-			os.Exit(0)
-		}
+		return ExitError(ExitUnknown, err, "Error occured: %s", err)
 	}
 
 	credential.Password = password
-	return credential, nil
+
+	out.DisplayCredential(credential)
+	return nil
 }

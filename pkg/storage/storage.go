@@ -15,7 +15,6 @@ type Storage interface {
 	GetItemByName(context.Context, string) (Item, error)
 	GetItemByIndex(context.Context, int) (Item, error)
 	GetAllItems(context.Context) ([]Item, error)
-	CreateItem(context.Context, Item) error
 	AddCredential(context.Context, string, Credential) error
 	DeleteCredential(context.Context, Item, Credential) error
 	UpdateItem(context.Context, Item) error

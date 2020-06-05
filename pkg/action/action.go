@@ -47,14 +47,14 @@ func newAction(cfg *config.Config, sv semver.Version) (*Action, error) {
 func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item storage.Item) (storage.Credential, error) {
 	username, err := selection.ArgOrSelect(ctx, args, 1, "Username/Login", item.GetUsernameArray())
 	if err != nil {
-		os.Exit(1)
+		return storage.Credential{}, ExitError(ExitUnknown, err, "Selection Failed: %s", err)
 	}
 
 	// Check if name, username combination exists
 	credential, err := item.GetCredentialByUsername(username)
 	if err != nil {
-		out.InvalidUsername(item.Name, username)
-		os.Exit(0)
+		identifier := out.BuildIdentifier(item.Name, username)
+		return storage.Credential{}, ExitError(ExitNotFound, err, "Username/Login not found: %s", identifier)
 	}
 
 	return credential, nil
@@ -94,7 +94,6 @@ func (s *Action) checkPassword(ctx context.Context, password []byte) (bool, erro
 
 	_, err = crypt.AesGcmDecrypt(password, item.Credentials[0].Password)
 	if err != nil {
-		out.InvalidPassword()
 		return false, nil
 	}
 
@@ -133,15 +132,14 @@ func (s *Action) getSite(ctx context.Context, name string) (storage.Item, error)
 	return item, nil
 }
 
-func (s *Action) exists(ctx context.Context, name, username string) (bool, error) {
+func (s *Action) exists(ctx context.Context, name, username string) bool {
 	item, err := s.Store.GetItemByName(ctx, name)
 	if err == nil {
 		_, err = item.GetCredentialByUsername(username)
 		if err == nil {
-			out.InvalidUsername(name, username)
-			return true, nil
+			return true
 		}
 	}
 
-	return false, nil
+	return false
 }

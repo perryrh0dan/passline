@@ -3,7 +3,7 @@ package action
 import (
 	"fmt"
 
-	ucli "github.com/urfave/cli"
+	ucli "github.com/urfave/cli/v2"
 )
 
 const (
@@ -13,6 +13,8 @@ const (
 	ExitUnknown
 	// ExitUsage is used if there was some kind of invocation error
 	ExitUsage
+	// Exit Duplicated is used if the item already exists
+	ExitDuplicated
 	// ExitAborted is used if the user willingly aborted an action
 	ExitAborted
 	// ExitUnsupported is used if an operation is not supported by passline
@@ -23,10 +25,8 @@ const (
 	// ExitNotInitialized is used if someone is trying to use an unitialized
 	// store
 	ExitNotInitialized
-	// ExitGit is used if any git errors are encountered
-	ExitGit
-	// ExitMount is used if a substore mount operation fails
-	ExitMount
+	// Exit Password is used if the global password is wrong
+	ExitPassword
 	// ExitNoName is used when no name was provided for a named entry
 	ExitNoName
 	// ExitNotFound is used if a requested secret is not found
