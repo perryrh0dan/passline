@@ -7,7 +7,7 @@
 </h4>
 
 <div align="center">
-  <img alt="List" width="70%" src="media/core.gif">
+  <img alt="List" width="70%" src="media/passline.gif">
 </div>
 
 <div align="center">
