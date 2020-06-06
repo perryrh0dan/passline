@@ -1,8 +1,6 @@
 package action
 
 import (
-	"os"
-
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 
@@ -17,19 +15,18 @@ func (s *Action) List(c *ucli.Context) error {
 	if args.Len() >= 1 {
 		item, err := s.getSite(ctx, args.Get(0))
 		if err != nil {
-			out.InvalidName(args.Get(0))
-			os.Exit(0)
+			return ExitError(ExitNotFound, err, "Item not found: %s", args.Get(0))
 		}
 
 		out.DisplayItem(item)
 	} else {
 		items, err := s.getSites(ctx)
 		if err != nil {
-			return nil
+			return ExitError(ExitUnknown, err, "Unable to list items")
 		}
 
 		if len(items) == 0 {
-			out.NoItemsMessage()
+			return ExitError(ExitNotFound, err, "No items found")
 		}
 		out.DisplayItems(items)
 	}

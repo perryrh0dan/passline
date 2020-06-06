@@ -81,13 +81,10 @@ func (s *Action) Generate(c *ucli.Context) error {
 		return err
 	}
 
-	globalPassword := s.getGlobalPassword(ctx)
-	println()
-
-	// check global password
-	valid, err := s.checkPassword(ctx, globalPassword)
-	if err != nil || !valid {
-		return ExitError(ExitPassword, err, "Wrong Password")
+	// get and check global password
+	globalPassword, err := s.getGlobalPassword(ctx)
+	if err != nil {
+		return err
 	}
 
 	// Create credentials

@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"os"
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
 	"passline/pkg/crypt"
@@ -17,16 +16,15 @@ import (
 func (s *Action) Edit(c *ucli.Context) error {
 	ctx := ctxutil.WithGlobalFlags(c)
 
-	// Get all Sites
+	// Get all items
 	names, err := s.getSiteNames(ctx)
 	if err != nil {
-		return err
+		return ExitError(ExitUnknown, err, "Error selecting item: %s", err)
 	}
 
-	// Check if site exists
+	// Check if any item exists
 	if len(names) <= 0 {
-		out.NoItemsMessage()
-		os.Exit(0)
+		return ExitError(ExitNotFound, err, "No items found")
 	}
 
 	args := c.Args()
@@ -39,8 +37,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 
 	item, err := s.getSite(ctx, name)
 	if err != nil {
-		out.InvalidName(name)
-		os.Exit(0)
+		return ExitError(ExitNotFound, err, "Item not found: %s", name)
 	}
 
 	credential, err := s.selectCredential(ctx, args, item)
@@ -50,9 +47,11 @@ func (s *Action) Edit(c *ucli.Context) error {
 
 	selectedUsername := credential.Username
 
-	// Get global password.
-	globalPassword := s.getGlobalPassword(ctx)
-	println()
+	// get and check global password
+	globalPassword, err := s.getGlobalPassword(ctx)
+	if err != nil {
+		return err
+	}
 
 	// Decrypt Credentials to display secrets
 	err = crypt.DecryptCredential(&credential, globalPassword)

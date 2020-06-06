@@ -34,11 +34,16 @@ func newAction(cfg *config.Config, sv semver.Version) (*Action, error) {
 		name = filepath.Base(os.Args[0])
 	}
 
+	store, err := storage.New(cfg)
+	if err != nil {
+		return nil, ExitError(ExitUnknown, err, "Unable to initialize storage: %s", err)
+	}
+
 	act := &Action{
 		Name:    name,
 		cfg:     cfg,
 		version: sv,
-		Store:   storage.New(cfg),
+		Store:   store,
 	}
 
 	return act, nil
@@ -60,7 +65,7 @@ func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item stor
 	return credential, nil
 }
 
-func (s *Action) getGlobalPassword(ctx context.Context) []byte {
+func (s *Action) getGlobalPassword(ctx context.Context) ([]byte, error) {
 	valid := false
 	var globalPassword []byte
 	for !valid {
@@ -70,11 +75,12 @@ func (s *Action) getGlobalPassword(ctx context.Context) []byte {
 		var err error
 		valid, err = s.checkPassword(ctx, globalPassword)
 		if err != nil || !valid {
-			os.Exit(1)
+			return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
 		}
 	}
 
-	return globalPassword
+	println()
+	return globalPassword, nil
 }
 
 func (s *Action) checkPassword(ctx context.Context, password []byte) (bool, error) {
