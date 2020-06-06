@@ -7,19 +7,22 @@ import (
 	"runtime"
 	"sort"
 
+	ap "passline/pkg/action"
+	"passline/pkg/config"
+	"passline/pkg/ctxutil"
+
 	"github.com/blang/semver"
 	"github.com/fatih/color"
 	ucli "github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
-
-	ap "passline/pkg/action"
-	"passline/pkg/config"
-	"passline/pkg/ctxutil"
 )
 
 func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.App) {
 	// try to load config
 	cfg, err := config.Get()
+	if err != nil {
+		os.Exit(ap.ExitConfig)
+	}
 
 	// set config values
 	ctx = initContext(ctx, cfg)

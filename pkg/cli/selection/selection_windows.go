@@ -22,7 +22,7 @@ func Default(message string, items []string) (int, error) {
 		return 0, err
 	}
 
-	selected := -1
+	selected := 0
 
 	// Open keyboard
 	err = keyboard.Open()

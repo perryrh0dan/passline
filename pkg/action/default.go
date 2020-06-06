@@ -1,8 +1,6 @@
 package action
 
 import (
-	"os"
-
 	"passline/pkg/cli/selection"
 	"passline/pkg/clipboard"
 	"passline/pkg/crypt"
@@ -60,8 +58,7 @@ func (s *Action) Default(c *ucli.Context) error {
 	identifier := out.BuildIdentifier(name, credential.Username)
 	err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password))
 	if err != nil {
-		out.ClipboardError()
-		os.Exit(0)
+		return ExitError(ExitUnknown, err, "Unable to copy to clipboard: %s", err)
 	}
 
 	out.SuccessfulCopiedToClipboard(item.Name, credential.Username)
