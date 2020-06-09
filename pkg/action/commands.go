@@ -1,12 +1,12 @@
 package action
 
 import (
-	"github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v2"
 )
 
-// GetCommands returns the cli commands exported by this module
-func (s *Action) GetCommands() []*cli.Command {
-	return []*cli.Command{
+// GetCommands returns the ucli commands exported by this module
+func (s *Action) GetCommands() []*ucli.Command {
+	return []*ucli.Command{
 		{
 			Name:      "backup",
 			Aliases:   []string{"b"},
@@ -40,11 +40,16 @@ func (s *Action) GetCommands() []*cli.Command {
 			Aliases:   []string{"g"},
 			Usage:     "Generate a password for an item",
 			ArgsUsage: "<name> <username>",
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
+			Flags: []ucli.Flag{
+				&ucli.BoolFlag{
 					Name:    "advanced",
 					Aliases: []string{"a"},
 					Usage:   "Enable advanced mode",
+				},
+				&ucli.BoolFlag{
+					Name:    "print",
+					Aliases: []string{"p"},
+					Usage:   "Print the generated password to the terminal",
 				},
 			},
 			Action: s.Generate,
@@ -68,11 +73,11 @@ func (s *Action) GetCommands() []*cli.Command {
 			Usage:       "Internal command to clear clipboard",
 			Description: "Clear the clipboard if the content matches the checksum.",
 			Hidden:      true,
-			Flags: []cli.Flag{
-				&cli.IntFlag{
+			Flags: []ucli.Flag{
+				&ucli.IntFlag{
 					Name:  "timeout",
 					Usage: "Time to wait",
-				}, &cli.BoolFlag{
+				}, &ucli.BoolFlag{
 					Name:  "force",
 					Usage: "Clear clipboard even if checksum mismatches",
 				},

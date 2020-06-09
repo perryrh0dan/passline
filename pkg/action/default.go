@@ -53,15 +53,17 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
-	out.DisplayCredential(credential)
-
-	identifier := out.BuildIdentifier(name, credential.Username)
-	err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password))
-	if err != nil {
-		return ExitError(ExitUnknown, err, "Unable to copy to clipboard: %s", err)
+	if ctxutil.IsAutoClip(ctx) || IsClip(ctx) {
+		identifier := out.BuildIdentifier(name, credential.Username)
+		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
+			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
+		}
+		out.SuccessfulCopiedToClipboard(name, credential.Username)
+		if ctxutil.IsAutoClip(ctx) && !c.Bool("print") {
+			return nil
+		}
 	}
 
-	out.SuccessfulCopiedToClipboard(item.Name, credential.Username)
-
+	out.DisplayCredential(credential)
 	return nil
 }
