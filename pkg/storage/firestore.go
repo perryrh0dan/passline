@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"passline/pkg/config"
 	"path"
 	"sort"
 
@@ -22,7 +23,7 @@ type FireStore struct {
 }
 
 func NewFirestore() (*FireStore, error) {
-	mainDir, _ := getMainDir()
+	mainDir := config.Directory()
 	credentialsFile := path.Join(mainDir, "firestore.json")
 
 	ctx := context.TODO()

@@ -81,13 +81,10 @@ func (s *Action) Generate(c *ucli.Context) error {
 		return err
 	}
 
-	globalPassword := s.getGlobalPassword(ctx)
-	println()
-
-	// check global password
-	valid, err := s.checkPassword(ctx, globalPassword)
-	if err != nil || !valid {
-		return ExitError(ExitPassword, err, "Wrong Password")
+	// get and check global password
+	globalPassword, err := s.getGlobalPassword(ctx)
+	if err != nil {
+		return err
 	}
 
 	// Create credentials
@@ -105,15 +102,21 @@ func (s *Action) Generate(c *ucli.Context) error {
 		return ExitError(ExitUnknown, err, "Error occured: %s", err)
 	}
 
+	// set unencrypted password to copy to clipboard and to show in terminal
+	credential.Password = password
+
 	if ctxutil.IsAutoClip(ctx) || IsClip(ctx) {
-		if err = clipboard.CopyTo(ctx, credential.Username, []byte(credential.Password)); err != nil {
+		identifier := out.BuildIdentifier(name, credential.Username)
+		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
 			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
 		}
 		if ctxutil.IsAutoClip(ctx) && !c.Bool("print") {
+			out.SuccessfulCopiedToClipboard(name, credential.Username)
 			return nil
 		}
 	}
 
+	out.DisplayCredential(credential)
 	out.SuccessfulCopiedToClipboard(name, credential.Username)
 	return nil
 }

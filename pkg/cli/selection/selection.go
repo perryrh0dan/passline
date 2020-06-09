@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 
 	"passline/pkg/cli/terminal"
 	"passline/pkg/util"
@@ -33,9 +32,6 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 		selection, err := Default(message, items)
 		if err != nil {
 			return "", err
-		}
-		if selection == -1 {
-			os.Exit(1)
 		}
 
 		terminal.MoveCursorUp(1)

@@ -8,6 +8,8 @@ import (
 	"os"
 	"path"
 	"sort"
+
+	"github.com/gopasspw/gopass/pkg/config"
 )
 
 type LocalStorage struct {
@@ -16,7 +18,7 @@ type LocalStorage struct {
 }
 
 func NewLocalStorage() (*LocalStorage, error) {
-	mainDir, _ := getMainDir()
+	mainDir := config.Directory()
 
 	storageDir := path.Join(mainDir, "storage")
 	storageFile := path.Join(storageDir, "storage.json")
@@ -58,14 +60,11 @@ func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credenti
 	if err != nil {
 		// Generate new item entry
 		item := Item{Name: name, Credentials: []Credential{credential}}
-		err = ls.createItem(ctx, item)
-		if err != nil {
-			os.Exit(0)
-		}
-
+		ls.createItem(ctx, item)
 		return nil
 	}
 
+	// if item exists just append
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
@@ -79,10 +78,7 @@ func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credenti
 		}
 	}
 
-	err = ls.setData(data)
-	if err != nil {
-		return err
-	}
+	ls.setData(data)
 	return nil
 }
 
@@ -110,36 +106,28 @@ func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, credent
 func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 	// TODO check if username is valid
 
-	err := ls.deleteItem(item)
-	if err != nil {
-		return err
-	}
-
-	err = ls.createItem(ctx, item)
-	if err != nil {
-		return err
-	}
+	ls.deleteItem(item)
+	ls.createItem(ctx, item)
 
 	return nil
 }
 
 func (ls *LocalStorage) SetData(ctx context.Context, data Data) error {
-	return ls.setData(data)
-}
-
-func (ls *LocalStorage) createItem(ctx context.Context, item Item) error {
-	data := ls.getData()
-	data.Items = append(data.Items, item)
 	ls.setData(data)
 	return nil
 }
 
-func (ls *LocalStorage) deleteItem(item Item) error {
+func (ls *LocalStorage) createItem(ctx context.Context, item Item) {
+	data := ls.getData()
+	data.Items = append(data.Items, item)
+	ls.setData(data)
+}
+
+func (ls *LocalStorage) deleteItem(item Item) {
 	data := ls.getData()
 	index := getIndexOfItem(data.Items, item)
 	data.Items = removeFromItems(data.Items, index)
 	ls.setData(data)
-	return nil
 }
 
 func ensureDirectories(storageDir, storageFile string) {
@@ -168,12 +156,10 @@ func (ls LocalStorage) getData() Data {
 	return data
 }
 
-func (ls LocalStorage) setData(data Data) error {
+func (ls LocalStorage) setData(data Data) {
 	_, err := os.Stat(ls.storageDir)
 	if err == nil {
 		file, _ := json.MarshalIndent(data, "", " ")
 		_ = ioutil.WriteFile(ls.storageFile, file, 0644)
 	}
-
-	return nil
 }

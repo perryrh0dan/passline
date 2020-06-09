@@ -7,19 +7,22 @@ import (
 	"runtime"
 	"sort"
 
+	ap "passline/pkg/action"
+	"passline/pkg/config"
+	"passline/pkg/ctxutil"
+
 	"github.com/blang/semver"
 	"github.com/fatih/color"
 	ucli "github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
-
-	ap "passline/pkg/action"
-	"passline/pkg/config"
-	"passline/pkg/ctxutil"
 )
 
 func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.App) {
 	// try to load config
 	cfg, err := config.Get()
+	if err != nil {
+		os.Exit(ap.ExitConfig)
+	}
 
 	// set config values
 	ctx = initContext(ctx, cfg)
@@ -51,13 +54,14 @@ WEBSITE:
 
 	app.Flags = []ucli.Flag{
 		&ucli.BoolFlag{
-			Name:  "yes",
-			Usage: "Assume yes on all yes/no questions or use the default on all others",
-		},
-		&ucli.BoolFlag{
 			Name:    "force",
 			Aliases: []string{"f"},
 			Usage:   "Force displaying content",
+		},
+		&ucli.BoolFlag{
+			Name:    "print",
+			Aliases: []string{"p"},
+			Usage:   "Print the generated password to the terminal",
 		},
 	}
 

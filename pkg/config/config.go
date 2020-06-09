@@ -19,18 +19,13 @@ var (
 )
 
 type Config struct {
-	Directory     string `yaml:"directory"`
 	Storage       string `yaml:"storage"`
 	AutoClip      bool   `yaml:"autoclip"`
 	Notifications bool   `yaml:"notifications"`
 	NoColor       bool   `yaml:"nocolor"`
 }
 
-var configFile string
-
 func init() {
-	configFile = configLocation()
-
 	ensureConfigFile()
 	config, _ := Get()
 	_ = ensureMainDir(config)
@@ -38,18 +33,18 @@ func init() {
 }
 
 func ensureConfigFile() {
-	_, err := os.Stat(configFile)
+	_, err := os.Stat(configLocation())
 	if err == nil {
 		return
 	}
 
 	config := new()
 	file, _ := json.MarshalIndent(config, "", " ")
-	_ = ioutil.WriteFile(configFile, file, 0644)
+	_ = ioutil.WriteFile(configLocation(), file, 0644)
 }
 
 func ensureMainDir(config *Config) error {
-	mainDir := config.Directory
+	mainDir := Directory()
 	_, err := os.Stat(mainDir)
 	if err != nil {
 		err := os.MkdirAll(mainDir, os.ModePerm)
@@ -62,7 +57,7 @@ func ensureMainDir(config *Config) error {
 }
 
 func ensureBackupDir(config *Config) error {
-	backupDir := config.Directory + "/backup"
+	backupDir := Directory() + "/backup"
 	_, err := os.Stat(backupDir)
 	if err != nil {
 		err := os.Mkdir(backupDir, os.ModePerm)
@@ -84,32 +79,24 @@ func formatPasslineDir(dirPath string) (string, error) {
 
 func new() Config {
 	return Config{
-		Directory: "~",
-		Storage:   "local",
-		AutoClip:  true,
-		NoColor:   false,
+		Storage:       "local",
+		AutoClip:      true,
+		Notifications: true,
+		NoColor:       false,
 	}
 }
 
 func Get() (*Config, error) {
 	config := Config{}
 
-	file, _ := ioutil.ReadFile(configFile)
+	file, _ := ioutil.ReadFile(configLocation())
 	_ = json.Unmarshal([]byte(file), &config)
-
-	if strings.HasPrefix(config.Directory, "~") {
-		var err error
-		config.Directory, err = formatPasslineDir(config.Directory)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	return &config, nil
 }
 
 // configLocation returns the location of the config file
-// (a YAML file that contains values such as the path to the password store)
+// (a JSON file that contains values such as the path to the password store)
 func configLocation() string {
 	// First, check for the "PASSLINE_CONFIG" environment variable
 	if cf := os.Getenv("PASSLINE_CONFIG"); cf != "" {

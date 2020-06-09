@@ -1,8 +1,6 @@
 package action
 
 import (
-	"os"
-
 	"passline/pkg/cli/selection"
 	"passline/pkg/clipboard"
 	"passline/pkg/crypt"
@@ -23,7 +21,7 @@ func (s *Action) Default(c *ucli.Context) error {
 
 	// Check if sites exists
 	if len(names) <= 0 {
-		return ExitError(ExitNotFound, err, "No sites found")
+		return ExitError(ExitNotFound, err, "No items found")
 	}
 
 	args := c.Args()
@@ -31,13 +29,12 @@ func (s *Action) Default(c *ucli.Context) error {
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
-		return ExitError(ExitNotFound, err, "No sites found with filter: %s", args.Get(0))
+		return ExitError(ExitUnknown, err, "Error selecting item: %s", err)
 	}
 
 	item, err := s.getSite(ctx, name)
 	if err != nil {
-		out.InvalidName(name)
-		os.Exit(0)
+		return ExitError(ExitNotFound, err, "Item not found: %s", name)
 	}
 
 	credential, err := s.selectCredential(ctx, args, item)
@@ -45,27 +42,29 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
-	// Get global password.
-	globalPassword := s.getGlobalPassword(ctx)
-	println()
-
-	// globalPassword := []byte("test")
+	// get and check global password
+	globalPassword, err := s.getGlobalPassword(ctx)
+	if err != nil {
+		return err
+	}
 
 	err = crypt.DecryptCredential(&credential, globalPassword)
 	if err != nil {
 		return err
 	}
 
-	out.DisplayCredential(credential)
-
-	identifier := out.BuildIdentifier(name, credential.Username)
-	err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password))
-	if err != nil {
-		out.ClipboardError()
-		os.Exit(0)
+	if ctxutil.IsAutoClip(ctx) || IsClip(ctx) {
+		identifier := out.BuildIdentifier(name, credential.Username)
+		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
+			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
+		}
+		if ctxutil.IsAutoClip(ctx) && !c.Bool("print") {
+			out.SuccessfulCopiedToClipboard(name, credential.Username)
+			return nil
+		}
 	}
 
-	out.SuccessfulCopiedToClipboard(item.Name, credential.Username)
-
+	out.DisplayCredential(credential)
+	out.SuccessfulCopiedToClipboard(name, credential.Username)
 	return nil
 }

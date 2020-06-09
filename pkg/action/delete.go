@@ -3,7 +3,6 @@ package action
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
@@ -24,8 +23,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 
 	// Check if any item exists
 	if len(names) <= 0 {
-		out.NoItemsMessage()
-		return nil
+		return ExitError(ExitNotFound, err, "No items found")
 	}
 
 	args := c.Args()
@@ -33,13 +31,12 @@ func (s *Action) Delete(c *ucli.Context) error {
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
-		return err
+		return ExitError(ExitUnknown, err, "Error selecting item: %s", err)
 	}
 
 	item, err := s.getSite(ctx, name)
 	if err != nil {
-		out.InvalidName(name)
-		os.Exit(0)
+		return ExitError(ExitNotFound, err, "Item not found: %s", name)
 	}
 
 	credential, err := s.selectCredential(ctx, args, item)
@@ -55,7 +52,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 
 	err = s.delete(ctx, item.Name, credential.Username)
 	if err != nil {
-		return err
+		return ExitError(ExitUnknown, err, "Unable to delete item: %s", err)
 	}
 
 	out.SuccessfulDeletedItem(item.Name, credential.Username)
@@ -75,7 +72,7 @@ func (s *Action) delete(ctx context.Context, name, username string) error {
 
 	err = s.Store.DeleteCredential(ctx, item, credential)
 	if err != nil {
-		os.Exit(0)
+		return err
 	}
 
 	return nil
