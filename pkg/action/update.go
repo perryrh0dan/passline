@@ -26,7 +26,7 @@ func (s *Action) Update(c *ucli.Context) error {
 		return nil
 	}
 
-	message := "Do you want to update to: " + s.version.String() + "? (y/n): "
+	message := "Do you want to update to: " + latest.Version.String() + "? (y/n): "
 	confirm := input.Confirmation(message)
 
 	if !confirm {
