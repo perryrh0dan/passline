@@ -1,4 +1,4 @@
-package main
+package migration
 
 import (
 	"context"
@@ -12,19 +12,19 @@ const (
 	newPassword = ""
 )
 
-// 0.7.3 -> 0.8.0
-func migrateV1() error {
+// 0.7.3 -> 1.0.0
+func MigrateV1() error {
 	cfg, err := config.Get()
 	if err != nil {
 		return err
 	}
 
-	storage, err := storage.New(cfg)
+	store, err := storage.New(cfg)
 	if err != nil {
 		return err
 	}
 
-	items, err := storage.GetAllItems(context.TODO())
+	items, err := store.GetAllItems(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func migrateV1() error {
 			pw, err := crypt.AesGcmEncrypt([]byte(encryptionKey), items[i].Credentials[x].Password)
 			items[i].Credentials[x].Password = pw
 			if err != nil {
-				return
+				return err
 			}
 		}
 	}
@@ -71,8 +71,10 @@ func migrateV1() error {
 		Items: items,
 	}
 
-	err := storage.SetData(context.TODO(), data)
+	err = store.SetData(context.TODO(), data)
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
