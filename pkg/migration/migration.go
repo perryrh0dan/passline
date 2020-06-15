@@ -19,12 +19,12 @@ func migrateV1() error {
 		return err
 	}
 
-	storage, err := storage.New(cfg)
+	store, err := storage.New(cfg)
 	if err != nil {
 		return err
 	}
 
-	items, err := storage.GetAllItems(context.TODO())
+	items, err := store.GetAllItems(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func migrateV1() error {
 			pw, err := crypt.AesGcmEncrypt([]byte(encryptionKey), items[i].Credentials[x].Password)
 			items[i].Credentials[x].Password = pw
 			if err != nil {
-				return
+				return err
 			}
 		}
 	}
@@ -71,8 +71,10 @@ func migrateV1() error {
 		Items: items,
 	}
 
-	err := storage.SetData(context.TODO(), data)
+	err = store.SetData(context.TODO(), data)
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
