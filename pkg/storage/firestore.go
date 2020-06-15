@@ -1,14 +1,13 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"log"
 	"os"
 	"passline/pkg/config"
 	"path"
 	"sort"
-
-	"golang.org/x/net/context"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -21,6 +20,11 @@ import (
 type FireStore struct {
 	client *firestore.Client
 }
+
+const (
+	DataCollection   = "passline"
+	ConfigCollection = "config"
+)
 
 func NewFirestore() (*FireStore, error) {
 	mainDir := config.Directory()
@@ -52,7 +56,7 @@ func NewFirestore() (*FireStore, error) {
 }
 
 func (fs *FireStore) GetItemByName(ctx context.Context, name string) (Item, error) {
-	dsnap, err := fs.client.Collection("passline").Doc(name).Get(context.Background())
+	dsnap, err := fs.client.Collection(DataCollection).Doc(name).Get(context.Background())
 	if err != nil {
 		return Item{}, err
 	}
@@ -77,7 +81,7 @@ func (fs *FireStore) GetItemByIndex(ctx context.Context, index int) (Item, error
 
 func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 	items := []Item{}
-	iter := fs.client.Collection("passline").Documents(ctx)
+	iter := fs.client.Collection(DataCollection).Documents(ctx)
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -152,9 +156,12 @@ func (fs *FireStore) SetData(ctx context.Context, data Data) error {
 	batch := fs.client.Batch()
 
 	for _, item := range data.Items {
-		itemRef := fs.client.Collection("passline").Doc(item.Name)
+		itemRef := fs.client.Collection(DataCollection).Doc(item.Name)
 		batch.Set(itemRef, item)
 	}
+
+	itemRef := fs.client.Collection(ConfigCollection).Doc("config")
+	batch.Set(itemRef, Config{Key: data.Key})
 
 	_, err := batch.Commit(ctx)
 	if err != nil {
@@ -164,8 +171,29 @@ func (fs *FireStore) SetData(ctx context.Context, data Data) error {
 	return nil
 }
 
+func (fs *FireStore) GetKey(ctx context.Context) (string, error) {
+	doc, err := fs.client.Collection(ConfigCollection).Doc("config").Get(ctx)
+	if err != nil {
+		return "", nil
+	}
+
+	var config Config
+	doc.DataTo(&config)
+	return config.Key, nil
+}
+
+func (fs *FireStore) SetKey(ctx context.Context, key string) error {
+	doc := fs.client.Collection(ConfigCollection).Doc("config")
+	_, err := doc.Set(ctx, Config{Key: key})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (fs *FireStore) createItem(ctx context.Context, item Item) error {
-	_, err := fs.client.Collection("passline").Doc(item.Name).Set(ctx, item)
+	_, err := fs.client.Collection(DataCollection).Doc(item.Name).Set(ctx, item)
 	if err != nil {
 		log.Fatalf("Failed adding item: %v", err)
 	}
@@ -174,7 +202,7 @@ func (fs *FireStore) createItem(ctx context.Context, item Item) error {
 }
 
 func (fs *FireStore) deleteItem(ctx context.Context, item Item) error {
-	_, err := fs.client.Collection("passline").Doc(item.Name).Delete(ctx)
+	_, err := fs.client.Collection(DataCollection).Doc(item.Name).Delete(ctx)
 	if err != nil {
 		log.Printf("An error has occured: %s", err)
 		return err

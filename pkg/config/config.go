@@ -107,7 +107,7 @@ func configLocation() string {
 	return path.Join(homeDir, ".passline", "config.json")
 }
 
-// Directory returns the configuration directory for the gopass config file
+// Directory returns the configuration directory for the passline config file
 func Directory() string {
 	return filepath.Dir(configLocation())
 }

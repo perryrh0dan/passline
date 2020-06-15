@@ -65,45 +65,39 @@ func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item stor
 	return credential, nil
 }
 
-func (s *Action) getGlobalPassword(ctx context.Context) ([]byte, error) {
-	valid := false
-	var globalPassword []byte
-	for !valid {
-		globalPassword = input.Password("Enter Global Password: ")
+func (s *Action) getMasterKey(ctx context.Context) ([]byte, error) {
+	password := input.Password("Enter master password: ")
 
-		// Check global password
+	// Get encrypted content encryption key from store
+	encryptedEncryptionKey, err := s.Store.GetKey(ctx)
+	if err != nil {
+		return []byte{}, ExitError(ExitUnknown, err, "Unable to load key: %s", err)
+	}
+
+	decryptedEncryptionKey := ""
+	if encryptedEncryptionKey != "" {
+		// If encrypted encryption key exists decrypt it
 		var err error
-		valid, err = s.checkPassword(ctx, globalPassword)
-		if err != nil || !valid {
+		decryptedEncryptionKey, err = crypt.DecryptKey(password, encryptedEncryptionKey)
+		if err != nil {
 			return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
 		}
+	} else {
+		// generate new encryption key
+		decryptedEncryptionKey, err = crypt.GenerateKey()
+		if err != nil {
+			return []byte{}, ExitError(ExitUnknown, err, "Unable to generate key: %s", err)
+		}
+		// encrypt and save it
+		encryptedEncryptionKey, err = crypt.EncryptKey(password, decryptedEncryptionKey)
+		if err != nil {
+			return []byte{}, ExitError(ExitUnknown, err, "Unable to store key: %s", err)
+		}
+		s.Store.SetKey(ctx, encryptedEncryptionKey)
 	}
 
 	println()
-	return globalPassword, nil
-}
-
-func (s *Action) checkPassword(ctx context.Context, password []byte) (bool, error) {
-	data, err := s.Store.GetAllItems(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	if len(data) == 0 {
-		return true, nil
-	}
-
-	item, err := s.Store.GetItemByIndex(ctx, 0)
-	if err != nil {
-		return false, err
-	}
-
-	_, err = crypt.AesGcmDecrypt(password, item.Credentials[0].Password)
-	if err != nil {
-		return false, nil
-	}
-
-	return true, nil
+	return []byte(decryptedEncryptionKey), nil
 }
 
 func (s *Action) getSites(ctx context.Context) ([]storage.Item, error) {

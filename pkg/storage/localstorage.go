@@ -9,7 +9,7 @@ import (
 	"path"
 	"sort"
 
-	"github.com/gopasspw/gopass/pkg/config"
+	"passline/pkg/config"
 )
 
 type LocalStorage struct {
@@ -113,6 +113,18 @@ func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 }
 
 func (ls *LocalStorage) SetData(ctx context.Context, data Data) error {
+	ls.setData(data)
+	return nil
+}
+
+func (ls *LocalStorage) GetKey(ctx context.Context) (string, error) {
+	data := ls.getData()
+	return data.Key, nil
+}
+
+func (ls *LocalStorage) SetKey(ctx context.Context, key string) error {
+	data := ls.getData()
+	data.Key = key
 	ls.setData(data)
 	return nil
 }

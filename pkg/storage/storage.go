@@ -18,16 +18,24 @@ type Storage interface {
 	DeleteCredential(context.Context, Item, Credential) error
 	UpdateItem(context.Context, Item) error
 	SetData(context.Context, Data) error
+	GetKey(context.Context) (string, error)
+	SetKey(context.Context, string) error
+}
+
+type Config struct {
+	Key string `json:"key"`
 }
 
 // Data structure
 type Data struct {
+	Key   string `json:"key"`
 	Items []Item `json:"items"`
 }
 
 // Backup structure
 type Backup struct {
 	Date  time.Time `json:"date"`
+	Key   string    `json:"key"`
 	Items []Item    `json:"items"`
 }
 

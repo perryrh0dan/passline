@@ -49,12 +49,21 @@ func (s *Action) backup(ctx context.Context, path string) error {
 		return err
 	}
 
+	key, err := s.Store.GetKey(ctx)
+	if err != nil {
+		return err
+	}
+
 	if !strings.HasSuffix(path, ".json") {
 		path = path + ".json"
 	}
 
 	time := time.Now()
-	data := storage.Backup{Date: time, Items: items}
+	data := storage.Backup{
+		Date:  time,
+		Key:   key,
+		Items: items,
+	}
 
 	file, _ := json.MarshalIndent(data, "", " ")
 	_ = ioutil.WriteFile(path, file, 0644)

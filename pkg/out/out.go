@@ -69,6 +69,11 @@ func SuccessfulUpdated(version string) {
 	d.Printf("Successfully updated to version: %v\n", version)
 }
 
+func SuccessfulChangedPassword() {
+	d := color.New(color.FgGreen)
+	d.Printf("Successfully changed password\n")
+}
+
 // InvalidName error message
 func InvalidName(name string) {
 	fmt.Printf("Unable to find item with name: %s\n", name)
