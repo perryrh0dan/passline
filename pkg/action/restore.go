@@ -27,11 +27,13 @@ func (s *Action) Restore(c *ucli.Context) error {
 		return err
 	}
 
-	message := fmt.Sprintf("Are you sure you want to restore this  backup: %s (y/n): ", path)
-	confirm := input.Confirmation(message)
+	if !ctxutil.HasAlwaysYes(ctx) {
+		message := fmt.Sprintf("Are you sure you want to restore this  backup: %s (y/n): ", path)
+		confirm := input.Confirmation(message)
 
-	if !confirm {
-		return nil
+		if !confirm {
+			return nil
+		}
 	}
 
 	err = s.restore(ctx, path)

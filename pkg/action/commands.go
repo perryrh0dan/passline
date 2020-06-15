@@ -62,6 +62,12 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Action:    s.List,
 		},
 		{
+			Name:    "password",
+			Aliases: []string{"p"},
+			Usage:   "Change master password",
+			Action:  s.Password,
+		},
+		{
 			Name:      "restore",
 			Aliases:   []string{"r"},
 			Usage:     "Restore backup",

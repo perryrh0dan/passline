@@ -5,7 +5,7 @@ import (
 )
 
 var decryptedText string = "Hallo Perry"
-var encryptedText string
+var encryptedText string = "iY__LhvawdPwCjP43cApeRPPAbMhFHtR4oDLcPnKjXxLwSMkGQsw"
 
 func TestEncrypt(t *testing.T) {
 	var err error
@@ -22,24 +22,9 @@ func TestDecrypt(t *testing.T) {
 	}
 }
 
-func TestGeneratePassword(t *testing.T) {
-	password, err := GeneratePassword(&GeneratorOptions{Length: 20})
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(password) != 20 {
-		t.Errorf("GeneratePassword() = %s; wanted length %v", password, len(password))
-	}
-}
-
-func TestGeneratePasswordWithCustomLength(t *testing.T) {
-	password, err := GeneratePassword(&GeneratorOptions{Length: 10})
-	if err != nil {
-		t.Error(err)
-	}
-
-	if len(password) != 10 {
-		t.Errorf("GeneratePassword() = %s; wanted length %v", password, len(password))
+func TestGenerateKey(t *testing.T) {
+	got, err := GenerateKey()
+	if err != nil || len(got) != 32 {
+		t.Errorf("GenerateKey() = length %d; wanted length %d", len(got), 32)
 	}
 }

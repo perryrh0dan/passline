@@ -8,8 +8,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	random "math/rand"
-	"time"
 
 	"passline/pkg/storage"
 
@@ -21,23 +19,12 @@ type GeneratorOptions struct {
 }
 
 func DecryptCredential(credential *storage.Credential, globalPassword []byte) error {
-	err := DecryptPassword(credential, globalPassword)
+	err := decryptPassword(credential, globalPassword)
 	if err != nil {
 		return err
 	}
 
-	err = DecryptRecoveryCodes(credential, globalPassword)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DecryptPassword(credential *storage.Credential, globalPassword []byte) error {
-	// Decrypt passwords
-	var err error
-	credential.Password, err = AesGcmDecrypt(globalPassword, credential.Password)
+	err = decryptRecoveryCodes(credential, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -45,27 +32,13 @@ func DecryptPassword(credential *storage.Credential, globalPassword []byte) erro
 	return nil
 }
 
-func DecryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
-	var decryptedRecoveryCodes = make([]string, 0)
-	for _, c := range credential.RecoveryCodes {
-		decryptedRecoveryCode, err := AesGcmDecrypt(globalPassword, c)
-		if err != nil {
-			return err
-		}
-		decryptedRecoveryCodes = append(decryptedRecoveryCodes, decryptedRecoveryCode)
-	}
-
-	credential.RecoveryCodes = decryptedRecoveryCodes
-	return nil
-}
-
-func EncryptCredential(credential *storage.Credential, globalPassword []byte) error {
-	err := EncryptPassword(credential, globalPassword)
+func EncryptCredential(credential *storage.Credential, key []byte) error {
+	err := encryptPassword(credential, key)
 	if err != nil {
 		return err
 	}
 
-	err = EncryptRecoveryCodes(credential, globalPassword)
+	err = encryptRecoveryCodes(credential, key)
 	if err != nil {
 		return err
 	}
@@ -73,35 +46,26 @@ func EncryptCredential(credential *storage.Credential, globalPassword []byte) er
 	return nil
 }
 
-func EncryptPassword(credential *storage.Credential, globalPassword []byte) error {
-	var err error
-	credential.Password, err = AesGcmEncrypt(globalPassword, credential.Password)
+func EncryptKey(password []byte, key string) (string, error) {
+	pwKey := GetKey(password)
+	encryptedKey, err := AesGcmEncrypt(pwKey, key)
 	if err != nil {
-		return err
+		return "", err
 	}
-
-	return nil
+	return encryptedKey, nil
 }
 
-func EncryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
-	var encryptedRecoveryCodes = make([]string, 0)
-
-	for _, c := range credential.RecoveryCodes {
-		encryptedRecoveryCode, err := AesGcmEncrypt(globalPassword, c)
-		if err != nil {
-			return err
-		}
-		encryptedRecoveryCodes = append(encryptedRecoveryCodes, encryptedRecoveryCode)
+func DecryptKey(password []byte, encryptedKey string) (string, error) {
+	pwKey := GetKey(password)
+	key, err := AesGcmDecrypt(pwKey, encryptedKey)
+	if err != nil {
+		return "", err
 	}
-
-	credential.RecoveryCodes = encryptedRecoveryCodes
-	return nil
+	return key, nil
 }
 
 // AesGcmEncrypt takes an encryption key and a plaintext string and encrypts it with AES256 in GCM mode, which provides authenticated encryption. Returns the ciphertext and the used nonce.
-func AesGcmEncrypt(password []byte, text string) (string, error) {
-	// Generate key from password with kdf
-	key := GenerateKey(password)
+func AesGcmEncrypt(key []byte, text string) (string, error) {
 	plaintextBytes := []byte(text)
 
 	// Creation of the new block cipher based on the key
@@ -130,10 +94,7 @@ func AesGcmEncrypt(password []byte, text string) (string, error) {
 }
 
 // AesGcmDecrypt takes an decryption key, a ciphertext and the corresponding nonce and decrypts it with AES256 in GCM mode. Returns the plaintext string.
-func AesGcmDecrypt(password []byte, cryptoText string) (string, error) {
-	// Generate key from password with kdf
-	key := GenerateKey(password)
-
+func AesGcmDecrypt(key []byte, cryptoText string) (string, error) {
 	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
 
 	block, err := aes.NewCipher(key)
@@ -156,42 +117,67 @@ func AesGcmDecrypt(password []byte, cryptoText string) (string, error) {
 	return fmt.Sprintf("%s", plaintextBytes), nil
 }
 
-func GenerateKey(password []byte) []byte {
+func GetKey(password []byte) []byte {
 	salt := []byte("This is the salt")
 	dk := pbkdf2.Key(password, salt, 4096, 32, sha1.New)
 	return dk
 }
 
-func GeneratePassword(options *GeneratorOptions) (string, error) {
-	lowercase := []rune("abcdefghijklmnopqrstuvwxyz")
-	uppercase := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	numbers := []rune("0123456789")
-	symbols := []rune("!$%&()/?")
-	all := append(lowercase, uppercase...)
-	all = append(all, numbers...)
-	all = append(all, symbols...)
-	random.Seed(time.Now().UnixNano())
-	var a = []rune{}
-
-	// get the requirements
-	a = append(a, lowercase[random.Intn(len(lowercase))])
-	a = append(a, uppercase[random.Intn(len(uppercase))])
-	a = append(a, numbers[random.Intn(len(numbers))])
-	a = append(a, symbols[random.Intn(len(symbols))])
-
-	// populate the rest with random chars
-	for i := 0; i < options.Length-4; i++ {
-		a = append(a, all[random.Intn(len(all))])
+func GenerateKey() (string, error) {
+	key := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, key); err != nil {
+		return "", err
 	}
 
-	// shuffle up
-	for i := 0; i < options.Length; i++ {
-		randomPosition := random.Intn(options.Length)
-		temp := a[i]
-		a[i] = a[randomPosition]
-		a[randomPosition] = temp
+	return string(key), nil
+}
+
+func encryptPassword(credential *storage.Credential, key []byte) error {
+	var err error
+	credential.Password, err = AesGcmEncrypt(key, credential.Password)
+	if err != nil {
+		return err
 	}
 
-	password := string(a)
-	return password, nil
+	return nil
+}
+
+func encryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
+	var encryptedRecoveryCodes = make([]string, 0)
+
+	for _, c := range credential.RecoveryCodes {
+		encryptedRecoveryCode, err := AesGcmEncrypt(globalPassword, c)
+		if err != nil {
+			return err
+		}
+		encryptedRecoveryCodes = append(encryptedRecoveryCodes, encryptedRecoveryCode)
+	}
+
+	credential.RecoveryCodes = encryptedRecoveryCodes
+	return nil
+}
+
+func decryptPassword(credential *storage.Credential, globalPassword []byte) error {
+	// Decrypt passwords
+	var err error
+	credential.Password, err = AesGcmDecrypt(globalPassword, credential.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
+	var decryptedRecoveryCodes = make([]string, 0)
+	for _, c := range credential.RecoveryCodes {
+		decryptedRecoveryCode, err := AesGcmDecrypt(globalPassword, c)
+		if err != nil {
+			return err
+		}
+		decryptedRecoveryCodes = append(decryptedRecoveryCodes, decryptedRecoveryCode)
+	}
+
+	credential.RecoveryCodes = decryptedRecoveryCodes
+	return nil
 }

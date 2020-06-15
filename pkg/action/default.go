@@ -43,7 +43,7 @@ func (s *Action) Default(c *ucli.Context) error {
 	}
 
 	// get and check global password
-	globalPassword, err := s.getGlobalPassword(ctx)
+	globalPassword, err := s.getMasterKey(ctx)
 	if err != nil {
 		return err
 	}

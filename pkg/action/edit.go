@@ -48,7 +48,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 	selectedUsername := credential.Username
 
 	// get and check global password
-	globalPassword, err := s.getGlobalPassword(ctx)
+	globalPassword, err := s.getMasterKey(ctx)
 	if err != nil {
 		return err
 	}

@@ -63,6 +63,10 @@ WEBSITE:
 			Aliases: []string{"p"},
 			Usage:   "Print the generated password to the terminal",
 		},
+		&ucli.BoolFlag{
+			Name:  "yes",
+			Usage: "Assume yes on all yes/no questions or use the default on all others",
+		},
 	}
 
 	app.Commands = action.GetCommands()
