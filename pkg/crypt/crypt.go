@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 
@@ -68,6 +69,10 @@ func DecryptKey(password []byte, encryptedKey string) (string, error) {
 func AesGcmEncrypt(key []byte, text string) (string, error) {
 	plaintextBytes := []byte(text)
 
+	if len(key) != 32 {
+		return "", errors.New("Wrong key length")
+	}
+
 	// Creation of the new block cipher based on the key
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -97,6 +102,10 @@ func AesGcmEncrypt(key []byte, text string) (string, error) {
 func AesGcmDecrypt(key []byte, cryptoText string) (string, error) {
 	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
 
+	if len(key) != 32 {
+		return "", errors.New("Wrong key length")
+	}
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
@@ -121,15 +130,6 @@ func GetKey(password []byte) []byte {
 	salt := []byte("This is the salt")
 	dk := pbkdf2.Key(password, salt, 4096, 32, sha1.New)
 	return dk
-}
-
-func GenerateKey() (string, error) {
-	key := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, key); err != nil {
-		return "", err
-	}
-
-	return string(key), nil
 }
 
 func encryptPassword(credential *storage.Credential, key []byte) error {

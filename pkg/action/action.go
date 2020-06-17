@@ -2,6 +2,7 @@ package action
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -66,37 +67,54 @@ func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item stor
 }
 
 func (s *Action) getMasterKey(ctx context.Context) ([]byte, error) {
-	password := input.Password("Enter master password: ")
-
 	// Get encrypted content encryption key from store
 	encryptedEncryptionKey, err := s.Store.GetKey(ctx)
 	if err != nil {
 		return []byte{}, ExitError(ExitUnknown, err, "Unable to load key: %s", err)
 	}
 
-	decryptedEncryptionKey := ""
 	if encryptedEncryptionKey != "" {
 		// If encrypted encryption key exists decrypt it
-		var err error
-		decryptedEncryptionKey, err = crypt.DecryptKey(password, encryptedEncryptionKey)
+		password := input.Password("Enter master password: ")
+		fmt.Println()
+
+		encryptionKey, err := crypt.DecryptKey(password, encryptedEncryptionKey)
 		if err != nil {
 			return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
 		}
+		return []byte(encryptionKey), nil
 	} else {
-		// generate new encryption key
-		decryptedEncryptionKey, err = crypt.GenerateKey()
+		// initiate new encryption key
+		encryptionKey, err := s.initMasterKey(ctx)
 		if err != nil {
-			return []byte{}, ExitError(ExitUnknown, err, "Unable to generate key: %s", err)
+			return nil, err
 		}
-		// encrypt and save it
-		encryptedEncryptionKey, err = crypt.EncryptKey(password, decryptedEncryptionKey)
-		if err != nil {
-			return []byte{}, ExitError(ExitUnknown, err, "Unable to store key: %s", err)
-		}
-		s.Store.SetKey(ctx, encryptedEncryptionKey)
+
+		return encryptionKey, nil
+	}
+}
+
+func (s *Action) initMasterKey(ctx context.Context) ([]byte, error) {
+	decryptedEncryptionKey, err := crypt.GenerateKey()
+	if err != nil {
+		return []byte{}, ExitError(ExitUnknown, err, "Unable to generate key: %s", err)
 	}
 
-	println()
+	password := input.Password("Enter master password: ")
+	fmt.Println()
+	passwordTwo := input.Password("Enter master password again: ")
+	fmt.Println()
+
+	if string(password) != string(passwordTwo) {
+		return []byte{}, ExitError(ExitPassword, err, "Password do not match")
+	}
+
+	encryptedEncryptionKey, err := crypt.EncryptKey(password, decryptedEncryptionKey)
+	if err != nil {
+		return []byte{}, ExitError(ExitUnknown, err, "Unable to store key: %s", err)
+	}
+	s.Store.SetKey(ctx, encryptedEncryptionKey)
+
 	return []byte(decryptedEncryptionKey), nil
 }
 
