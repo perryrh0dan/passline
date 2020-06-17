@@ -48,6 +48,7 @@ func Default(message string, items []string) (int, error) {
 		case keyboard.KeyEsc:
 			open = false
 		case keyboard.KeyCtrlC:
+			selected = -1
 			open = false
 		case keyboard.KeyEnter:
 			selected = list.Index()
