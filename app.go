@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"runtime"
 	"sort"
 
 	ap "passline/pkg/action"
@@ -12,7 +11,6 @@ import (
 	"passline/pkg/ctxutil"
 
 	"github.com/blang/semver"
-	"github.com/fatih/color"
 	ucli "github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -81,15 +79,8 @@ func initContext(ctx context.Context, cfg *config.Config) context.Context {
 	// initialize from config, may be overridden by env vars
 	ctx = cfg.WithContext(ctx)
 
-	// support for no-color.org
-	if nc := os.Getenv("NO_COLOR"); nc != "" {
-		color.NoColor = true
-		ctx = ctxutil.WithColor(ctx, false)
-	}
-
 	// only emit color codes when stdout is a terminal
 	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
-		color.NoColor = true
 		ctx = ctxutil.WithColor(ctx, false)
 		ctx = ctxutil.WithTerminal(ctx, false)
 		ctx = ctxutil.WithInteractive(ctx, false)
@@ -99,14 +90,6 @@ func initContext(ctx context.Context, cfg *config.Config) context.Context {
 	if info, err := os.Stdin.Stat(); err == nil && info.Mode()&os.ModeCharDevice == 0 {
 		ctx = ctxutil.WithInteractive(ctx, false)
 		ctx = ctxutil.WithStdin(ctx, true)
-	}
-
-	// disable colored output on windows since cmd.exe doesn't support ANSI color
-	// codes. Other terminal may do, but until we can figure that out better
-	// disable this for all terms on this platform
-	if runtime.GOOS == "windows" {
-		color.NoColor = true
-		ctx = ctxutil.WithColor(ctx, false)
 	}
 
 	return ctx
