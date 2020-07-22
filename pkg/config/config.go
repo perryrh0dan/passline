@@ -22,7 +22,6 @@ type Config struct {
 	Storage       string `yaml:"storage"`
 	AutoClip      bool   `yaml:"autoclip"`
 	Notifications bool   `yaml:"notifications"`
-	NoColor       bool   `yaml:"nocolor"`
 }
 
 func init() {
@@ -82,7 +81,6 @@ func new() Config {
 		Storage:       "local",
 		AutoClip:      true,
 		Notifications: true,
-		NoColor:       false,
 	}
 }
 
