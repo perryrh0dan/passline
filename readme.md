@@ -154,6 +154,11 @@ VS-Code settings
 
 GOOS=windows GOARCH=amd64 go build
 
+### Icon
+
+Icon is stored under notify/icon.go in dec.
+Use this [tool](https://tomeko.net/online_tools/file_to_hex.php?lang=en) to easy convert file to hex and then to dec.
+
 ## Team
 
 - Thomas Pöhlmann [(@perryrh0dan)](https://github.com/perryrh0dan)
