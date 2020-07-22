@@ -75,14 +75,23 @@ func (s *Action) getMasterKey(ctx context.Context) ([]byte, error) {
 
 	if encryptedEncryptionKey != "" {
 		// If encrypted encryption key exists decrypt it
-		password := input.Password("Enter master password: ")
-		fmt.Println()
+		// try password three times
+		counter := 0
+		for counter < 3 {
+			password := input.Password("Enter master password: ")
+			fmt.Println()
 
-		encryptionKey, err := crypt.DecryptKey(password, encryptedEncryptionKey)
-		if err != nil {
-			return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
+			encryptionKey, err := crypt.DecryptKey(password, encryptedEncryptionKey)
+			if err == nil {
+				return []byte(encryptionKey), nil
+			} else if counter != 2 {
+				fmt.Println("Wrong password! Please try again")
+			}
+
+			counter += 1
 		}
-		return []byte(encryptionKey), nil
+
+		return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
 	} else {
 		// initiate new encryption key
 		encryptionKey, err := s.initMasterKey(ctx)
