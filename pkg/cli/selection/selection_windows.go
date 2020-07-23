@@ -81,8 +81,7 @@ func printList(list *list.List) {
 			fmt.Println(text)
 		} else {
 			d := color.New(color.FgGreen)
-			text := d.Sprintf("[x] %s", item)
-			fmt.Println(text)
+			d.Printf("[x] %s\n", item)
 		}
 	}
 }
