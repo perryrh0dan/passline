@@ -37,17 +37,19 @@ func Notify(ctx context.Context, subj, msg string) error {
 	}
 
 	if isWindows10 {
-		return sendBaloon(subj, msg)
-	} else {
 		return sendToast(subj, msg)
+	} else {
+		return sendBaloon(subj, msg)
 	}
 }
 
 func sendToast(subj, msg string) error {
 	notification := toast.Notification{
-		AppID:   "Passline",
-		Title:   subj,
-		Message: msg,
+		AppID:    "Passline",
+		Title:    subj,
+		Message:  msg,
+		Icon:     iconURI(),
+		Duration: "short",
 	}
 	return notification.Push()
 }
