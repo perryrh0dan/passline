@@ -40,7 +40,7 @@ func CopyTo(ctx context.Context, name string, content []byte) error {
 	}
 
 	// out.Print(ctx, "✔ Copied %s to clipboard. Will clear in %d seconds.", color.YellowString(name), ctxutil.GetClipTimeout(ctx))
-	_ = notify.Notify(ctx, "passline - clipboard", fmt.Sprintf("✔ Copied %s to clipboard. Will clear in %d seconds.", name, ctxutil.GetClipTimeout(ctx)))
+	_ = notify.Notify(ctx, "passline - clipboard", fmt.Sprintf("Copied %s to clipboard. Will clear in %d seconds.", name, ctxutil.GetClipTimeout(ctx)))
 	return nil
 }
 
