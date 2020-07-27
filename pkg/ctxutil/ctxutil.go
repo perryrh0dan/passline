@@ -21,7 +21,7 @@ const (
 	ctxKeyAutoClip
 	ctxKeyNotifications
 	ctxKeyForce
-	ctxKeyUsername
+	ctxKeyDefaultUsername
 	ctxKeyEmail
 	ctxKeyAdvanced
 )
@@ -226,7 +226,7 @@ func IsNotifications(ctx context.Context) bool {
 	return is(ctx, ctxKeyNotifications, true)
 }
 
-// withAdvanced returns a context with the value for Advanced set
+// WithAdvanced returns a context with the value for Advanced set
 func WithAdvanced(ctx context.Context, advanced bool) context.Context {
 	return context.WithValue(ctx, ctxKeyAdvanced, advanced)
 }
@@ -272,13 +272,13 @@ func IsForce(ctx context.Context) bool {
 }
 
 // WithUsername returns a context with the username set in the context
-func WithUsername(ctx context.Context, sv string) context.Context {
-	return context.WithValue(ctx, ctxKeyUsername, sv)
+func WithDefaultUsername(ctx context.Context, sv string) context.Context {
+	return context.WithValue(ctx, ctxKeyDefaultUsername, sv)
 }
 
 // GetUsername returns the username from the context
-func GetUsername(ctx context.Context) string {
-	sv, ok := ctx.Value(ctxKeyUsername).(string)
+func GetDefaultUsername(ctx context.Context) string {
+	sv, ok := ctx.Value(ctxKeyDefaultUsername).(string)
 	if !ok {
 		return ""
 	}

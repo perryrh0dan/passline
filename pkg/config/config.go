@@ -19,9 +19,10 @@ var (
 )
 
 type Config struct {
-	Storage       string `yaml:"storage"`
-	AutoClip      bool   `yaml:"autoclip"`
-	Notifications bool   `yaml:"notifications"`
+	Storage         string `yaml:"storage"`
+	AutoClip        bool   `yaml:"autoclip"`
+	Notifications   bool   `yaml:"notifications"`
+	DefaultUsername string `yaml:"defaultUsername"`
 }
 
 func init() {
