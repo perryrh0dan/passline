@@ -44,7 +44,8 @@ func (s *Action) Delete(c *ucli.Context) error {
 		return err
 	}
 
-	message := fmt.Sprintf("Are you sure you want to delete this item: %s (y/n): ", credential.Username)
+	identifier := out.BuildIdentifier(item.Name, credential.Username)
+	message := fmt.Sprintf("Are you sure you want to delete this item: %s (y/n): ", identifier)
 	confirm := input.Confirmation(message)
 	if !confirm {
 		return nil

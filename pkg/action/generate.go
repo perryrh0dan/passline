@@ -44,13 +44,16 @@ func (s *Action) Generate(c *ucli.Context) error {
 		return ExitError(ExitUnknown, err, "Failed to read input: %s", err)
 	}
 
+	// Load default user
+	defaultUsername := ctxutil.GetDefaultUsername(ctx)
+
 	// User input username
-	username, err := input.ArgOrInput(args, 1, "Username/Login", "")
+	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername)
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Failed to read input: %s", err)
 	}
 
-	// Check if name, username combination exists
+	// Check if name, use)rname combination exists
 	exists := s.exists(ctx, name, username)
 	if exists {
 		identifier := out.BuildIdentifier(name, username)

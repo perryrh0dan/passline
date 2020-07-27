@@ -14,6 +14,9 @@ func (c *Config) WithContext(ctx context.Context) context.Context {
 	if !ctxutil.HasNotifications(ctx) {
 		ctx = ctxutil.WithNotifications(ctx, c.Notifications)
 	}
+	if ctxutil.GetDefaultUsername(ctx) == "" {
+		ctx = ctxutil.WithDefaultUsername(ctx, c.DefaultUsername)
+	}
 
 	return ctx
 }
