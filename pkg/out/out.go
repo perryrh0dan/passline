@@ -54,6 +54,12 @@ func SuccessfulDeletedItem(name, username string) {
 	d.Printf("Successful deleted item: %s\n", identifier)
 }
 
+func SuccessfulAddedItem(name, username string) {
+	identifier := color.YellowString(BuildIdentifier(name, username))
+	d := color.New(color.FgGreen)
+	d.Printf("Successful added item: %s\n", identifier)
+}
+
 func SuccessfulCreatedBackup(path string) {
 	d := color.New(color.FgGreen)
 	d.Printf("Successful created backup: %s\n", path)
