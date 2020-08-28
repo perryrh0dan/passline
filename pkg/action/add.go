@@ -72,6 +72,10 @@ func (s *Action) Add(c *ucli.Context) error {
 
 	credential.Password = password
 
-	out.DisplayCredential(credential)
+	out.SuccessfulAddedItem(name, credential.Username)
+	if c.Bool("print") {
+		out.DisplayCredential(credential)
+	}
+
 	return nil
 }
