@@ -64,6 +64,8 @@ func Default(message string, items []string) (int, error) {
 	}
 
 	clearScreen(list)
+	// If we remove this line also the url selection gets cleared
+	ansi.CursorDown(1)
 	return selected, nil
 }
 
