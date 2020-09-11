@@ -5,7 +5,7 @@ import (
 )
 
 func TestGeneratePassword(t *testing.T) {
-	password, err := GeneratePassword(&GeneratorOptions{Length: 20})
+	password, err := GeneratePassword(&Options{Length: 20})
 	if err != nil {
 		t.Error(err)
 	}
@@ -16,7 +16,7 @@ func TestGeneratePassword(t *testing.T) {
 }
 
 func TestGeneratePasswordWithCustomLength(t *testing.T) {
-	password, err := GeneratePassword(&GeneratorOptions{Length: 10})
+	password, err := GeneratePassword(&Options{Length: 10})
 	if err != nil {
 		t.Error(err)
 	}

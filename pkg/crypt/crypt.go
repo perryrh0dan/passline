@@ -15,8 +15,20 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-type GeneratorOptions struct {
-	Length int
+type Options struct {
+	Length            int
+	IncludeSymbols    bool
+	IncludeNumbers    bool
+	IncludeCharacters bool
+}
+
+func DefaultOptions() Options {
+	return Options{
+		Length:            20,
+		IncludeCharacters: true,
+		IncludeNumbers:    true,
+		IncludeSymbols:    true,
+	}
 }
 
 func DecryptCredential(credential *storage.Credential, globalPassword []byte) error {

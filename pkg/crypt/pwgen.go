@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func GeneratePassword(options *GeneratorOptions) (string, error) {
+func GeneratePassword(options *Options) (string, error) {
 	lowercase := []rune("abcdefghijklmnopqrstuvwxyz")
 	uppercase := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	numbers := []rune("0123456789")
