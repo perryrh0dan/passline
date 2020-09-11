@@ -9,17 +9,21 @@ import (
 	"strings"
 	"syscall"
 
+	"passline/pkg/out"
+
 	"github.com/blang/semver"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 const (
 	name = "passline"
+	repo = "perryrh0dan/passline"
 )
 
 var (
 	// Version is the released version of passline
-	version string = "1.3.2"
+	version string = "1.3.3"
 	// BuildTime is the time the binary was built
 	date string
 )
@@ -51,6 +55,12 @@ func main() {
 	}()
 
 	sv := getVersion()
+
+	// check for updates
+	latest, found, _ := selfupdate.DetectLatest(repo)
+	if found && !latest.Version.Equals(sv) {
+		out.UpdateFound()
+	}
 
 	ctx, app := setupApp(ctx, sv)
 	if err := app.RunContext(ctx, os.Args); err != nil {
