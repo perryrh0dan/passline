@@ -212,8 +212,8 @@ func IsVerbose(ctx context.Context) bool {
 }
 
 // WithNotifications returns a context with the value for Notifications set
-func WithNotifications(ctx context.Context, verbose bool) context.Context {
-	return context.WithValue(ctx, ctxKeyNotifications, verbose)
+func WithNotifications(ctx context.Context, notification bool) context.Context {
+	return context.WithValue(ctx, ctxKeyNotifications, notification)
 }
 
 // HasNotifications returns true if a value for Notifications has been set in this context
@@ -236,7 +236,7 @@ func HasAdvanced(ctx context.Context) bool {
 	return hasBool(ctx, ctxKeyAdvanced)
 }
 
-// IsAdvanced returns the value of Advanced or the default (true)
+// IsAdvanced returns the value of Advanced or the default (false)
 func IsAdvanced(ctx context.Context) bool {
 	return is(ctx, ctxKeyAdvanced, false)
 }
@@ -271,12 +271,16 @@ func IsForce(ctx context.Context) bool {
 	return is(ctx, ctxKeyForce, false)
 }
 
-// WithUsername returns a context with the username set in the context
-func WithDefaultUsername(ctx context.Context, sv string) context.Context {
-	return context.WithValue(ctx, ctxKeyDefaultUsername, sv)
+// WithDefaultUsername returns a context with the username set in the context
+func WithDefaultUsername(ctx context.Context, username string) context.Context {
+	return context.WithValue(ctx, ctxKeyDefaultUsername, username)
 }
 
-// GetUsername returns the username from the context
+func HasDefaultUsername(ctx context.Context) bool {
+	return hasString(ctx, ctxKeyDefaultUsername)
+}
+
+// GetDefaultUsername returns the username from the context
 func GetDefaultUsername(ctx context.Context) string {
 	sv, ok := ctx.Value(ctxKeyDefaultUsername).(string)
 	if !ok {
