@@ -90,6 +90,11 @@ func (s *Action) Generate(c *ucli.Context) error {
 		}
 	}
 
+	if !options.Validate() {
+		out.InvalidGeneratorOptions()
+		return nil
+	}
+
 	password, err := crypt.GeneratePassword(&options)
 	if err != nil {
 		return err

@@ -22,6 +22,13 @@ type Options struct {
 	IncludeCharacters bool
 }
 
+func (options *Options) Validate() bool {
+	if options.IncludeCharacters || options.IncludeNumbers || options.IncludeSymbols {
+		return true
+	}
+	return false
+}
+
 func DefaultOptions() Options {
 	return Options{
 		Length:            20,
