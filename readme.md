@@ -31,6 +31,8 @@ By utilizing a simple and minimal usage syntax, that requires a flat leaning cur
 
 Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob/master/contributing.md#translating-documentation) to learn more on how to translate this document into more languages.
 
+Come over to [Gitter](https://gitter.im/perryrh0danpassline/community?source=orgpage) or [Twitter](https://twitter.com/perryrh0dan1) to share your thoughts on the project.
+
 ## Highlights
 
 - Multiple storage modules (local, firestore)
