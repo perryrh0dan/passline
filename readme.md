@@ -21,7 +21,7 @@
       <img src="https://api.codeclimate.com/v1/badges/83561b59422e2492f9db/maintainability" />
    </a>
    <a href="https://gitter.im/perryrh0danpassline/community">
-      <img alt="Build Status" src="https://badges.gitter.im/taskline/community.svg" />
+      <img alt="Build Status" src="https://badges.gitter.im/community.svg" />
    </a>
 </div>
 
