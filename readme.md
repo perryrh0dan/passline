@@ -21,7 +21,7 @@
       <img src="https://api.codeclimate.com/v1/badges/83561b59422e2492f9db/maintainability" />
    </a>
    <a href="https://gitter.im/perryrh0danpassline/community">
-      <img alt="Build Status" src="https://badges.gitter.im/taskline/community.svg" />
+      <img alt="Build Status" src="https://badges.gitter.im/community.svg" />
    </a>
 </div>
 
@@ -30,6 +30,8 @@
 By utilizing a simple and minimal usage syntax, that requires a flat leaning curve, Passline enables you to effectively manage you password accross multiple devices within your terminal. All Password are stored AES-256 encrypted and can only be encrypted with a your global password. Currently data can be stored localy on your computer or in your own firebase database.
 
 Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob/master/contributing.md#translating-documentation) to learn more on how to translate this document into more languages.
+
+Come over to [Gitter](https://gitter.im/perryrh0danpassline/community?source=orgpage) or [Twitter](https://twitter.com/perryrh0dan1) to share your thoughts on the project.
 
 ## Highlights
 
