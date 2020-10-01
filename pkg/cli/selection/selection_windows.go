@@ -43,8 +43,10 @@ func Default(message string, items []string) (int, error) {
 		update := false
 		switch key {
 		case keyboard.KeyEsc:
+			selected = -1
 			open = false
 		case keyboard.KeyCtrlC:
+			selected = -1
 			open = false
 		case keyboard.KeyEnter:
 			selected = list.Index()
