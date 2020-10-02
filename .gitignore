@@ -6,6 +6,7 @@
 *.dylib
 /passline
 /passline-*
+/main
 
 
 # Test binary, build with `go test -c`
@@ -27,7 +28,7 @@ coverage.txt
 
 # builds
 dist/
-passline*
+/passline*
 
 # travis
 bin/
