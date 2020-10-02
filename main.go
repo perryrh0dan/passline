@@ -58,8 +58,8 @@ func main() {
 
 	// check for updates
 	latest, found, _ := selfupdate.DetectLatest(repo)
-	if found && !latest.Version.Equals(sv) {
-		out.UpdateFound()
+	if found && latest.Version.GT(sv) {
+		out.UpdateFound(sv, latest.Version)
 	}
 
 	ctx, app := setupApp(ctx, sv)
