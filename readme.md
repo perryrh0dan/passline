@@ -154,7 +154,15 @@ VS-Code settings
 
 ### Build
 
+``` bash
 GOOS=windows GOARCH=amd64 go build
+```
+
+### Test
+
+``` bash
+go test ./...
+```
 
 ### Icon
 
