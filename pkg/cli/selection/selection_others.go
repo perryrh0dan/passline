@@ -90,7 +90,26 @@ func printList(list *list.List, sb *screenbuf.ScreenBuf) {
 		}
 	}
 
+	printFooter(list, sb)
+
 	sb.Flush()
+}
+
+func printFooter(list *list.List, sb *screenbuf.ScreenBuf) {
+	var from = list.Start() + 1
+	var size = list.Size()
+	var length = list.Length()
+
+	var to int
+	if size < length {
+		to = list.Start() + size
+	} else {
+		to = length
+	}
+
+	text := fmt.Sprintf("Items %d - %d of %d", from, to, length)
+	sb.WriteString("")
+	sb.WriteString(text)
 }
 
 func clearScreen(sb *screenbuf.ScreenBuf) {
