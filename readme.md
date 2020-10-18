@@ -88,17 +88,19 @@ DESCRIPTION:
 COMMANDS:
    add, a       Add an existing password for a website
    backup, b    Create a backup
-   generate, g  Generate a password for an item
    delete, d    Delete an item
    edit, e      Edit an item
+   generate, g  Generate a password for an item
    list, ls     List all items
+   password, p  Change master password
    restore, r   Restore a backup
    update, u    Update to the newest release
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --help, -h     show help
-   --version, -v  print the version
+   -- print, -p   Display password on the terminal (default: false)
+   --help, -h     show help (default: false)
+   --version, -v  print the version (default: false)
 
 WEBSITE:
    https://github.com/perryrh0dan/passline
@@ -154,7 +156,15 @@ VS-Code settings
 
 ### Build
 
+``` bash
 GOOS=windows GOARCH=amd64 go build
+```
+
+### Test
+
+``` bash
+go test ./...
+```
 
 ### Icon
 

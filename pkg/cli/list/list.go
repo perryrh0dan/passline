@@ -232,3 +232,13 @@ func (l *List) Items() ([]interface{}, int) {
 
 	return result, active
 }
+
+// Size returns the visible size of the list
+func (l *List) Size() int {
+	return l.size
+}
+
+// Length return length of list
+func (l *List) Length() int {
+	return len(l.items)
+}
