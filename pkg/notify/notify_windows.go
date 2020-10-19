@@ -38,9 +38,9 @@ func Notify(ctx context.Context, subj, msg string) error {
 
 	if isWindows10 {
 		return sendToast(subj, msg)
-	} else {
-		return sendBaloon(subj, msg)
 	}
+
+	return sendBaloon(subj, msg)
 }
 
 func sendToast(subj, msg string) error {
