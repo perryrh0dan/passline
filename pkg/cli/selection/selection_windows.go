@@ -88,13 +88,37 @@ func printList(list *list.List) {
 			d.Printf("[x] %s\n", item)
 		}
 	}
+
+	printFooter(list)
+}
+
+func printFooter(list *list.List) {
+	var from = list.Start() + 1
+	var size = list.Size()
+	var length = list.Length()
+
+	var to int
+	if size < length {
+		to = list.Start() + size
+	} else {
+		to = length
+	}
+
+	text := fmt.Sprintf("Items %d - %d of %d", from, to, length)
+	fmt.Println()
+	fmt.Println(text)
 }
 
 func clearScreen(list *list.List) {
 	values, _ := list.Items()
 
+	// Clear list items
 	for i := 1; i <= len(values); i++ {
 		ansi.CursorUp(1)
 		ansi.EraseInLine(3)
 	}
+
+	// Clear Footer
+	ansi.CursorUp(2)
+	ansi.EraseInLine(3)
 }
