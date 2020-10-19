@@ -17,30 +17,28 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 	// if input is no item name use as filter
 	if util.ArrayContains(items, userInput) {
 		return userInput, nil
-	} else {
-		items = util.FilterArray(items, userInput)
-		if len(items) == 0 {
-			return "", errors.New("Not found")
-		}
+	}
+	items = util.FilterArray(items, userInput)
+	if len(items) == 0 {
+		return "", errors.New("Not found")
 	}
 
 	if len(items) == 1 {
 		fmt.Printf("Selected %s: %s\n", message, items[0])
 		return items[0], nil
-	} else {
-		message := fmt.Sprintf("Please select a %s: ", message)
-		selection, err := Default(message, items)
-		if err != nil {
-			return "", err
-		}
-
-		if selection == -1 {
-			return "", errors.New("Canceled selection")
-		}
-
-		terminal.MoveCursorUp(1)
-		terminal.ClearLines(1)
-		fmt.Printf("%s%s\n", message, items[selection])
-		return items[selection], nil
 	}
+	message = fmt.Sprintf("Please select a %s: ", message)
+	selection, err := Default(message, items)
+	if err != nil {
+		return "", err
+	}
+
+	if selection == -1 {
+		return "", errors.New("Canceled selection")
+	}
+
+	terminal.MoveCursorUp(1)
+	terminal.ClearLines(1)
+	fmt.Printf("%s%s\n", message, items[selection])
+	return items[selection], nil
 }
