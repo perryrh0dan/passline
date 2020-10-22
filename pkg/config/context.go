@@ -5,7 +5,7 @@ import (
 	"passline/pkg/ctxutil"
 )
 
-// WithContext returns a context with all config options set for this store
+// WithContext returns a context with all config options set
 // config, if they have not been already set in the context
 func (c *Config) WithContext(ctx context.Context) context.Context {
 	if !ctxutil.HasAutoClip(ctx) {
@@ -16,6 +16,9 @@ func (c *Config) WithContext(ctx context.Context) context.Context {
 	}
 	if !ctxutil.HasDefaultUsername(ctx) {
 		ctx = ctxutil.WithDefaultUsername(ctx, c.DefaultUsername)
+	}
+	if !ctxutil.HasQuickSelect(ctx) {
+		ctx = ctxutil.WithQuickSelect(ctx, c.QuickSelect)
 	}
 
 	return ctx

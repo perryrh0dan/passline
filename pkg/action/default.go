@@ -42,6 +42,13 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
+	// quick select
+	if ctxutil.IsQuickSelect(ctx) {
+		if err = clipboard.CopyTo(ctx, "Username", []byte(credential.Username)); err != nil {
+			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
+		}
+	}
+
 	// get and check global password
 	globalPassword, err := s.getMasterKey(ctx)
 	if err != nil {
