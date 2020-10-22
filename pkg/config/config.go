@@ -22,6 +22,7 @@ type Config struct {
 	Storage         string `yaml:"storage"`
 	AutoClip        bool   `yaml:"autoclip"`
 	Notifications   bool   `yaml:"notifications"`
+	QuickSelect     bool   `yaml:"quickselect"`
 	DefaultUsername string `yaml:"defaultUsername"`
 }
 

@@ -24,6 +24,7 @@ const (
 	ctxKeyDefaultUsername
 	ctxKeyEmail
 	ctxKeyAdvanced
+	ctxKeyQuickSelect
 )
 
 // WithGlobalFlags parses any global flags from the cli context and returns
@@ -276,6 +277,7 @@ func WithDefaultUsername(ctx context.Context, username string) context.Context {
 	return context.WithValue(ctx, ctxKeyDefaultUsername, username)
 }
 
+// HasDefaultUsername returns true if the context has
 func HasDefaultUsername(ctx context.Context) bool {
 	return hasString(ctx, ctxKeyDefaultUsername)
 }
@@ -289,16 +291,17 @@ func GetDefaultUsername(ctx context.Context) string {
 	return sv
 }
 
-// WithEmail returns a context with the email set in the context
-func WithEmail(ctx context.Context, sv string) context.Context {
-	return context.WithValue(ctx, ctxKeyEmail, sv)
+// WithQuickSelect returns a context with the quickselect flag set
+func WithQuickSelect(ctx context.Context, qs bool) context.Context {
+	return context.WithValue(ctx, ctxKeyQuickSelect, qs)
 }
 
-// GetEmail returns the email from the context
-func GetEmail(ctx context.Context) string {
-	sv, ok := ctx.Value(ctxKeyEmail).(string)
-	if !ok {
-		return ""
-	}
-	return sv
+// HasQuickSelect returns true if the context has the quickselect flag set
+func HasQuickSelect(ctx context.Context) bool {
+	return hasBool(ctx, ctxKeyQuickSelect)
+}
+
+// IsQuickSelect returns the quickselect flag value of the default (false)
+func IsQuickSelect(ctx context.Context) bool {
+	return is(ctx, ctxKeyQuickSelect, false)
 }

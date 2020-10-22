@@ -2,6 +2,18 @@
 
 Changelog for passline
 
+## Version 1.5.0
+
+- Add QuickSelect feature
+
+## Version 1.4.1
+
+- Fix selection footer on windows
+
+## Version 1.4.0
+
+- Add Selection footer
+
 ## Version 1.3.5
 
 - Selection can now be canceled with ESC.
