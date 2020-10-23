@@ -37,7 +37,6 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 		return "", errors.New("Canceled selection")
 	}
 
-	terminal.MoveCursorUp(1)
 	terminal.ClearLines(1)
 	fmt.Printf("%s%s\n", message, items[selection])
 	return items[selection], nil

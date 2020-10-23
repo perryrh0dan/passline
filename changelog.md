@@ -2,6 +2,14 @@
 
 Changelog for passline
 
+## Version 1.5.2
+
+- Fix selection on windows cmd
+
+## Version 1.5.1
+
+- Disable notification for quick select username
+
 ## Version 1.5.0
 
 - Add QuickSelect feature
