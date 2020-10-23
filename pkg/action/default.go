@@ -42,9 +42,9 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
-	// quick select
 	if ctxutil.IsQuickSelect(ctx) {
-		if err = clipboard.CopyTo(ctx, "Username", []byte(credential.Username)); err != nil {
+		// disable notifications for quick select
+		if err = clipboard.CopyTo(ctxutil.WithNotifications(ctx, false), "", []byte(credential.Username)); err != nil {
 			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
 		}
 	}
