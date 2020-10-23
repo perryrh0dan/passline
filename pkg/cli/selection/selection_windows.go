@@ -67,7 +67,7 @@ func Default(message string, items []string) (int, error) {
 
 	clearScreen(list)
 	// If we remove this line also the url selection gets cleared
-	ansi.CursorDown(1)
+	// ansi.CursorDown(1)
 	return selected, nil
 }
 
@@ -112,13 +112,17 @@ func printFooter(list *list.List) {
 func clearScreen(list *list.List) {
 	values, _ := list.Items()
 
+	// Clear Footer
+	ansi.EraseInLine(3)
+	ansi.CursorUp(1)
+	ansi.EraseInLine(3)
+
+	ansi.CursorUp(1)
+	ansi.EraseInLine(3)
+
 	// Clear list items
 	for i := 1; i <= len(values); i++ {
 		ansi.CursorUp(1)
 		ansi.EraseInLine(3)
 	}
-
-	// Clear Footer
-	ansi.CursorUp(2)
-	ansi.EraseInLine(3)
 }
