@@ -27,7 +27,7 @@
 
 ## Description
 
-By utilizing a simple and minimal usage syntax, that requires a flat leaning curve, Passline enables you to effectively manage you password accross multiple devices within your terminal. All Password are stored AES-256 encrypted and can only be encrypted with a your global password. Currently data can be stored localy on your computer or in your own firebase database.
+Passline is a command line-based password management system. Thanks to its simple and minimal usage syntax, Passline enables users to effectively manage various passwords across multiple devices within the terminal. All Passwords are stored AES-256 encrypted and can only be encrypted with a global password. Currently data can be stored localy on your computer or in your own firebase database.
 
 Visit the [contributing guidelines](https://github.com/perryrh0dan/passline/blob/master/contributing.md#translating-documentation) to learn more on how to translate this document into more languages.
 
@@ -36,10 +36,10 @@ Come over to [Gitter](https://gitter.im/perryrh0danpassline/community?source=org
 ## Highlights
 
 - Multiple storage modules (local, firestore)
-- Passwords and recovery codes are aes-256 encryped
+- Passwords and recovery codes are AES-256 encryped
 - Intuitive and fast command line interface
 - Filtering allows fast selection of credentials
-- Build in update functionality
+- Built-in update functionality
 
 ## Contents
 
@@ -57,8 +57,9 @@ Come over to [Gitter](https://gitter.im/perryrh0danpassline/community?source=org
 
 ### Binary
 
-1. Download the latest release for your platform
-2. Run it
+1. Download the latest release for your platform.
+2. Unzip the tar.gz files before running. 
+3. Click on the passline.exe file to start the application. 
 
 ### Snapcraft
 
@@ -67,7 +68,7 @@ snap install passline
 snap alias passline pl # set alias
 ```
 
-**Note:** Due to the snap's strictly confined nature, both the storage & configuration files will be saved under the [ `$SNAP_USER_DATA` ](https://docs.snapcraft.io/reference/env) environment variable instead of the generic `$HOME` one.
+**Note:** Due to the Snapcraft's strictly confined nature, both storage & configuration files will be saved under the [ `$SNAP_USER_DATA` ](https://docs.snapcraft.io/reference/env) environment variable instead of the generic `$HOME` one.
 
 ## Usage
 
@@ -86,21 +87,21 @@ DESCRIPTION:
    Password manager for the command line
 
 COMMANDS:
-   add, a       Add an existing password for a website
-   backup, b    Create a backup
-   delete, d    Delete an item
-   edit, e      Edit an item
-   generate, g  Generate a password for an item
-   list, ls     List all items
-   password, p  Change master password
-   restore, r   Restore a backup
-   update, u    Update to the newest release
+   add, a       Adds an existing password for a website
+   backup, b    Creates a backup
+   delete, d    Deletes an item
+   edit, e      Edits an item
+   generate, g  Generates a password for an website
+   list, ls     Lists all websites/passwords
+   password, p  Changes master password
+   restore, r   Restores a backup
+   update, u    Updates to the newest release
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   -- print, -p   Display password on the terminal (default: false)
-   --help, -h     show help (default: false)
-   --version, -v  print the version (default: false)
+   -- print, -p   Displays password on the terminal (default: false)
+   --help, -h     Shows help (default: false)
+   --version, -v  Prints the version (default: false)
 
 WEBSITE:
    https://github.com/perryrh0dan/passline
@@ -110,35 +111,35 @@ WEBSITE:
 
 #### Add
 
-Add an existing username, password pair.
+Adds an existing username, password pair.
 
 #### Backup
 
-Create a backup. 
+Creates a backup. 
 
 #### Generate
 
-Generate and store a password for a website/username combination.
+Generates and stores a password for a website/username combination.
 
 #### Delete
 
-Delete an existing username, password pair.
+Deletes an existing username, password pair.
 
 #### Edit
 
-Edit an entry
+Edits an entry
 
 #### List
 
-List all websites
+Lists all websites
 
 #### Restore
 
-Restore a backup file.
+Restores a backup file.
 
 #### Update
 
-Update passline to the latest release on github.
+Updates passline to the latest release on github.
 
 ## Development
 
