@@ -8,9 +8,6 @@ import (
 	"passline/pkg/ctxutil"
 	"passline/pkg/notify"
 
-	// "github.com/gopasspw/gopass/internal/out"
-	// "github.com/perryrh0dan/passline/pkg/out"
-
 	"github.com/atotto/clipboard"
 	"github.com/pkg/errors"
 )
