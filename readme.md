@@ -48,7 +48,8 @@ Come over to [Gitter](https://gitter.im/perryrh0danpassline/community?source=org
 - [Contents](#contents)
 - [Install](#install)
 - [Usage](#usage)
-- [Flight Manual](#flight-manual)
+- [Configuration](#configuration)
+- [Before Flight](#before-flight)
 - [Development](#development)
 - [Team](#team)
 - [License](#license)
@@ -105,6 +106,35 @@ GLOBAL OPTIONS:
 WEBSITE:
    https://github.com/perryrh0dan/passline
 ```
+
+## Configuration
+
+To configure passline open to the ~/.passline/config.json file and modify any of the options to match your own preferences. To reset to the default values, simply delete the config file.
+
+The following illustrates all the available options with their respective default values.
+
+``` json
+{
+ "Storage": "firestore", // Storage module. Currently there are two modules `local` and `firestore`
+ "AutoClip": true, // Always copy the password to the clipboard
+ "Notifications": true, // Display notifications
+ "QuickSelect": true, // Copy username to clipboard
+ "DefaultUsername": "thomaspoehlmann96@googlemail.com"
+}
+```
+
+### Before flight
+
+When you want to use the local storage module there is no further configuration need. When you want to use the firestore module follow this steps:
+
+#### Setup Firestore
+
+1. Create a new Project on the google cloud platform.
+2. Create a new service account for this project.
+3. Download the authorization.json file and insert it in the ~/.passline directory with the name `firestore.json`.
+
+or follow this [instruction page](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application).
+
 
 ## Development
 
