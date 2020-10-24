@@ -115,19 +115,35 @@ The following illustrates all the available options with their respective defaul
 
 ``` json
 {
- "Storage": "firestore", // Storage module. Currently there are two modules `local` and `firestore`
- "AutoClip": true, // Always copy the password to the clipboard
- "Notifications": true, // Display notifications
- "QuickSelect": true, // Copy username to clipboard
+ "Storage": "firestore",
+ "AutoClip": true,
+ "Notifications": true,
+ "QuickSelect": true,
  "DefaultUsername": "thomaspoehlmann96@googlemail.com"
 }
 ```
 
-### Before flight
+### Storage
+
+Storage module. Currently there are two modules `local` and `firestore`
+
+### AutoClip
+
+Always copy the password to the clipboard
+
+### Notifications
+
+Display notifications
+
+### QuickSelect
+
+Copy username to clipboard
+
+## Before flight
 
 When you want to use the local storage module there is no further configuration need. When you want to use the firestore module follow this steps:
 
-#### Setup Firestore
+### Setup Firestore
 
 1. Create a new Project on the google cloud platform.
 2. Create a new service account for this project.
