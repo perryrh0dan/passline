@@ -52,14 +52,9 @@ WEBSITE:
 
 	app.Flags = []ucli.Flag{
 		&ucli.BoolFlag{
-			Name:    "force",
-			Aliases: []string{"f"},
-			Usage:   "Force displaying content",
-		},
-		&ucli.BoolFlag{
 			Name:    "print",
 			Aliases: []string{"p"},
-			Usage:   "Print the generated password to the terminal",
+			Usage:   "Prints the password to the terminal",
 		},
 		&ucli.BoolFlag{
 			Name:  "yes",

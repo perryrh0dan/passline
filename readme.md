@@ -57,9 +57,8 @@ Come over to [Gitter](https://gitter.im/perryrh0danpassline/community?source=org
 
 ### Binary
 
-1. Download the latest release for your platform.
-2. Unzip the tar.gz files before running. 
-3. Click on the passline.exe file to start the application. 
+1. Download the latest [release](https://github.com/perryrh0dan/passline/releases) for your platform.
+2. Copy the binary to your `/bin` folder or point the path environment variable to it.
 
 ### Snapcraft
 
@@ -106,40 +105,6 @@ GLOBAL OPTIONS:
 WEBSITE:
    https://github.com/perryrh0dan/passline
 ```
-
-### Flight Manual
-
-#### Add
-
-Adds an existing username, password pair.
-
-#### Backup
-
-Creates a backup. 
-
-#### Generate
-
-Generates and stores a password for a website/username combination.
-
-#### Delete
-
-Deletes an existing username, password pair.
-
-#### Edit
-
-Edits an entry
-
-#### List
-
-Lists all websites
-
-#### Restore
-
-Restores a backup file.
-
-#### Update
-
-Updates passline to the latest release on github.
 
 ## Development
 
