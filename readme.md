@@ -80,7 +80,7 @@ USAGE:
    passline [global options] command [command options] [arguments...]
 
 VERSION:
-   0.5.3
+   1.5.3
 
 DESCRIPTION:
    Password manager for the command line
@@ -94,11 +94,11 @@ COMMANDS:
    list, ls     Lists all websites/passwords
    password, p  Changes master password
    restore, r   Restores a backup
-   update, u    Updates to the newest release
+   update, u    Updates to the latest release
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   -- print, -p   Displays password on the terminal (default: false)
+   --print, -p   Displays password on the terminal (default: false)
    --help, -h     Shows help (default: false)
    --version, -v  Prints the version (default: false)
 
