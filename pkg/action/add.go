@@ -23,8 +23,11 @@ func (s *Action) Add(c *ucli.Context) error {
 		return ExitError(1, err, "Failed to enter name")
 	}
 
+	// Load default user
+	defaultUsername := ctxutil.GetDefaultUsername(ctx)
+
 	// User input username
-	username, err := input.ArgOrInput(args, 1, "Username/Login", "")
+	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername)
 	if err != nil {
 		return ExitError(1, err, "Failed to enter username/login")
 	}
