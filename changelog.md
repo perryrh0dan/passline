@@ -2,6 +2,10 @@
 
 Changelog for passline
 
+## Version 1.5.4
+
+- Use default username in add command
+
 ## Version 1.5.2
 
 - Fix selection on windows cmd
