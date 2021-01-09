@@ -12,7 +12,7 @@ import (
 )
 
 func (s *Action) Add(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+	ctx := generateParseArgs(c)
 
 	args := c.Args()
 	out.CreateMessage()
@@ -44,14 +44,19 @@ func (s *Action) Add(c *ucli.Context) error {
 		return err
 	}
 
-	recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
-	if err != nil {
-		return err
-	}
-
+	// Get advanced parameters
 	recoveryCodes := make([]string, 0)
-	if recoveryCodesString != "" {
-		recoveryCodes = util.StringToArray(recoveryCodesString)
+
+	if ctxutil.IsAdvanced(ctx) {
+		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
+		if err != nil {
+			return err
+		}
+
+		recoveryCodes = make([]string, 0)
+		if recoveryCodesString != "" {
+			recoveryCodes = util.StringToArray(recoveryCodesString)
+		}
 	}
 
 	// get and check global password

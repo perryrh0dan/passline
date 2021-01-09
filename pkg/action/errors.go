@@ -13,7 +13,7 @@ const (
 	ExitUnknown
 	// ExitUsage is used if there was some kind of invocation error
 	ExitUsage
-	// Exit Duplicated is used if the item already exists
+	// ExitDuplicated is used if the item already exists
 	ExitDuplicated
 	// ExitAborted is used if the user willingly aborted an action
 	ExitAborted
@@ -25,7 +25,7 @@ const (
 	// ExitNotInitialized is used if someone is trying to use an unitialized
 	// store
 	ExitNotInitialized
-	// Exit Password is used if the global password is wrong
+	// ExitPassword is used if the global password is wrong
 	ExitPassword
 	// ExitNoName is used when no name was provided for a named entry
 	ExitNoName
