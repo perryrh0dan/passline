@@ -1,6 +1,7 @@
 package action
 
 import (
+	"context"
 	"strconv"
 
 	"passline/pkg/cli/input"
@@ -13,6 +14,18 @@ import (
 
 	ucli "github.com/urfave/cli/v2"
 )
+
+func generateParseArgs(c *ucli.Context) context.Context {
+	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
+	}
+	if c.IsSet("force") {
+		ctx = ctxutil.WithForce(ctx, c.Bool("force"))
+	}
+
+	return ctx
+}
 
 func (s *Action) Generate(c *ucli.Context) error {
 	ctx := generateParseArgs(c)

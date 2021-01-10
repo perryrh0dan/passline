@@ -1,6 +1,7 @@
 package action
 
 import (
+	"context"
 	"passline/pkg/cli/input"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
@@ -11,8 +12,17 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
+func addParseArgs(c *ucli.Context) context.Context {
+	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
+	}
+
+	return ctx
+}
+
 func (s *Action) Add(c *ucli.Context) error {
-	ctx := generateParseArgs(c)
+	ctx := addParseArgs(c)
 
 	args := c.Args()
 	out.CreateMessage()

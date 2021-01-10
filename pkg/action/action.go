@@ -10,7 +10,6 @@ import (
 	"passline/pkg/cli/selection"
 	"passline/pkg/config"
 	"passline/pkg/crypt"
-	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 	"passline/pkg/storage"
 
@@ -49,18 +48,6 @@ func newAction(cfg *config.Config, sv semver.Version) (*Action, error) {
 	}
 
 	return act, nil
-}
-
-func generateParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("advanced") {
-		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
-	}
-	if c.IsSet("force") {
-		ctx = ctxutil.WithForce(ctx, c.Bool("force"))
-	}
-
-	return ctx
 }
 
 func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item storage.Item) (storage.Credential, error) {
