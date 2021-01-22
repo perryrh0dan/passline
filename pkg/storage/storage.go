@@ -84,7 +84,13 @@ func (item *Item) GetUsernameArray() []string {
 type Credential struct {
 	Username      string   `json:"username"`
 	Password      string   `json:"password"`
+	Category      string   `json:"category"`
 	RecoveryCodes []string `json:"recoveryCodes"`
+}
+
+func (c Credential) UnmarshalJSON([]byte) error {
+	println("test")
+	return nil
 }
 
 func New(cfg *config.Config) (Storage, error) {

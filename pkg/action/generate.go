@@ -15,6 +15,8 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
+const PASSWORD_MIN_LENGTH = 8
+
 func generateParseArgs(c *ucli.Context) context.Context {
 	ctx := ctxutil.WithGlobalFlags(c)
 	if c.IsSet("advanced") {
@@ -59,6 +61,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 
 	// Get advanced parameters
 	recoveryCodes := make([]string, 0)
+	category := "default"
 
 	if ctxutil.IsAdvanced(ctx) {
 		length, err := input.Default("Please enter the length of the password []: (%s) ", strconv.Itoa(options.Length))
@@ -71,12 +74,17 @@ func (s *Action) Generate(c *ucli.Context) error {
 		}
 
 		// check length
-		if options.Length < 8 {
+		if options.Length < PASSWORD_MIN_LENGTH {
 			out.PasswordTooShort()
 			return nil
 		}
 
-		options.IncludeCharacters = input.Confirmation("Should the password include Character (y/n): ")
+		category, err = input.Default("Please enter a category []: (%s)", "default")
+		if err != nil {
+			return err
+		}
+
+		options.IncludeCharacters = input.Confirmation("Should the password include Characters (y/n): ")
 		options.IncludeNumbers = input.Confirmation("Should the password include Numbers (y/n): ")
 		options.IncludeSymbols = input.Confirmation("Should the password include Symbols (y/n): ")
 
@@ -107,7 +115,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	}
 
 	// Create credentials
-	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes}
+	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category}
 
 	// Encrypt credentials
 	err = crypt.EncryptCredential(&credential, globalPassword)

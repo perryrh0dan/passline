@@ -66,6 +66,12 @@ func (s *Action) Edit(c *ucli.Context) error {
 	}
 	credential.Username = newUsername
 
+	// Get new category
+	newCategory, err := input.Default("Please enter a new Category []: (%s ", credential.Category)
+	if err != nil {
+		return err
+	}
+
 	// Get new recoveryCodes
 	recoveryCodes := util.ArrayToString(credential.RecoveryCodes)
 	newRecoveryCodes, err := input.Default("Please enter your recovery codes []: (%s) ", recoveryCodes)
@@ -73,6 +79,8 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return err
 	}
 
+	// Edit credential
+	credential.Category = newCategory
 	// TODO remove spaces
 	credential.RecoveryCodes = make([]string, 0)
 
