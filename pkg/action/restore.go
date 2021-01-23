@@ -22,7 +22,7 @@ func (s *Action) Restore(c *ucli.Context) error {
 	out.RestoreMessage()
 
 	// User input path
-	path, err := input.ArgOrInput(args, 0, "Path", "")
+	path, err := input.ArgOrInput(args, 0, "Path", "", "required")
 	if err != nil {
 		return err
 	}

@@ -38,7 +38,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	options := crypt.DefaultOptions()
 
 	// User input name
-	name, err := input.ArgOrInput(args, 0, "URL", "")
+	name, err := input.ArgOrInput(args, 0, "URL", "", "required")
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Failed to read input: %s", err)
 	}
@@ -47,7 +47,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	defaultUsername := ctxutil.GetDefaultUsername(ctx)
 
 	// User input username
-	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername)
+	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername, "required")
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Failed to read input: %s", err)
 	}
@@ -64,7 +64,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	category := "default"
 
 	if ctxutil.IsAdvanced(ctx) {
-		length, err := input.Default("Please enter the length of the password []: (%s) ", strconv.Itoa(options.Length))
+		length, err := input.Default("Please enter the length of the password (%s): ", strconv.Itoa(options.Length), "number:8")
 		if err != nil {
 			return err
 		}
@@ -79,16 +79,22 @@ func (s *Action) Generate(c *ucli.Context) error {
 			return nil
 		}
 
-		category, err = input.Default("Please enter a category []: (%s)", "default")
+		category, err = input.Default("Please enter a category (%s): ", "default", "")
 		if err != nil {
 			return err
 		}
 
-		options.IncludeCharacters = input.Confirmation("Should the password include Characters (y/n): ")
-		options.IncludeNumbers = input.Confirmation("Should the password include Numbers (y/n): ")
-		options.IncludeSymbols = input.Confirmation("Should the password include Symbols (y/n): ")
+		if !ctxutil.IsAlwaysYes(ctx) {
+			options.IncludeCharacters = input.Confirmation("Should the password include Characters (y/n): ")
+			options.IncludeNumbers = input.Confirmation("Should the password include Numbers (y/n): ")
+			options.IncludeSymbols = input.Confirmation("Should the password include Symbols (y/n): ")
+		} else {
+			options.IncludeCharacters = true
+			options.IncludeNumbers = true
+			options.IncludeSymbols = true
+		}
 
-		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
+		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "", "")
 		if err != nil {
 			return err
 		}

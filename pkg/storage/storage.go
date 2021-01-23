@@ -88,7 +88,7 @@ type Credential struct {
 	RecoveryCodes []string `json:"recoveryCodes"`
 }
 
-func (c Credential) UnmarshalJSON([]byte) error {
+func (c *Credential) UnmarshalJSON([]byte) error {
 	println("test")
 	return nil
 }

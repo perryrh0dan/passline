@@ -20,6 +20,9 @@ func (c *Config) WithContext(ctx context.Context) context.Context {
 	if !ctxutil.HasQuickSelect(ctx) {
 		ctx = ctxutil.WithQuickSelect(ctx, c.QuickSelect)
 	}
+	if !ctxutil.HasCategory(ctx) {
+		ctx = ctxutil.WithCategory(ctx, c.DefaultCategory)
+	}
 
 	return ctx
 }

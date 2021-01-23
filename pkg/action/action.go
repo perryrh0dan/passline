@@ -10,6 +10,7 @@ import (
 	"passline/pkg/cli/selection"
 	"passline/pkg/config"
 	"passline/pkg/crypt"
+	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 	"passline/pkg/storage"
 
@@ -145,6 +146,34 @@ func (s *Action) getSiteNames(ctx context.Context) ([]string, error) {
 	var names []string
 	for _, item := range items {
 		names = append(names, item.Name)
+	}
+
+	return names, nil
+}
+
+func (s *Action) getItemNamesByCategory(ctx context.Context) ([]string, error) {
+	category := ctxutil.GetCategory(ctx)
+
+	if category == "*" {
+		return s.getSiteNames(ctx)
+	}
+
+	items, err := s.getSites(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var names []string
+	for _, item := range items {
+		found := false
+		for _, cred := range item.Credentials {
+			if cred.Category == category {
+				found = true
+			}
+		}
+		if found {
+			names = append(names, item.Name)
+		}
 	}
 
 	return names, nil

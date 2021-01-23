@@ -19,6 +19,7 @@ import (
 
 type FireStore struct {
 	client *firestore.Client
+	items  []Item
 }
 
 const (
@@ -80,7 +81,10 @@ func (fs *FireStore) GetItemByIndex(ctx context.Context, index int) (Item, error
 }
 
 func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
-	items := []Item{}
+	if len(fs.items) > 0 {
+		return fs.items, nil
+	}
+
 	iter := fs.client.Collection(DataCollection).Documents(ctx)
 	for {
 		doc, err := iter.Next()
@@ -93,11 +97,19 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 
 		var item Item
 		doc.DataTo(&item)
-		items = append(items, item)
+
+		// Add default Category if not exists
+		for index, cred := range item.Credentials {
+			if cred.Category == "" {
+				item.Credentials[index].Category = "default"
+			}
+		}
+
+		fs.items = append(fs.items, item)
 	}
 
-	sort.Sort(ByName(items))
-	return items, nil
+	sort.Sort(ByName(fs.items))
+	return fs.items, nil
 }
 
 func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential) error {

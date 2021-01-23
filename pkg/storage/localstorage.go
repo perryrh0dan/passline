@@ -32,7 +32,7 @@ func (ls *LocalStorage) GetItemByName(ctx context.Context, name string) (Item, e
 	data := ls.getData()
 	for i := 0; i < len(data.Items); i++ {
 		if data.Items[i].Name == name {
-			return *data.Items[i], nil
+			return data.Items[i], nil
 		}
 	}
 
