@@ -25,6 +25,7 @@ type FireStore struct {
 const (
 	DataCollection   = "passline"
 	ConfigCollection = "config"
+	DefaultCategory  = "default"
 )
 
 func NewFirestore() (*FireStore, error) {
@@ -64,6 +65,13 @@ func (fs *FireStore) GetItemByName(ctx context.Context, name string) (Item, erro
 	var item Item
 	dsnap.DataTo(&item)
 
+	// Add default Category if not exists
+	for index, cred := range item.Credentials {
+		if cred.Category == "" {
+			item.Credentials[index].Category = DefaultCategory
+		}
+	}
+
 	return item, nil
 }
 
@@ -101,7 +109,7 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 		// Add default Category if not exists
 		for index, cred := range item.Credentials {
 			if cred.Category == "" {
-				item.Credentials[index].Category = "default"
+				item.Credentials[index].Category = DefaultCategory
 			}
 		}
 

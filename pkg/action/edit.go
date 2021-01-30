@@ -28,7 +28,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 	}
 
 	args := c.Args()
-	out.DeleteMessage()
+	out.EditMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {

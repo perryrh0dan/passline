@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -88,8 +89,21 @@ type Credential struct {
 	RecoveryCodes []string `json:"recoveryCodes"`
 }
 
-func (c *Credential) UnmarshalJSON([]byte) error {
-	println("test")
+func (c *Credential) UnmarshalJSON(data []byte) error {
+	type Alias Credential
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if c.Category == "" {
+		c.Category = "default"
+	}
+
 	return nil
 }
 

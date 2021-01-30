@@ -2,7 +2,6 @@ package action
 
 import (
 	"context"
-	"fmt"
 	"passline/pkg/cli/selection"
 	"passline/pkg/clipboard"
 	"passline/pkg/crypt"
@@ -70,8 +69,6 @@ func (s *Action) Default(c *ucli.Context) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Category: %s\n", credential.Category)
 
 	if ctxutil.IsAutoClip(ctx) || IsClip(ctx) {
 		identifier := out.BuildIdentifier(name, credential.Username)
