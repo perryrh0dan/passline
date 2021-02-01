@@ -28,4 +28,4 @@ jobs:
         with:
           go-version: 1.15
       - name: Deploy
-        run: bash scripts/test.sh
+        run: bash scripts/deploy.sh
