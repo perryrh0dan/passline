@@ -29,3 +29,5 @@ jobs:
           go-version: 1.15
       - name: Deploy
         run: bash scripts/deploy.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
