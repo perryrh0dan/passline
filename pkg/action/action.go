@@ -51,18 +51,6 @@ func newAction(cfg *config.Config, sv semver.Version) (*Action, error) {
 	return act, nil
 }
 
-func generateParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("advanced") {
-		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
-	}
-	if c.IsSet("force") {
-		ctx = ctxutil.WithForce(ctx, c.Bool("force"))
-	}
-
-	return ctx
-}
-
 func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item storage.Item) (storage.Credential, error) {
 	username, err := selection.ArgOrSelect(ctx, args, 1, "Username/Login", item.GetUsernameArray())
 	if err != nil {
@@ -158,6 +146,34 @@ func (s *Action) getSiteNames(ctx context.Context) ([]string, error) {
 	var names []string
 	for _, item := range items {
 		names = append(names, item.Name)
+	}
+
+	return names, nil
+}
+
+func (s *Action) getItemNamesByCategory(ctx context.Context) ([]string, error) {
+	category := ctxutil.GetCategory(ctx)
+
+	if category == "*" {
+		return s.getSiteNames(ctx)
+	}
+
+	items, err := s.getSites(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var names []string
+	for _, item := range items {
+		found := false
+		for _, cred := range item.Credentials {
+			if cred.Category == category {
+				found = true
+			}
+		}
+		if found {
+			names = append(names, item.Name)
+		}
 	}
 
 	return names, nil

@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -13,7 +14,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func ArgOrInput(args ucli.Args, index int, message string, defaultValue string) (string, error) {
+func ArgOrInput(args ucli.Args, index int, message, defaultValue, rules string) (string, error) {
 	userInput := args.Get(index)
 
 	if userInput == "" {
@@ -25,7 +26,7 @@ func ArgOrInput(args ucli.Args, index int, message string, defaultValue string) 
 		}
 
 		var err error
-		userInput, err = Default(message, defaultValue)
+		userInput, err = Default(message, defaultValue, rules)
 		if err != nil {
 			return "", err
 		}
@@ -34,39 +35,49 @@ func ArgOrInput(args ucli.Args, index int, message string, defaultValue string) 
 	return userInput, nil
 }
 
-func Default(message string, defaultValue string) (string, error) {
-	// find if %s is in string
-	rgx := regexp.MustCompile("%s")
-	matches := rgx.FindAllStringIndex(message, -1)
+func Default(message, defaultValue, rules string) (string, error) {
+	// input validation
+	var input string
+	for true {
+		// find if %s is in string
+		rgx := regexp.MustCompile("%s")
+		matches := rgx.FindAllStringIndex(message, -1)
 
-	// print message
-	if len(matches) == 0 {
-		fmt.Print(message)
-	} else {
-		fmt.Printf(message, defaultValue)
+		// print message
+		if len(matches) == 0 {
+			fmt.Print(message)
+		} else {
+			fmt.Printf(message, defaultValue)
+		}
+
+		reader := bufio.NewReader(os.Stdin)
+
+		var err error
+		input, err = reader.ReadString('\n')
+		if err != nil {
+			return "", err
+		}
+		input = strings.TrimSuffix(input, "\n")
+		input = strings.TrimSuffix(input, "\r") // TODO Test if working for Linux
+
+		// if input empty assign default value also valid if defaultValue is empty
+		if input == "" {
+			input = defaultValue
+		}
+
+		if validate(input, rules) {
+			break
+		}
 	}
 
-	reader := bufio.NewReader(os.Stdin)
-	text, err := reader.ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-	text = strings.TrimSuffix(text, "\n")
-	// TODO Test if working for Linux
-	text = strings.TrimSuffix(text, "\r")
-
-	// if input empty assign default value also valid if defaultValue is empty
-	if text == "" {
-		text = defaultValue
-	}
-	return text, nil
+	return input, nil
 }
 
 func Confirmation(message string) bool {
 	result := ""
 	for result != "y" && result != "n" {
 		var err error
-		result, err = Default(message, "")
+		result, err = Default(message, "", "required")
 		if err != nil {
 			return false
 		}
@@ -87,4 +98,36 @@ func Password(message string) []byte {
 
 	// Return the password as a string.
 	return p
+}
+
+func validate(input string, meta string) bool {
+	input = strings.TrimSpace(input)
+	rules := strings.Split(meta, ",")
+
+	required, _ := regexp.Compile("required")
+	length, _ := regexp.Compile("length:\\d+")
+	number, _ := regexp.Compile("number:\\d+")
+
+	valid := true
+
+	for _, rule := range rules {
+		if required.MatchString(rule) {
+			if len(input) < 1 {
+				valid = false
+			}
+		} else if length.MatchString(rule) {
+			value, _ := strconv.Atoi(strings.Split(rule, ":")[1])
+			if len(input) < value {
+				valid = false
+			}
+		} else if number.MatchString(rule) {
+			value, _ := strconv.Atoi(strings.Split(rule, ":")[1])
+			number, _ := strconv.Atoi(input)
+			if number < value {
+				valid = false
+			}
+		}
+	}
+
+	return valid
 }

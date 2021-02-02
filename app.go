@@ -45,11 +45,6 @@ WEBSITE:
 
 	`, ucli.AppHelpTemplate)
 
-	// default command to get password
-	app.Action = func(c *ucli.Context) error {
-		return action.Default(c)
-	}
-
 	app.Flags = []ucli.Flag{
 		&ucli.BoolFlag{
 			Name:    "print",
@@ -60,6 +55,16 @@ WEBSITE:
 			Name:  "yes",
 			Usage: "Assume yes on all yes/no questions or use the default on all others",
 		},
+		&ucli.StringFlag{
+			Name:    "category",
+			Aliases: []string{"c"},
+			Usage:   "Select only items with given category",
+		},
+	}
+
+	// default command to get password
+	app.Action = func(c *ucli.Context) error {
+		return action.Default(c)
 	}
 
 	app.Commands = action.GetCommands()

@@ -1,6 +1,7 @@
 package action
 
 import (
+	"context"
 	"passline/pkg/cli/input"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
@@ -11,14 +12,23 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
+func addParseArgs(c *ucli.Context) context.Context {
+	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
+	}
+
+	return ctx
+}
+
 func (s *Action) Add(c *ucli.Context) error {
-	ctx := generateParseArgs(c)
+	ctx := addParseArgs(c)
 
 	args := c.Args()
 	out.CreateMessage()
 
 	// User input name
-	name, err := input.ArgOrInput(args, 0, "URL", "")
+	name, err := input.ArgOrInput(args, 0, "URL", "", "required")
 	if err != nil {
 		return ExitError(1, err, "Failed to enter name")
 	}
@@ -27,7 +37,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	defaultUsername := ctxutil.GetDefaultUsername(ctx)
 
 	// User input username
-	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername)
+	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername, "required")
 	if err != nil {
 		return ExitError(1, err, "Failed to enter username/login")
 	}
@@ -39,16 +49,22 @@ func (s *Action) Add(c *ucli.Context) error {
 		return ExitError(ExitDuplicated, err, "Item/Username already exists: %s", identifier)
 	}
 
-	password, err := input.Default("Please enter the existing Password []: ", "")
+	password, err := input.Default("Please enter the existing Password []: ", "", "required")
 	if err != nil {
 		return err
 	}
 
 	// Get advanced parameters
+	category := "default"
 	recoveryCodes := make([]string, 0)
 
 	if ctxutil.IsAdvanced(ctx) {
-		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
+		category, err = input.Default("Please enter a category []: (%s)", "default", "")
+		if err != nil {
+			return err
+		}
+
+		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "", "")
 		if err != nil {
 			return err
 		}
@@ -66,7 +82,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	}
 
 	// Create Credentials
-	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes}
+	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category}
 
 	err = crypt.EncryptCredential(&credential, globalPassword)
 	if err != nil {

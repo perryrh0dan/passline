@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -84,7 +85,26 @@ func (item *Item) GetUsernameArray() []string {
 type Credential struct {
 	Username      string   `json:"username"`
 	Password      string   `json:"password"`
+	Category      string   `json:"category"`
 	RecoveryCodes []string `json:"recoveryCodes"`
+}
+
+func (c *Credential) UnmarshalJSON(data []byte) error {
+	type Alias Credential
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if c.Category == "" {
+		c.Category = "default"
+	}
+
+	return nil
 }
 
 func New(cfg *config.Config) (Storage, error) {

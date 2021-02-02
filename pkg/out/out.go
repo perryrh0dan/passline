@@ -164,6 +164,11 @@ func DeleteMessage() {
 	d.Printf("Deleting item...\n")
 }
 
+func EditMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Editing item...\n")
+}
+
 func RestoreMessage() {
 	d := color.New(color.FgGreen)
 	d.Printf("Restoring backup...\n")

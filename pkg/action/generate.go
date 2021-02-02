@@ -1,6 +1,7 @@
 package action
 
 import (
+	"context"
 	"strconv"
 
 	"passline/pkg/cli/input"
@@ -14,6 +15,20 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
+const PASSWORD_MIN_LENGTH = 8
+
+func generateParseArgs(c *ucli.Context) context.Context {
+	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
+	}
+	if c.IsSet("force") {
+		ctx = ctxutil.WithForce(ctx, c.Bool("force"))
+	}
+
+	return ctx
+}
+
 func (s *Action) Generate(c *ucli.Context) error {
 	ctx := generateParseArgs(c)
 
@@ -23,7 +38,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	options := crypt.DefaultOptions()
 
 	// User input name
-	name, err := input.ArgOrInput(args, 0, "URL", "")
+	name, err := input.ArgOrInput(args, 0, "URL", "", "required")
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Failed to read input: %s", err)
 	}
@@ -32,7 +47,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	defaultUsername := ctxutil.GetDefaultUsername(ctx)
 
 	// User input username
-	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername)
+	username, err := input.ArgOrInput(args, 1, "Username/Login", defaultUsername, "required")
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Failed to read input: %s", err)
 	}
@@ -46,9 +61,10 @@ func (s *Action) Generate(c *ucli.Context) error {
 
 	// Get advanced parameters
 	recoveryCodes := make([]string, 0)
+	category := "default"
 
 	if ctxutil.IsAdvanced(ctx) {
-		length, err := input.Default("Please enter the length of the password []: (%s) ", strconv.Itoa(options.Length))
+		length, err := input.Default("Please enter the length of the password (%s): ", strconv.Itoa(options.Length), "number:8")
 		if err != nil {
 			return err
 		}
@@ -58,16 +74,27 @@ func (s *Action) Generate(c *ucli.Context) error {
 		}
 
 		// check length
-		if options.Length < 8 {
+		if options.Length < PASSWORD_MIN_LENGTH {
 			out.PasswordTooShort()
 			return nil
 		}
 
-		options.IncludeCharacters = input.Confirmation("Should the password include Character (y/n): ")
-		options.IncludeNumbers = input.Confirmation("Should the password include Numbers (y/n): ")
-		options.IncludeSymbols = input.Confirmation("Should the password include Symbols (y/n): ")
+		category, err = input.Default("Please enter a category (%s): ", "default", "")
+		if err != nil {
+			return err
+		}
 
-		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "")
+		if !ctxutil.IsAlwaysYes(ctx) {
+			options.IncludeCharacters = input.Confirmation("Should the password include Characters (y/n): ")
+			options.IncludeNumbers = input.Confirmation("Should the password include Numbers (y/n): ")
+			options.IncludeSymbols = input.Confirmation("Should the password include Symbols (y/n): ")
+		} else {
+			options.IncludeCharacters = true
+			options.IncludeNumbers = true
+			options.IncludeSymbols = true
+		}
+
+		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "", "")
 		if err != nil {
 			return err
 		}
@@ -94,7 +121,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	}
 
 	// Create credentials
-	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes}
+	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category}
 
 	// Encrypt credentials
 	err = crypt.EncryptCredential(&credential, globalPassword)

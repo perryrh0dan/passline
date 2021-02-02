@@ -25,6 +25,7 @@ const (
 	ctxKeyEmail
 	ctxKeyAdvanced
 	ctxKeyQuickSelect
+	ctxKeyCategory
 )
 
 // WithGlobalFlags parses any global flags from the cli context and returns
@@ -277,7 +278,7 @@ func WithDefaultUsername(ctx context.Context, username string) context.Context {
 	return context.WithValue(ctx, ctxKeyDefaultUsername, username)
 }
 
-// HasDefaultUsername returns true if the context has
+// HasDefaultUsername returns true if the context has defaultUsername set
 func HasDefaultUsername(ctx context.Context) bool {
 	return hasString(ctx, ctxKeyDefaultUsername)
 }
@@ -304,4 +305,23 @@ func HasQuickSelect(ctx context.Context) bool {
 // IsQuickSelect returns the quickselect flag value of the default (false)
 func IsQuickSelect(ctx context.Context) bool {
 	return is(ctx, ctxKeyQuickSelect, false)
+}
+
+// WithCategory returns a context with the category set in the context
+func WithCategory(ctx context.Context, category string) context.Context {
+	return context.WithValue(ctx, ctxKeyCategory, category)
+}
+
+// HasCategory returns true if the context has the category set
+func HasCategory(ctx context.Context) bool {
+	return hasString(ctx, ctxKeyCategory)
+}
+
+// GetCategory returns the category from the context
+func GetCategory(ctx context.Context) string {
+	sv, ok := ctx.Value(ctxKeyCategory).(string)
+	if !ok {
+		return "*"
+	}
+	return sv
 }

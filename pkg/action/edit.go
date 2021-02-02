@@ -28,7 +28,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 	}
 
 	args := c.Args()
-	out.DeleteMessage()
+	out.EditMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
@@ -60,21 +60,28 @@ func (s *Action) Edit(c *ucli.Context) error {
 	}
 
 	// Get new username
-	newUsername, err := input.Default("Please enter a new Username/Login []: (%s) ", credential.Username)
+	newUsername, err := input.Default("Please enter a new Username/Login []: (%s) ", credential.Username, "")
 	if err != nil {
 		return err
 	}
 	credential.Username = newUsername
 
-	// Get new recoveryCodes
-	recoveryCodes := util.ArrayToString(credential.RecoveryCodes)
-	newRecoveryCodes, err := input.Default("Please enter your recovery codes []: (%s) ", recoveryCodes)
+	// Get new category
+	newCategory, err := input.Default("Please enter a new Category []: (%s ", credential.Category, "")
 	if err != nil {
 		return err
 	}
 
-	// TODO remove spaces
-	credential.RecoveryCodes = make([]string, 0)
+	// Get new recoveryCodes
+	recoveryCodes := util.ArrayToString(credential.RecoveryCodes)
+	newRecoveryCodes, err := input.Default("Please enter your recovery codes []: (%s) ", recoveryCodes, "")
+	if err != nil {
+		return err
+	}
+
+	// Edit credential
+	credential.Category = newCategory
+	credential.RecoveryCodes = make([]string, 0) // TODO remove spaces
 
 	// use one space to clear recovery codes
 	if newRecoveryCodes != " " {

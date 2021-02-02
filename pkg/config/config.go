@@ -24,6 +24,7 @@ type Config struct {
 	Notifications   bool   `yaml:"notifications"`
 	QuickSelect     bool   `yaml:"quickselect"`
 	DefaultUsername string `yaml:"defaultUsername"`
+	DefaultCategory string `yaml:"defaultCategory"`
 }
 
 func init() {

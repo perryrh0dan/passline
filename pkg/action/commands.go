@@ -8,13 +8,6 @@ import (
 func (s *Action) GetCommands() []*ucli.Command {
 	return []*ucli.Command{
 		{
-			Name:      "backup",
-			Aliases:   []string{"b"},
-			Usage:     "Creates a backup",
-			ArgsUsage: "<path>",
-			Action:    s.Backup,
-		},
-		{
 			Name:      "add",
 			Aliases:   []string{"a"},
 			Usage:     "Adds an existing password for a website",
@@ -27,6 +20,13 @@ func (s *Action) GetCommands() []*ucli.Command {
 				},
 			},
 			Action: s.Add,
+		},
+		{
+			Name:      "backup",
+			Aliases:   []string{"b"},
+			Usage:     "Creates a backup",
+			ArgsUsage: "<path>",
+			Action:    s.Backup,
 		},
 		{
 			Name:      "delete",
