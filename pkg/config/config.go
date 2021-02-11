@@ -27,6 +27,24 @@ type Config struct {
 	DefaultCategory string `yaml:"defaultCategory"`
 }
 
+func (c *Config) UnmarshalJSON(data []byte) error {
+	type Alias Config
+
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if c.DefaultCategory == "" {
+		c.DefaultCategory = "*"
+	}
+
+	return nil
+}
+
 func init() {
 	ensureConfigFile()
 	config, _ := Get()

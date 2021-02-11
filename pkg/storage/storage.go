@@ -63,20 +63,12 @@ func (item *Item) GetCredentialByUsername(username string) (Credential, error) {
 	return Credential{}, errors.New("Not found")
 }
 
-func (item *Item) GetCredentialsName() ([]string, error) {
-	var list []string
-
-	for i := 0; i < len(item.Credentials); i++ {
-		list = append(list, item.Credentials[i].Username)
-	}
-
-	return list, nil
-}
-
-func (item *Item) GetUsernameArray() []string {
+func (item *Item) GetUsernameArray(category string) []string {
 	var creds []string
 	for _, cred := range item.Credentials {
-		creds = append(creds, cred.Username)
+		if category == "*" || category == cred.Category {
+			creds = append(creds, cred.Username)
+		}
 	}
 
 	return creds
