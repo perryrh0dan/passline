@@ -67,7 +67,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 	credential.Username = newUsername
 
 	// Get new category
-	newCategory, err := input.Default("Please enter a new Category []: (%s ", credential.Category, "")
+	newCategory, err := input.Default("Please enter a new Category []: (%s) ", credential.Category, "")
 	if err != nil {
 		return err
 	}

@@ -52,7 +52,9 @@ func newAction(cfg *config.Config, sv semver.Version) (*Action, error) {
 }
 
 func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item storage.Item) (storage.Credential, error) {
-	username, err := selection.ArgOrSelect(ctx, args, 1, "Username/Login", item.GetUsernameArray())
+	category := ctxutil.GetCategory(ctx)
+
+	username, err := selection.ArgOrSelect(ctx, args, 1, "Username/Login", item.GetUsernameArray(category))
 	if err != nil {
 		return storage.Credential{}, ExitError(ExitUnknown, err, "Selection Failed: %s", err)
 	}

@@ -2,6 +2,20 @@
 
 Changelog for passline
 
+## Version 1.7.1
+
+### Fix
+
+- Set default category to "*"
+- Display Bug in edit crdential
+
+## Version 1.7.0
+
+### Feature
+
+- Add filterable categories to credentials
+- Set Default category in the config.json 
+
 ## Version 1.5.4
 
 - Use default username in add command
