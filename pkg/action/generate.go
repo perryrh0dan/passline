@@ -61,7 +61,12 @@ func (s *Action) Generate(c *ucli.Context) error {
 
 	// Get advanced parameters
 	recoveryCodes := make([]string, 0)
-	category := "default"
+
+	// Get the default category from the context or use default
+	category := ctxutil.GetCategory(ctx)
+	if (category == "*") {
+		category = "default"
+	}
 
 	if ctxutil.IsAdvanced(ctx) {
 		length, err := input.Default("Please enter the length of the password (%s): ", strconv.Itoa(options.Length), "number:8")

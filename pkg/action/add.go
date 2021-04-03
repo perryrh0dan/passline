@@ -55,8 +55,13 @@ func (s *Action) Add(c *ucli.Context) error {
 	}
 
 	// Get advanced parameters
-	category := "default"
 	recoveryCodes := make([]string, 0)
+	
+	// Get the default category from the context or use default
+	category := ctxutil.GetCategory(ctx)
+	if (category == "*") {
+		category = "default"
+	}
 
 	if ctxutil.IsAdvanced(ctx) {
 		category, err = input.Default("Please enter a category []: (%s)", "default", "")
