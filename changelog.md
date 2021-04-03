@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.7.2
+
+### Fix
+
+- Use default category in add and generate method
+
 ## Version 1.7.1
 
 ### Fix
