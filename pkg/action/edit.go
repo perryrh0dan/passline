@@ -13,13 +13,22 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
-func (s *Action) Edit(c *ucli.Context) error {
+func editParseArgs(c *ucli.Context) context.Context {
 	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("category") {
+		ctx = ctxutil.WithCategory(ctx, c.String("category"))
+	}
 
-	// Get all items
-	names, err := s.getSiteNames(ctx)
+	return ctx
+}
+
+func (s *Action) Edit(c *ucli.Context) error {
+	ctx := editParseArgs(c)
+
+	// Get all Sites
+	names, err := s.getItemNamesByCategory(ctx)
 	if err != nil {
-		return ExitError(ExitUnknown, err, "Error selecting item: %s", err)
+		return err
 	}
 
 	// Check if any item exists

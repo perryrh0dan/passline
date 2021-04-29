@@ -12,11 +12,20 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
-func (s *Action) Delete(c *ucli.Context) error {
+func deleteParseArgs(c *ucli.Context) context.Context {
 	ctx := ctxutil.WithGlobalFlags(c)
+	if c.IsSet("category") {
+		ctx = ctxutil.WithCategory(ctx, c.String("category"))
+	}
 
-	// Get all Items
-	names, err := s.getSiteNames(ctx)
+	return ctx
+}
+
+func (s *Action) Delete(c *ucli.Context) error {
+	ctx := deleteParseArgs(c)
+
+	// Get all Sites
+	names, err := s.getItemNamesByCategory(ctx)
 	if err != nil {
 		return err
 	}
