@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.7.3
+
+### Fix
+
+- category is now also used in edit and delete command
+
 ## Version 1.7.2
 
 ### Fix
