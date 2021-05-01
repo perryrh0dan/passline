@@ -13,17 +13,8 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
-func editParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("category") {
-		ctx = ctxutil.WithCategory(ctx, c.String("category"))
-	}
-
-	return ctx
-}
-
 func (s *Action) Edit(c *ucli.Context) error {
-	ctx := editParseArgs(c)
+	ctx := ctxutil.WithGlobalFlags(c)
 
 	// Get all Sites
 	names, err := s.getItemNamesByCategory(ctx)

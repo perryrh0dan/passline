@@ -31,10 +31,15 @@ const (
 // WithGlobalFlags parses any global flags from the cli context and returns
 // a regular context
 func WithGlobalFlags(c *cli.Context) context.Context {
+	ctx := c.Context
 	if c.Bool("yes") {
-		return WithAlwaysYes(c.Context, true)
+		ctx = WithAlwaysYes(ctx, true)
 	}
-	return c.Context
+	if c.IsSet("category") {
+		ctx = WithCategory(ctx, c.String("category"))
+	}
+
+	return ctx
 }
 
 // ProgressCallback is a callback for updateing progress
