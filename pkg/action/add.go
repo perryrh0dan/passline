@@ -56,10 +56,10 @@ func (s *Action) Add(c *ucli.Context) error {
 
 	// Get advanced parameters
 	recoveryCodes := make([]string, 0)
-	
+
 	// Get the default category from the context or use default
 	category := ctxutil.GetCategory(ctx)
-	if (category == "*") {
+	if category == "*" {
 		category = "default"
 	}
 

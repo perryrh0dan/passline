@@ -1,7 +1,6 @@
 package action
 
 import (
-	"context"
 	"passline/pkg/cli/selection"
 	"passline/pkg/clipboard"
 	"passline/pkg/crypt"
@@ -11,17 +10,8 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
-func defaultParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("category") {
-		ctx = ctxutil.WithCategory(ctx, c.String("category"))
-	}
-
-	return ctx
-}
-
 func (s *Action) Default(c *ucli.Context) error {
-	ctx := defaultParseArgs(c)
+	ctx := ctxutil.WithGlobalFlags(c)
 
 	// Get all Sites
 	names, err := s.getItemNamesByCategory(ctx)

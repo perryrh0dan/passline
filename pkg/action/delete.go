@@ -12,17 +12,8 @@ import (
 	ucli "github.com/urfave/cli/v2"
 )
 
-func deleteParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("category") {
-		ctx = ctxutil.WithCategory(ctx, c.String("category"))
-	}
-
-	return ctx
-}
-
 func (s *Action) Delete(c *ucli.Context) error {
-	ctx := deleteParseArgs(c)
+	ctx := ctxutil.WithGlobalFlags(c)
 
 	// Get all Sites
 	names, err := s.getItemNamesByCategory(ctx)
