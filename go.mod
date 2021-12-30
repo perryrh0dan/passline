@@ -12,7 +12,6 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/godbus/dbus v0.0.0-20190623212516-8a1682060722
-	github.com/gopasspw/gopass v1.9.2
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mitchellh/go-ps v1.0.0
