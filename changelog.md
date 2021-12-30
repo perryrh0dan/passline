@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.8.0
+
+### Feature
+
+- Add new "me" command to display default suername and phone number
+
 ## Version 1.7.4
 
 ### Fix
