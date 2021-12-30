@@ -25,6 +25,7 @@ type Config struct {
 	QuickSelect     bool   `yaml:"quickselect"`
 	DefaultUsername string `yaml:"defaultUsername"`
 	DefaultCategory string `yaml:"defaultCategory"`
+	PhoneNumber     string `yaml:"phoneNumber"`
 }
 
 func (c *Config) UnmarshalJSON(data []byte) error {
