@@ -92,14 +92,19 @@ func (s *Action) Edit(c *ucli.Context) error {
 		credential.RecoveryCodes = util.StringToArray(newRecoveryCodes)
 	}
 
-	item, err := s.Store.GetItemByName(ctx, name)
+	err = crypt.EncryptCredential(&credential, globalPassword)
 	if err != nil {
 		return err
 	}
 
-	err = crypt.EncryptCredential(&credential, globalPassword)
-	if err != nil {
-		return err
+	// Stop if item and username combination already exists
+	newItem, err := s.Store.GetItemByName(ctx, newName)
+	if err == nil {
+		_, err = newItem.GetCredentialByUsername(credential.Username)
+		if err == nil {
+			return ExitError(ExitAborted, err, "Item: %s with username: %s already exists", newName, credential.Username)
+		}
+
 	}
 
 	err = s.Store.DeleteCredential(ctx, item, selectedUsername)
