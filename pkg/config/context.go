@@ -23,6 +23,9 @@ func (c *Config) WithContext(ctx context.Context) context.Context {
 	if !ctxutil.HasCategory(ctx) {
 		ctx = ctxutil.WithCategory(ctx, c.DefaultCategory)
 	}
+	if !ctxutil.HasPhoneNumber(ctx) {
+		ctx = ctxutil.WithPhoneNumber(ctx, c.PhoneNumber)
+	}
 
 	return ctx
 }

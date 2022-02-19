@@ -26,6 +26,7 @@ const (
 	ctxKeyAdvanced
 	ctxKeyQuickSelect
 	ctxKeyCategory
+	ctxKeyPhoneNumber
 )
 
 // WithGlobalFlags parses any global flags from the cli context and returns
@@ -327,6 +328,25 @@ func GetCategory(ctx context.Context) string {
 	sv, ok := ctx.Value(ctxKeyCategory).(string)
 	if !ok {
 		return "*"
+	}
+	return sv
+}
+
+// WithCategory returns a context with the category set in the context
+func WithPhoneNumber(ctx context.Context, phoneNumber string) context.Context {
+	return context.WithValue(ctx, ctxKeyPhoneNumber, phoneNumber)
+}
+
+// HasPhoneNumber returns true if the context has the phone number set
+func HasPhoneNumber(ctx context.Context) bool {
+	return hasString(ctx, ctxKeyPhoneNumber)
+}
+
+// GetPhoneNumber returns the phone number from the context
+func GetPhoneNumber(ctx context.Context) string {
+	sv, ok := ctx.Value(ctxKeyPhoneNumber).(string)
+	if !ok {
+		return ""
 	}
 	return sv
 }

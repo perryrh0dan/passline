@@ -174,6 +174,11 @@ func RestoreMessage() {
 	d.Printf("Restoring backup...\n")
 }
 
+func InfoCardMessage(username, phoneNumber string) {
+	fmt.Printf("Username: %s\n", username)
+	fmt.Printf("Phone number: %s\n", phoneNumber)
+}
+
 func MissingArgument(arguments []string) {
 	d := color.New(color.FgRed)
 	d.Printf("error: missing required arguments %s\n", strings.Join(arguments, ", "))

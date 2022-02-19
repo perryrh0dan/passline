@@ -25,6 +25,7 @@ type Config struct {
 	QuickSelect     bool   `yaml:"quickselect"`
 	DefaultUsername string `yaml:"defaultUsername"`
 	DefaultCategory string `yaml:"defaultCategory"`
+	PhoneNumber     string `yaml:"phoneNumber"`
 }
 
 func (c *Config) UnmarshalJSON(data []byte) error {
@@ -106,7 +107,7 @@ func new() Config {
 }
 
 func Get() (*Config, error) {
-	config := Config{}
+	config := new()
 
 	file, _ := ioutil.ReadFile(configLocation())
 	_ = json.Unmarshal([]byte(file), &config)

@@ -78,6 +78,14 @@ func (s *Action) getMasterKey(ctx context.Context) ([]byte, error) {
 
 	if encryptedEncryptionKey != "" {
 		// If encrypted encryption key exists decrypt it
+		envKey := []byte(os.Getenv("PASSLINE_MASTER_KEY"))
+		if len(envKey) > 0 {
+			encryptionKey, err := crypt.DecryptKey(envKey, encryptedEncryptionKey)
+			if err == nil {
+				return []byte(encryptionKey), nil
+			}
+		}
+
 		// try password three times
 		counter := 0
 		for counter < 3 {

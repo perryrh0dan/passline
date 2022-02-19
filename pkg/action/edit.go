@@ -1,13 +1,11 @@
 package action
 
 import (
-	"context"
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
-	"passline/pkg/storage"
 	"passline/pkg/util"
 
 	ucli "github.com/urfave/cli/v2"
@@ -59,6 +57,12 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return err
 	}
 
+	// Get new URL
+	newName, err := input.Default("Please enter a new URL []: (%s) ", item.Name, "")
+	if err != nil {
+		return err
+	}
+
 	// Get new username
 	newUsername, err := input.Default("Please enter a new Username/Login []: (%s) ", credential.Username, "")
 	if err != nil {
@@ -88,43 +92,36 @@ func (s *Action) Edit(c *ucli.Context) error {
 		credential.RecoveryCodes = util.StringToArray(newRecoveryCodes)
 	}
 
-	err = s.edit(ctx, item.Name, selectedUsername, credential, globalPassword)
+	err = crypt.EncryptCredential(&credential, globalPassword)
+	if err != nil {
+		return err
+	}
+
+	// Stop if item and username combination already exists
+	newItem, err := s.Store.GetItemByName(ctx, newName)
+	if err == nil {
+		_, err = newItem.GetCredentialByUsername(credential.Username)
+		if err == nil {
+			return ExitError(ExitAborted, err, "Item: %s with username: %s already exists", newName, credential.Username)
+		}
+
+	}
+
+	err = s.Store.DeleteCredential(ctx, item, selectedUsername)
+	if err != nil {
+		return err
+	}
+
+	err = s.Store.AddCredential(ctx, newName, credential)
+	if err != nil {
+		return err
+	}
+
 	if err != nil {
 		return err
 	}
 
 	out.SuccessfulChangedItem(item.Name, credential.Username)
-
-	return nil
-}
-
-func (s *Action) edit(ctx context.Context, name, username string, updatedCredential storage.Credential, globalPassword []byte) error {
-	item, err := s.Store.GetItemByName(ctx, name)
-	if err != nil {
-		return err
-	}
-
-	// find credential in item
-	var credential *storage.Credential
-
-	for i := 0; i < len(item.Credentials); i++ {
-		if item.Credentials[i].Username == username {
-			credential = &item.Credentials[i]
-			break
-		}
-	}
-
-	*credential = updatedCredential
-
-	err = crypt.EncryptCredential(credential, globalPassword)
-	if err != nil {
-		return err
-	}
-
-	err = s.Store.UpdateItem(ctx, item)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

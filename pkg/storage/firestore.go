@@ -138,8 +138,8 @@ func (fs *FireStore) AddCredential(ctx context.Context, name string, credential 
 	return nil
 }
 
-func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, credential Credential) error {
-	indexCredential := getIndexOfCredential(item.Credentials, credential)
+func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username string) error {
+	indexCredential := getIndexOfCredential(item.Credentials, username)
 	if indexCredential == -1 {
 		return errors.New("Item not found")
 	}

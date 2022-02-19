@@ -64,6 +64,11 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Action:    s.List,
 		},
 		{
+			Name:   "me",
+			Usage:  "Display info card with default username and phone number",
+			Action: s.Me,
+		},
+		{
 			Name:    "password",
 			Aliases: []string{"p"},
 			Usage:   "Changes master password",

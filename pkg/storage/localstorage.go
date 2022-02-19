@@ -82,15 +82,15 @@ func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credenti
 	return nil
 }
 
-func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, credential Credential) error {
+func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, username string) error {
 	data := ls.getData()
-	indexItem := getIndexOfItem(data.Items, item)
+	indexItem := getIndexOfItem(data.Items, item.Name)
 	if indexItem == -1 {
 		return errors.New("Item not found")
 	}
 
 	if len(data.Items[indexItem].Credentials) > 1 {
-		indexCredential := getIndexOfCredential(data.Items[indexItem].Credentials, credential)
+		indexCredential := getIndexOfCredential(data.Items[indexItem].Credentials, username)
 		if indexCredential == -1 {
 			return errors.New("Item not found")
 		}
@@ -137,7 +137,7 @@ func (ls *LocalStorage) createItem(ctx context.Context, item Item) {
 
 func (ls *LocalStorage) deleteItem(item Item) {
 	data := ls.getData()
-	index := getIndexOfItem(data.Items, item)
+	index := getIndexOfItem(data.Items, item.Name)
 	data.Items = removeFromItems(data.Items, index)
 	ls.setData(data)
 }

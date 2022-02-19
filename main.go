@@ -23,7 +23,7 @@ const (
 
 var (
 	// Version is the released version of passline
-	version string = "1.7.4"
+	version string = "1.8.0"
 	// BuildTime is the time the binary was built
 	date string
 )
