@@ -107,7 +107,7 @@ func new() Config {
 }
 
 func Get() (*Config, error) {
-	config := Config{}
+	config := new()
 
 	file, _ := ioutil.ReadFile(configLocation())
 	_ = json.Unmarshal([]byte(file), &config)

@@ -16,7 +16,7 @@ type Storage interface {
 	GetItemByIndex(context.Context, int) (Item, error)
 	GetAllItems(context.Context) ([]Item, error)
 	AddCredential(context.Context, string, Credential) error
-	DeleteCredential(context.Context, Item, Credential) error
+	DeleteCredential(context.Context, Item, string) error
 	UpdateItem(context.Context, Item) error
 	SetData(context.Context, Data) error
 	GetKey(context.Context) (string, error)
@@ -128,18 +128,18 @@ func removeFromCredentials(s []Credential, i int) []Credential {
 	return s[:len(s)-1]
 }
 
-func getIndexOfItem(slice []Item, item Item) int {
+func getIndexOfItem(slice []Item, name string) int {
 	for p, v := range slice {
-		if v.Name == item.Name {
+		if v.Name == name {
 			return p
 		}
 	}
 	return -1
 }
 
-func getIndexOfCredential(slice []Credential, credential Credential) int {
+func getIndexOfCredential(slice []Credential, username string) int {
 	for p, v := range slice {
-		if v.Username == credential.Username {
+		if v.Username == username {
 			return p
 		}
 	}

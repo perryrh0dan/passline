@@ -66,12 +66,12 @@ func (s *Action) delete(ctx context.Context, name, username string) error {
 		return err
 	}
 
-	credential, err := item.GetCredentialByUsername(username)
+	_, err = item.GetCredentialByUsername(username)
 	if err != nil {
 		return err
 	}
 
-	err = s.Store.DeleteCredential(ctx, item, credential)
+	err = s.Store.DeleteCredential(ctx, item, username)
 	if err != nil {
 		return err
 	}
