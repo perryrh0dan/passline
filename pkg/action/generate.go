@@ -64,7 +64,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 
 	// Get the default category from the context or use default
 	category := ctxutil.GetCategory(ctx)
-	if (category == "*") {
+	if category == "*" {
 		category = "default"
 	}
 
@@ -143,7 +143,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	// set unencrypted password to copy to clipboard and to show in terminal
 	credential.Password = password
 
-	if ctxutil.IsAutoClip(ctx) || IsClip(ctx) {
+	if ctxutil.IsAutoClip(ctx) {
 		identifier := out.BuildIdentifier(name, credential.Username)
 		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
 			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)

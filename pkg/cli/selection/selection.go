@@ -29,6 +29,7 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 	}
 	message = fmt.Sprintf("Please select a %s: ", message)
 	selection, err := Default(message, items)
+
 	if err != nil {
 		return "", err
 	}

@@ -119,7 +119,8 @@ The following illustrates all the available options with their respective defaul
  "AutoClip": true,
  "Notifications": true,
  "QuickSelect": true,
- "DefaultUsername": "thomaspoehlmann96@googlemail.com"
+ "DefaultUsername": "thomaspoehlmann96@googlemail.com",
+ "DefaultCategory": "*"
 }
 ```
 
@@ -138,6 +139,14 @@ Display notifications
 ### QuickSelect
 
 Copy username to clipboard
+
+### DefaultUsername
+
+Default username to suggest
+
+### DefaultCategory
+
+If this is set to something else then "*" only this category will be used to suggest items. This can be overwritten by the --category option.
 
 ## Before flight
 
