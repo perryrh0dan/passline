@@ -2,11 +2,21 @@
 
 Changelog for passline
 
+## Version 1.9.0
+
+### Feature
+
+- Add new "category ls" command to display all available categories and the default one
+
+### Chore
+
+- Update dependencies
+
 ## Version 1.8.0
 
 ### Feature
 
-- Add new "me" command to display default suername and phone number
+- Add new "me" command to display default username and phone number
 
 ## Version 1.7.4
 

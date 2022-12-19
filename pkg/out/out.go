@@ -33,6 +33,18 @@ func DisplayItems(websites []storage.Item) {
 	}
 }
 
+func DisplayCategories(categories []string, activeCategory string) {
+	for _, category := range categories {
+		if category == activeCategory {
+			d := color.New(color.FgGreen)
+			d.Printf("%s\n", category)
+		} else {
+			fmt.Printf("%s\n", category)
+		}
+
+	}
+}
+
 func DisplayReleaseNotes(releaseNotes string) {
 	fmt.Println("Release note:\n", releaseNotes)
 }

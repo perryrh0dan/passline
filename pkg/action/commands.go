@@ -29,6 +29,17 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Action:    s.Backup,
 		},
 		{
+			Name: "category",
+			Subcommands: []*ucli.Command{
+				{
+					Name:    "list",
+					Aliases: []string{"ls"},
+					Usage:   "list all categories",
+					Action:  s.CategoryList,
+				},
+			},
+		},
+		{
 			Name:      "delete",
 			Aliases:   []string{"d"},
 			Usage:     "Deletes an item",
