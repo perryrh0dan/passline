@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.10.0
+
+### Feature
+
+- Add the option to overwrite exiting entry when editing an item. An confirmation dialog is displayed
+
 ## Version 1.9.0
 
 ### Feature

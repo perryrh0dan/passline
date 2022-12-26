@@ -1,6 +1,8 @@
 package action
 
 import (
+	"fmt"
+
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
 	"passline/pkg/crypt"
@@ -97,14 +99,22 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return err
 	}
 
-	// Stop if item and username combination already exists
+	existing := false
 	newItem, err := s.Store.GetItemByName(ctx, newName)
 	if err == nil {
 		_, err = newItem.GetCredentialByUsername(credential.Username)
 		if err == nil {
-			return ExitError(ExitAborted, err, "Item: %s with username: %s already exists", newName, credential.Username)
+			existing = true
 		}
+	}
 
+	if (existing) {
+		identifier := out.BuildIdentifier(newName, credential.Username)
+		message := fmt.Sprintf("Overwrite existing item %s []: (y/f) ", identifier)
+		confirm := input.Confirmation(message)
+		if !confirm {
+			return nil
+		}
 	}
 
 	err = s.Store.DeleteCredential(ctx, item, selectedUsername)
