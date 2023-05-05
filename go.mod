@@ -7,7 +7,6 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/atotto/clipboard v0.1.4
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203
 	github.com/fatih/color v1.13.0
 	github.com/godbus/dbus v0.0.0-20190623212516-8a1682060722
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
@@ -21,13 +20,16 @@ require (
 	google.golang.org/api v0.101.0
 	google.golang.org/grpc v1.50.1
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
+	atomicgo.dev/keyboard v0.2.9
 )
 
 require (
+	atomicgo.dev/keyboard v0.2.9 // indirect
 	cloud.google.com/go v0.104.0 // indirect
 	cloud.google.com/go/compute v1.10.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
 	cloud.google.com/go/storage v1.23.0 // indirect
+	github.com/containerd/console v1.0.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect

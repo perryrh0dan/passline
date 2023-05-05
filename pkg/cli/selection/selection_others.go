@@ -10,8 +10,9 @@ import (
 	"passline/pkg/cli/screenbuf"
 	"passline/pkg/cli/terminal"
 
-	"github.com/eiannone/keyboard"
 	"github.com/fatih/color"
+  "atomicgo.dev/keyboard"
+  "atomicgo.dev/keyboard/keys"
 )
 
 func Default(message string, items []string) (int, error) {
@@ -27,37 +28,29 @@ func Default(message string, items []string) (int, error) {
 
 	selected := 0
 
-	// Open keyboard
-	err = keyboard.Open()
-	if err != nil {
-		return selected, err
-	}
-	defer keyboard.Close()
-
 	printList(list, sb)
 
 	// Hide Cursor
 	terminal.HideCursor()
 	defer terminal.ShowCursor()
-	var open = true
 
-	for open {
-		_, key, _ := keyboard.GetKey()
+  keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		update := false
-		switch key {
-		case keyboard.KeyEsc:
+		
+    switch key.Code {
+		case keys.Esc:
 			selected = -1
-			open = false
-		case keyboard.KeyCtrlC:
+			return true, nil
+		case keys.CtrlC:
 			selected = -1
-			open = false
-		case keyboard.KeyEnter:
+			return true, nil
+		case keys.Enter:
 			selected = list.Index()
-			open = false
-		case keyboard.KeyArrowUp:
+			return true, nil
+		case keys.Up:
 			list.Prev()
 			update = true
-		case keyboard.KeyArrowDown:
+		case keys.Down:
 			list.Next()
 			update = true
 		}
@@ -65,9 +58,11 @@ func Default(message string, items []string) (int, error) {
 		if update {
 			printList(list, sb)
 		}
-	}
 
-	clearScreen(sb)
+    return false, nil
+  })
+
+  clearScreen(sb)
 	return selected, nil
 }
 
