@@ -35,7 +35,6 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 	}
 
 	if selection == -1 {
-    print("test")
 		return "", errors.New("Canceled selection")
 	}
 

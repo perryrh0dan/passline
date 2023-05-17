@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package selection
@@ -10,9 +11,9 @@ import (
 	"passline/pkg/cli/screenbuf"
 	"passline/pkg/cli/terminal"
 
+	"atomicgo.dev/keyboard"
+	"atomicgo.dev/keyboard/keys"
 	"github.com/fatih/color"
-  "atomicgo.dev/keyboard"
-  "atomicgo.dev/keyboard/keys"
 )
 
 func Default(message string, items []string) (int, error) {
@@ -34,10 +35,10 @@ func Default(message string, items []string) (int, error) {
 	terminal.HideCursor()
 	defer terminal.ShowCursor()
 
-  keyboard.Listen(func(key keys.Key) (stop bool, err error) {
+	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		update := false
-		
-    switch key.Code {
+
+		switch key.Code {
 		case keys.Esc:
 			selected = -1
 			return true, nil
@@ -53,16 +54,24 @@ func Default(message string, items []string) (int, error) {
 		case keys.Down:
 			list.Next()
 			update = true
+    case keys.RuneKey:
+      if key.String() == "j" {
+        list.Next()
+        update = true
+      } else if key.String() == "k" {
+        list.Prev()
+        update = true
+      }
 		}
 
 		if update {
 			printList(list, sb)
 		}
 
-    return false, nil
-  })
+		return false, nil
+	})
 
-  clearScreen(sb)
+	clearScreen(sb)
 	return selected, nil
 }
 

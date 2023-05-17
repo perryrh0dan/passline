@@ -9,7 +9,8 @@ import (
 	"passline/pkg/cli/list"
 	"passline/pkg/cli/terminal"
 
-	"github.com/eiannone/keyboard"
+	"atomicgo.dev/keyboard"
+	"atomicgo.dev/keyboard/keys"
 	"github.com/fatih/color"
 	"github.com/k0kubun/go-ansi"
 )
@@ -25,38 +26,29 @@ func Default(message string, items []string) (int, error) {
 
 	selected := 0
 
-	// Open keyboard
-	err = keyboard.Open()
-	if err != nil {
-		return selected, err
-	}
-	// TODO this war working before, is this needed ??
-	// defer keyboard.Close()
-
 	printList(list)
 
 	// Hide Cursor
 	terminal.HideCursor()
 	defer terminal.ShowCursor()
-	var open = true
 
-	for open {
-		_, key, _ := keyboard.GetKey()
+	keyboard.Listen(func(key keys.Key) (stop bool, err error) {
 		update := false
-		switch key {
-		case keyboard.KeyEsc:
+
+		switch key.Code {
+		case keys.Esc:
 			selected = -1
-			open = false
-		case keyboard.KeyCtrlC:
+			return true, nil
+		case keys.CtrlC:
 			selected = -1
-			open = false
-		case keyboard.KeyEnter:
+			return true, nil
+		case keys.Enter:
 			selected = list.Index()
-			open = false
-		case keyboard.KeyArrowUp:
+			return true, nil
+		case keys.Up:
 			list.Prev()
 			update = true
-		case keyboard.KeyArrowDown:
+		case keys.Down:
 			list.Next()
 			update = true
 		}
@@ -65,9 +57,13 @@ func Default(message string, items []string) (int, error) {
 			clearScreen(list)
 			printList(list)
 		}
-	}
+
+		return false, nil
+	})
 
 	clearScreen(list)
+	cursorStartOfLine()
+
 	return selected, nil
 }
 
@@ -80,6 +76,8 @@ func printList(list *list.List) {
 	}
 
 	for index, item := range items {
+		cursorStartOfLine()
+
 		if index != selected {
 			text := fmt.Sprintf("[ ] %s", item)
 			fmt.Println(text)
@@ -106,6 +104,7 @@ func printFooter(list *list.List) {
 
 	text := fmt.Sprintf("Items %d - %d of %d", from, to, length)
 	fmt.Println()
+	cursorStartOfLine()
 	fmt.Println(text)
 }
 
@@ -125,4 +124,8 @@ func clearScreen(list *list.List) {
 		ansi.CursorUp(1)
 		ansi.EraseInLine(3)
 	}
+}
+
+func cursorStartOfLine() {
+	ansi.CursorHorizontalAbsolute(0)
 }
