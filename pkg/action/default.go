@@ -42,7 +42,7 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
-	if ctxutil.IsQuickSelect(ctx) {
+	if ctxutil.IsQuickSelect(ctx) && !ctxutil.IsNoClip(ctx) {
 		// disable notifications for quick select
 		if err = clipboard.CopyTo(ctxutil.WithNotifications(ctx, false), "", []byte(credential.Username)); err != nil {
 			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
@@ -60,18 +60,17 @@ func (s *Action) Default(c *ucli.Context) error {
 		return err
 	}
 
-	if ctxutil.IsAutoClip(ctx) {
+	if ctxutil.IsAutoClip(ctx) && !ctxutil.IsNoClip(ctx) {
 		identifier := out.BuildIdentifier(name, credential.Username)
 		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
 			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
 		}
-		if ctxutil.IsAutoClip(ctx) && !c.Bool("print") {
+		if !c.Bool("print") {
 			out.SuccessfulCopiedToClipboard(name, credential.Username)
 			return nil
 		}
 	}
 
 	out.DisplayCredential(credential)
-	out.SuccessfulCopiedToClipboard(name, credential.Username)
 	return nil
 }
