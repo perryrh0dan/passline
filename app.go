@@ -60,6 +60,10 @@ WEBSITE:
 			Aliases: []string{"c"},
 			Usage:   "Select only items with given category",
 		},
+		&ucli.BoolFlag{
+			Name:  "noclip",
+			Usage: "Disable copy to clipboard",
+		},
 	}
 
 	// default command to get password
