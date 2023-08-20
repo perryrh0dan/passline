@@ -52,6 +52,15 @@ func Default(message string, items []string) (int, error) {
 			list.Next()
 			update = true
 		}
+		case keys.RuneKey:
+			if key.String() == "j" {
+				list.Next()
+				update = true
+			} else if key.String() == "k" {
+				list.Prev()
+				update = true
+			}
+		}
 
 		if update {
 			clearScreen(list)

@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.12.0
+
+### Feature
+
+- Add noclip global flag and vim motion for windows
+
 ## Version 1.10.0
 
 ### Feature
