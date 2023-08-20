@@ -51,7 +51,6 @@ func Default(message string, items []string) (int, error) {
 		case keys.Down:
 			list.Next()
 			update = true
-		}
 		case keys.RuneKey:
 			if key.String() == "j" {
 				list.Next()
