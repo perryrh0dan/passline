@@ -27,6 +27,7 @@ const (
 	ctxKeyQuickSelect
 	ctxKeyCategory
 	ctxKeyPhoneNumber
+	ctxNoClip
 )
 
 // WithGlobalFlags parses any global flags from the cli context and returns
@@ -38,6 +39,9 @@ func WithGlobalFlags(c *cli.Context) context.Context {
 	}
 	if c.IsSet("category") {
 		ctx = WithCategory(ctx, c.String("category"))
+	}
+	if c.Bool("noclip") {
+		ctx = WithNoClip(ctx, true)
 	}
 
 	return ctx
@@ -350,3 +354,18 @@ func GetPhoneNumber(ctx context.Context) string {
 	}
 	return sv
 }
+
+// WithAlwaysYes returns a context with the value of always yes set
+func WithNoClip(ctx context.Context, bv bool) context.Context {
+	return context.WithValue(ctx, ctxNoClip, bv)
+}
+
+// IsAlwaysYes returns the value of always yes or the default (false)
+func IsNoClip(ctx context.Context) bool {
+	bv, ok := ctx.Value(ctxNoClip).(bool)
+	if !ok {
+		return false
+	}
+	return bv
+}
+
