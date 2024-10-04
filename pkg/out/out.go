@@ -21,8 +21,11 @@ func DisplayCredential(credential storage.Credential) {
 	fmt.Printf("Username: %s\n", credential.Username)
 	fmt.Printf("Password: %s\n", credential.Password)
 
-	// TODO check if recovery codes exist
-	if len(credential.RecoveryCodes) > 0 {
+	if credential.Comment != "" {
+		fmt.Printf("Comment: %s\n", credential.Comment)
+	}
+
+	if len(credential.RecoveryCodes) > 0 && credential.RecoveryCodes[0] != "" {
 		fmt.Printf("Recovery codes: %s\n", util.ArrayToString(credential.RecoveryCodes))
 	}
 }
@@ -41,7 +44,6 @@ func DisplayCategories(categories []string, activeCategory string) {
 		} else {
 			fmt.Printf("%s\n", category)
 		}
-
 	}
 }
 

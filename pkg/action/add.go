@@ -56,6 +56,7 @@ func (s *Action) Add(c *ucli.Context) error {
 
 	// Get advanced parameters
 	recoveryCodes := make([]string, 0)
+	comment := ""
 
 	// Get the default category from the context or use default
 	category := ctxutil.GetCategory(ctx)
@@ -69,12 +70,16 @@ func (s *Action) Add(c *ucli.Context) error {
 			return err
 		}
 
+		comment, err = input.Default("Please enter a comment []: (%s)", "default", "")
+		if err != nil {
+			return err
+		}
+
 		recoveryCodesString, err := input.Default("Please enter your recovery codes if exists []: ", "", "")
 		if err != nil {
 			return err
 		}
 
-		recoveryCodes = make([]string, 0)
 		if recoveryCodesString != "" {
 			recoveryCodes = util.StringToArray(recoveryCodesString)
 		}
@@ -87,7 +92,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	}
 
 	// Create Credentials
-	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category}
+	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category, Comment: comment}
 
 	err = crypt.EncryptCredential(&credential, globalPassword)
 	if err != nil {

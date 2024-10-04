@@ -78,6 +78,7 @@ type Credential struct {
 	Username      string   `json:"username"`
 	Password      string   `json:"password"`
 	Category      string   `json:"category"`
+	Comment       string   `json:"comment"`
 	RecoveryCodes []string `json:"recoveryCodes"`
 }
 

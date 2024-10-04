@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	ucli "github.com/urfave/cli/v2"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 func ArgOrInput(args ucli.Args, index int, message, defaultValue, rules string) (string, error) {
@@ -89,7 +89,7 @@ func Confirmation(message string) bool {
 func Password(message string) []byte {
 	// Now get the password.
 	fmt.Print(message)
-	p, err := terminal.ReadPassword(int(syscall.Stdin))
+	p, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		if runtime.GOOS != "windows" {
 			panic(err)

@@ -66,14 +66,18 @@ func (s *Action) Edit(c *ucli.Context) error {
 	}
 
 	// Get new username
-	newUsername, err := input.Default("Please enter a new Username/Login []: (%s) ", credential.Username, "")
+	newUsername, err := input.Default("Please enter a new username/Login []: (%s) ", credential.Username, "")
 	if err != nil {
 		return err
 	}
-	credential.Username = newUsername
 
 	// Get new category
-	newCategory, err := input.Default("Please enter a new Category []: (%s) ", credential.Category, "")
+	newCategory, err := input.Default("Please enter a new category []: (%s) ", credential.Category, "")
+	if err != nil {
+		return err
+	}
+
+	newComment, err := input.Default("Please enter a new comment []: (%s) ", credential.Comment, "")
 	if err != nil {
 		return err
 	}
@@ -86,7 +90,9 @@ func (s *Action) Edit(c *ucli.Context) error {
 	}
 
 	// Edit credential
+	credential.Username = newUsername
 	credential.Category = newCategory
+	credential.Comment = newComment
 	credential.RecoveryCodes = make([]string, 0) // TODO remove spaces
 
 	// use one space to clear recovery codes
@@ -108,7 +114,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 		}
 	}
 
-	if (existing) {
+	if existing {
 		identifier := out.BuildIdentifier(newName, credential.Username)
 		message := fmt.Sprintf("Overwrite existing item %s []: (y/f) ", identifier)
 		confirm := input.Confirmation(message)

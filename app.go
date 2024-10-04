@@ -12,7 +12,7 @@ import (
 
 	"github.com/blang/semver"
 	ucli "github.com/urfave/cli/v2"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.App) {
@@ -84,7 +84,7 @@ func initContext(ctx context.Context, cfg *config.Config) context.Context {
 	ctx = cfg.WithContext(ctx)
 
 	// only emit color codes when stdout is a terminal
-	if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+	if !term.IsTerminal(int(os.Stdout.Fd())) {
 		ctx = ctxutil.WithColor(ctx, false)
 		ctx = ctxutil.WithTerminal(ctx, false)
 		ctx = ctxutil.WithInteractive(ctx, false)

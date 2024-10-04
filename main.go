@@ -13,7 +13,7 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 
 var (
 	// Version is the released version of passline
-	version string = "1.12.0"
+	version string = "1.13.0"
 	// BuildTime is the time the binary was built
 	date string
 )
@@ -32,7 +32,7 @@ func main() {
 	ctx := context.Background()
 
 	// Get the initial state of the terminal.
-	initialTermState, _ := terminal.GetState(int(syscall.Stdin))
+	initialTermState, _ := term.GetState(int(syscall.Stdin))
 
 	//trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
@@ -68,8 +68,8 @@ func main() {
 	}
 }
 
-func exit(initialTermState *terminal.State) {
-	_ = terminal.Restore(int(syscall.Stdin), initialTermState)
+func exit(initialTermState *term.State) {
+	_ = term.Restore(int(syscall.Stdin), initialTermState)
 	fmt.Println()
 	os.Exit(1)
 }
