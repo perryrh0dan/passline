@@ -15,10 +15,10 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rhysd/go-github-selfupdate v1.2.3
 	github.com/urfave/cli/v2 v2.25.3
-	golang.org/x/crypto v0.17.0
-	golang.org/x/net v0.17.0
-	golang.org/x/sys v0.15.0
-	golang.org/x/term v0.15.0
+	golang.org/x/crypto v0.21.0
+	golang.org/x/net v0.23.0
+	golang.org/x/sys v0.18.0
+	golang.org/x/term v0.18.0
 	google.golang.org/api v0.114.0
 	google.golang.org/grpc v1.56.3
 	gopkg.in/toast.v1 v1.0.0-20180812000517-0a84660828b2
