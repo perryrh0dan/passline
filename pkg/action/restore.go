@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"passline/pkg/cli/input"
@@ -54,7 +53,7 @@ func (s *Action) restore(ctx context.Context, path string) error {
 		return err
 	}
 
-	file, _ := ioutil.ReadFile(path)
+	file, _ := os.ReadFile(path)
 	_ = json.Unmarshal([]byte(file), &data)
 
 	err = s.Store.SetData(ctx, data)

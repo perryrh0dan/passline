@@ -15,7 +15,7 @@ import (
 	"github.com/k0kubun/go-ansi"
 )
 
-func Default(message string, items []string) (int, error) {
+func Default(message string, items []SelectItem) (int, error) {
 	// Print Message
 	fmt.Println(message)
 

@@ -16,13 +16,18 @@ import (
 	"github.com/fatih/color"
 )
 
-func Default(message string, items []string) (int, error) {
+func Default(message string, items []SelectItem) (int, error) {
 	// Print Message
 	fmt.Println(message)
 
 	sb := screenbuf.New(os.Stdout)
 
-	list, err := list.New(items, 10)
+	labels := make([]string, len(items))
+	for i, item := range items {
+		labels[i] = item.Label
+	}
+
+	list, err := list.New(labels, 10)
 	if err != nil {
 		return 0, err
 	}

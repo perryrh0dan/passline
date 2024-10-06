@@ -4,28 +4,33 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"passline/pkg/cli/terminal"
-	"passline/pkg/util"
 
 	ucli "github.com/urfave/cli/v2"
 )
 
-func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string, items []string) (string, error) {
+type SelectItem struct {
+	Value string
+	Label string
+}
+
+func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string, items []SelectItem) (string, error) {
 	userInput := args.Get(index)
 
 	// if input is no item name use as filter
-	if util.ArrayContains(items, userInput) {
+	if arrayContains(items, userInput) {
 		return userInput, nil
 	}
-	items = util.FilterArray(items, userInput)
+	items = filterArray(items, userInput)
 	if len(items) == 0 {
 		return "", errors.New("Not found")
 	}
 
 	if len(items) == 1 {
 		fmt.Printf("Selected %s: %s\n", message, items[0])
-		return items[0], nil
+		return items[0].Value, nil
 	}
 	message = fmt.Sprintf("Please select a %s: ", message)
 	selection, err := Default(message, items)
@@ -40,5 +45,25 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 
 	terminal.ClearLines(1)
 	fmt.Printf("%s%s\n", message, items[selection])
-	return items[selection], nil
+	return items[selection].Value, nil
+}
+
+func arrayContains(l []SelectItem, i string) bool {
+	for _, li := range l {
+		if li.Label == i {
+			return true
+		}
+	}
+
+	return false
+}
+
+func filterArray(l []SelectItem, filter string) []SelectItem {
+	filteredNames := make([]SelectItem, 0)
+	for _, i := range l {
+		if strings.Contains(i.Label, filter) {
+			filteredNames = append(filteredNames, i)
+		}
+	}
+	return filteredNames
 }

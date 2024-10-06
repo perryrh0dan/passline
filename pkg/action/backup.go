@@ -3,7 +3,7 @@ package action
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -66,7 +66,7 @@ func (s *Action) backup(ctx context.Context, path string) error {
 	}
 
 	file, _ := json.MarshalIndent(data, "", " ")
-	_ = ioutil.WriteFile(path, file, 0644)
+	_ = os.WriteFile(path, file, 0644)
 
 	return nil
 }
