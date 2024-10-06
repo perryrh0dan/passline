@@ -49,14 +49,20 @@ func New(items interface{}, size int) (*List, error) {
 // Prev moves the visible list back one item. If the selected item is out of
 // view, the new select item becomes the last visible item. If the list is
 // already at the top, nothing happens.
-func (l *List) Prev() {
+func (l *List) Prev() bool {
+	update := false
+
 	if l.cursor > 0 {
 		l.cursor--
+		update = true
 	}
 
 	if l.start > l.cursor {
 		l.start = l.cursor
+		update = true
 	}
+
+	return update
 }
 
 // Search allows the list to be filtered by a given term. The list must
@@ -128,16 +134,21 @@ func (l *List) SetCursor(i int) {
 // Next moves the visible list forward one item. If the selected item is out of
 // view, the new select item becomes the first visible item. If the list is
 // already at the bottom, nothing happens.
-func (l *List) Next() {
+func (l *List) Next() bool {
+	update := false
 	max := len(l.scope) - 1
 
 	if l.cursor < max {
 		l.cursor++
+		update = true
 	}
 
 	if l.start+l.size <= l.cursor {
 		l.start = l.cursor - l.size + 1
+		update = true
 	}
+
+	return update
 }
 
 // PageUp moves the visible list backward by x items. Where x is the size of the

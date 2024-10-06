@@ -46,18 +46,14 @@ func Default(message string, items []string) (int, error) {
 			selected = list.Index()
 			return true, nil
 		case keys.Up:
-			list.Prev()
-			update = true
+			update = list.Prev()
 		case keys.Down:
-			list.Next()
-			update = true
+			update = list.Next()
 		case keys.RuneKey:
 			if key.String() == "j" {
-				list.Next()
-				update = true
+				update = list.Next()
 			} else if key.String() == "k" {
-				list.Prev()
-				update = true
+				update = list.Prev()
 			}
 		}
 
