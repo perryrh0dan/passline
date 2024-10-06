@@ -54,7 +54,7 @@ func newAction(cfg *config.Config, sv semver.Version) (*Action, error) {
 func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item storage.Item) (storage.Credential, error) {
 	category := ctxutil.GetCategory(ctx)
 
-	username, err := selection.ArgOrSelect(ctx, args, 1, "Username/Login", item.GetUsernameArray(category))
+	username, err := selection.ArgOrSelect(ctx, args, 1, "Username/Login", item.GetUsernames(category))
 	if err != nil {
 		return storage.Credential{}, ExitError(ExitUnknown, err, "Selection Failed: %s", err)
 	}
@@ -147,21 +147,21 @@ func (s *Action) getSites(ctx context.Context) ([]storage.Item, error) {
 	return items, nil
 }
 
-func (s *Action) getSiteNames(ctx context.Context) ([]string, error) {
+func (s *Action) getSiteNames(ctx context.Context) ([]selection.SelectItem, error) {
 	items, err := s.getSites(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var names []string
+	var names []selection.SelectItem
 	for _, item := range items {
-		names = append(names, item.Name)
+		names = append(names, selection.SelectItem{Value: item.Name, Label: item.Name})
 	}
 
 	return names, nil
 }
 
-func (s *Action) getItemNamesByCategory(ctx context.Context) ([]string, error) {
+func (s *Action) getItemNamesByCategory(ctx context.Context) ([]selection.SelectItem, error) {
 	category := ctxutil.GetCategory(ctx)
 
 	if category == "*" {
@@ -173,7 +173,7 @@ func (s *Action) getItemNamesByCategory(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 
-	var names []string
+	var names []selection.SelectItem
 	for _, item := range items {
 		found := false
 		for _, cred := range item.Credentials {
@@ -182,7 +182,7 @@ func (s *Action) getItemNamesByCategory(ctx context.Context) ([]string, error) {
 			}
 		}
 		if found {
-			names = append(names, item.Name)
+			names = append(names, selection.SelectItem{Value: item.Name, Label: item.Name})
 		}
 	}
 

@@ -3,8 +3,10 @@ package storage
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
+	"passline/pkg/cli/selection"
 	"passline/pkg/config"
 
 	"golang.org/x/net/context"
@@ -63,11 +65,19 @@ func (item *Item) GetCredentialByUsername(username string) (Credential, error) {
 	return Credential{}, errors.New("Not found")
 }
 
-func (item *Item) GetUsernameArray(category string) []string {
-	var creds []string
+func (item *Item) GetUsernames(category string) []selection.SelectItem {
+	var creds []selection.SelectItem
 	for _, cred := range item.Credentials {
 		if category == "*" || category == cred.Category {
-			creds = append(creds, cred.Username)
+			label := cred.Username
+			if cred.Comment != "" {
+				label = fmt.Sprintf("%s (%s)", cred.Username, cred.Comment)
+			}
+
+			creds = append(creds, selection.SelectItem{
+				Value: cred.Username,
+				Label: label,
+			})
 		}
 	}
 

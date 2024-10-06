@@ -51,5 +51,5 @@ const (
 
 // ExitError returns a user friendly CLI error
 func ExitError(exitCode int, err error, format string, args ...interface{}) error {
-	return ucli.NewExitError(fmt.Sprintf(format, args...), exitCode)
+	return ucli.Exit(fmt.Sprintf(format, args...), exitCode)
 }

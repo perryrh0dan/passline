@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path"
 	"sort"
@@ -161,7 +160,7 @@ func (ls LocalStorage) getData() Data {
 
 	_, err := os.Stat(ls.storageFile)
 	if err == nil {
-		file, _ := ioutil.ReadFile(ls.storageFile)
+		file, _ := os.ReadFile(ls.storageFile)
 		_ = json.Unmarshal([]byte(file), &data)
 	}
 
@@ -172,6 +171,6 @@ func (ls LocalStorage) setData(data Data) {
 	_, err := os.Stat(ls.storageDir)
 	if err == nil {
 		file, _ := json.MarshalIndent(data, "", " ")
-		_ = ioutil.WriteFile(ls.storageFile, file, 0644)
+		_ = os.WriteFile(ls.storageFile, file, 0644)
 	}
 }

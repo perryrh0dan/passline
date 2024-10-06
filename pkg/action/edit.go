@@ -133,10 +133,6 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return err
 	}
 
-	if err != nil {
-		return err
-	}
-
 	out.SuccessfulChangedItem(item.Name, credential.Username)
 
 	return nil
