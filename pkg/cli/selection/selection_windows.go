@@ -19,7 +19,12 @@ func Default(message string, items []SelectItem) (int, error) {
 	// Print Message
 	fmt.Println(message)
 
-	list, err := list.New(items, 10)
+	labels := make([]string, len(items))
+	for i, item := range items {
+		labels[i] = item.Label
+	}
+
+	list, err := list.New(labels, 10)
 	if err != nil {
 		return 0, err
 	}
