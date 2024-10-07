@@ -29,7 +29,7 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 	}
 
 	if len(items) == 1 {
-		fmt.Printf("Selected %s: %s\n", message, items[0])
+		fmt.Printf("Selected %s: %s\n", message, items[0].Value)
 		return items[0].Value, nil
 	}
 	message = fmt.Sprintf("Please select a %s: ", message)
@@ -44,7 +44,7 @@ func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string,
 	}
 
 	terminal.ClearLines(1)
-	fmt.Printf("%s%s\n", message, items[selection])
+	fmt.Printf("%s%s\n", message, items[selection].Value)
 	return items[selection].Value, nil
 }
 
