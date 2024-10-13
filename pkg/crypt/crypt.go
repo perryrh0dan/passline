@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"io"
 
-	"passline/pkg/storage"
-
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -36,34 +34,6 @@ func DefaultOptions() Options {
 		IncludeNumbers:    true,
 		IncludeSymbols:    true,
 	}
-}
-
-func DecryptCredential(credential *storage.Credential, globalPassword []byte) error {
-	err := decryptPassword(credential, globalPassword)
-	if err != nil {
-		return err
-	}
-
-	err = decryptRecoveryCodes(credential, globalPassword)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func EncryptCredential(credential *storage.Credential, key []byte) error {
-	err := encryptPassword(credential, key)
-	if err != nil {
-		return err
-	}
-
-	err = encryptRecoveryCodes(credential, key)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func EncryptKey(password []byte, key string) (string, error) {
@@ -149,54 +119,4 @@ func GetKey(password []byte) []byte {
 	salt := []byte("This is the salt")
 	dk := pbkdf2.Key(password, salt, 4096, 32, sha1.New)
 	return dk
-}
-
-func encryptPassword(credential *storage.Credential, key []byte) error {
-	var err error
-	credential.Password, err = AesGcmEncrypt(key, credential.Password)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func encryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
-	var encryptedRecoveryCodes = make([]string, 0)
-
-	for _, c := range credential.RecoveryCodes {
-		encryptedRecoveryCode, err := AesGcmEncrypt(globalPassword, c)
-		if err != nil {
-			return err
-		}
-		encryptedRecoveryCodes = append(encryptedRecoveryCodes, encryptedRecoveryCode)
-	}
-
-	credential.RecoveryCodes = encryptedRecoveryCodes
-	return nil
-}
-
-func decryptPassword(credential *storage.Credential, globalPassword []byte) error {
-	// Decrypt passwords
-	var err error
-	credential.Password, err = AesGcmDecrypt(globalPassword, credential.Password)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func decryptRecoveryCodes(credential *storage.Credential, globalPassword []byte) error {
-	var decryptedRecoveryCodes = make([]string, 0)
-	for _, c := range credential.RecoveryCodes {
-		decryptedRecoveryCode, err := AesGcmDecrypt(globalPassword, c)
-		if err != nil {
-			return err
-		}
-		decryptedRecoveryCodes = append(decryptedRecoveryCodes, decryptedRecoveryCode)
-	}
-
-	credential.RecoveryCodes = decryptedRecoveryCodes
-	return nil
 }

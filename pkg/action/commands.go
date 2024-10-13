@@ -68,6 +68,12 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Action: s.Generate,
 		},
 		{
+			Name:    "init",
+			Aliases: []string{"i"},
+			Usage:   "Init a new vault",
+			Action:  s.Init,
+		},
+		{
 			Name:      "list",
 			Aliases:   []string{"ls"},
 			Usage:     "Lists all websites",

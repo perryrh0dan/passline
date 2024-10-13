@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"passline/pkg/crypt"
 	"regexp"
 	"runtime"
 	"strconv"
@@ -98,6 +99,40 @@ func Password(message string) []byte {
 
 	// Return the password as a string.
 	return p
+}
+
+func MasterPassword(encryptedEncryptionKey string, reason string) ([]byte, error) {
+	// If encrypted encryption key exists decrypt it
+	envKey := []byte(os.Getenv("PASSLINE_MASTER_KEY"))
+	if len(envKey) > 0 {
+		encryptionKey, err := crypt.DecryptKey(envKey, encryptedEncryptionKey)
+		if err == nil {
+			return []byte(encryptionKey), nil
+		}
+	}
+
+	prompt := "Enter master password: "
+	if reason != "" {
+		prompt = fmt.Sprintf("Enter master password %s: ", reason)
+	}
+
+	counter := 0
+	for counter < 3 {
+		password := Password(prompt)
+		fmt.Println()
+
+		encryptionKey, err := crypt.DecryptKey(password, encryptedEncryptionKey)
+		if err == nil {
+			return []byte(encryptionKey), nil
+		} else if counter != 2 {
+			fmt.Println("Wrong password! Please try again")
+		}
+
+		counter++
+	}
+
+	return []byte{}, fmt.Errorf("Wrong password")
+
 }
 
 func validate(input string, meta string) bool {

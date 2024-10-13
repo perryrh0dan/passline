@@ -66,12 +66,12 @@ func MigrateV1() error {
 		return err
 	}
 
-	data := storage.Data{
-		Key:   encryptedEncryptionKey,
-		Items: items,
+	err = store.SetItems(context.TODO(), items, []byte(newPassword))
+	if err != nil {
+		return err
 	}
 
-	err = store.SetData(context.TODO(), data)
+	err = store.SetKey(context.TODO(), encryptedEncryptionKey)
 	if err != nil {
 		return err
 	}

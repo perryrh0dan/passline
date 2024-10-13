@@ -27,6 +27,7 @@ const (
 	ctxKeyQuickSelect
 	ctxKeyCategory
 	ctxKeyPhoneNumber
+	ctxEncryption
 	ctxNoClip
 )
 
@@ -369,3 +370,15 @@ func IsNoClip(ctx context.Context) bool {
 	return bv
 }
 
+func WithEncryption(ctx context.Context, mode int) context.Context {
+	return context.WithValue(ctx, ctxEncryption, mode)
+}
+
+// GetPhoneNumber returns the phone number from the context
+func GetEncryption(ctx context.Context) int {
+	en, ok := ctx.Value(ctxEncryption).(int)
+	if !ok {
+		return -1
+	}
+	return en
+}

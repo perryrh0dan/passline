@@ -4,34 +4,48 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"sort"
 
+	"passline/pkg/cli/input"
 	"passline/pkg/config"
+	"passline/pkg/crypt"
+	"passline/pkg/ctxutil"
 )
 
 type LocalStorage struct {
 	storageDir  string
 	storageFile string
+	keyFile     string
+	items       []Item
+	key         string
 }
 
 func NewLocalStorage() (*LocalStorage, error) {
 	mainDir := config.Directory()
 
 	storageDir := path.Join(mainDir, "storage")
-	storageFile := path.Join(storageDir, "storage.json")
+	storageFile := path.Join(storageDir, "storage")
+	keyFile := path.Join(storageDir, "key")
 
-	ensureDirectories(storageDir, storageFile)
-	return &LocalStorage{storageDir: storageDir, storageFile: storageFile}, nil
+	ensureDirectories(storageDir)
+
+	ls := LocalStorage{storageDir: storageDir, storageFile: storageFile, keyFile: keyFile}
+
+	return &ls, nil
 }
 
-// Get item by name
 func (ls *LocalStorage) GetItemByName(ctx context.Context, name string) (Item, error) {
-	data := ls.getData()
-	for i := 0; i < len(data.Items); i++ {
-		if data.Items[i].Name == name {
-			return data.Items[i], nil
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return Item{}, err
+	}
+
+	for i := 0; i < len(items); i++ {
+		if items[i].Name == name {
+			return items[i], nil
 		}
 	}
 
@@ -39,109 +53,127 @@ func (ls *LocalStorage) GetItemByName(ctx context.Context, name string) (Item, e
 }
 
 func (ls *LocalStorage) GetItemByIndex(ctx context.Context, index int) (Item, error) {
-	data := ls.getData()
-	if index < 0 && index > len(data.Items) {
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return Item{}, err
+	}
+
+	if index < 0 && index > len(items) {
 		return Item{}, errors.New("Out of index")
 	}
 
-	return data.Items[index], nil
+	return items[index], nil
 }
 
 func (ls *LocalStorage) GetAllItems(ctx context.Context) ([]Item, error) {
-	data := ls.getData()
-	sort.Sort(ByName(data.Items))
-	return data.Items, nil
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Sort(ByName(items))
+	return items, nil
 }
 
-func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credential Credential) error {
+func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credential Credential, key []byte) error {
 	// Check if item already exists
 	_, err := ls.GetItemByName(ctx, name)
 	if err != nil {
 		// Generate new item entry
 		item := Item{Name: name, Credentials: []Credential{credential}}
-		ls.createItem(ctx, item)
+		ls.createItem(ctx, item, key)
 		return nil
 	}
 
 	// if item exists just append
-	data := ls.getData()
-	for i := 0; i < len(data.Items); i++ {
-		if data.Items[i].Name == name {
-			for y := 0; y < len(data.Items[i].Credentials); y++ {
-				if data.Items[i].Credentials[y].Username == credential.Username {
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(items); i++ {
+		if items[i].Name == name {
+			for y := 0; y < len(items[i].Credentials); y++ {
+				if items[i].Credentials[y].Username == credential.Username {
 					return errors.New("Username already exists")
 				}
 			}
-			data.Items[i].Credentials = append(data.Items[i].Credentials, credential)
+			items[i].Credentials = append(items[i].Credentials, credential)
 			break
 		}
 	}
 
-	ls.setData(data)
+	ls.SetItems(ctx, items, key)
 	return nil
 }
 
-func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, username string) error {
-	data := ls.getData()
-	indexItem := getIndexOfItem(data.Items, item.Name)
+func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, username string, key []byte) error {
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return err
+	}
+
+	indexItem := getIndexOfItem(items, item.Name)
 	if indexItem == -1 {
 		return errors.New("Item not found")
 	}
 
-	if len(data.Items[indexItem].Credentials) > 1 {
-		indexCredential := getIndexOfCredential(data.Items[indexItem].Credentials, username)
+	if len(items[indexItem].Credentials) > 1 {
+		indexCredential := getIndexOfCredential(items[indexItem].Credentials, username)
 		if indexCredential == -1 {
 			return errors.New("Item not found")
 		}
 
-		data.Items[indexItem].Credentials = removeFromCredentials(data.Items[indexItem].Credentials, indexCredential)
-		ls.setData(data)
+		items[indexItem].Credentials = removeFromCredentials(items[indexItem].Credentials, indexCredential)
+		ls.SetItems(ctx, items, key)
 	} else {
-		ls.deleteItem(data.Items[indexItem])
+		ls.deleteItem(ctx, items[indexItem])
 	}
 	return nil
 }
 
-func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
+func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item, key []byte) error {
 	// TODO check if username is valid
 
-	ls.deleteItem(item)
-	ls.createItem(ctx, item)
+	ls.deleteItem(ctx, item)
+	ls.createItem(ctx, item, key)
 
-	return nil
-}
-
-func (ls *LocalStorage) SetData(ctx context.Context, data Data) error {
-	ls.setData(data)
 	return nil
 }
 
 func (ls *LocalStorage) GetKey(ctx context.Context) (string, error) {
-	data := ls.getData()
-	return data.Key, nil
+	key, err := os.ReadFile(ls.keyFile)
+	if err != nil {
+		return "", err
+	}
+
+	return string(key), nil
 }
 
 func (ls *LocalStorage) SetKey(ctx context.Context, key string) error {
-	data := ls.getData()
-	data.Key = key
-	ls.setData(data)
+	err := os.WriteFile(ls.keyFile, []byte(key), 0644)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (ls *LocalStorage) createItem(ctx context.Context, item Item) {
-	data := ls.getData()
-	data.Items = append(data.Items, item)
-	ls.setData(data)
+func (ls *LocalStorage) GetRawItems(ctx context.Context) (json.RawMessage, error) {
+	file, err := os.ReadFile(ls.storageFile)
+	if err != nil {
+		return nil, err
+	}
+
+	var js json.RawMessage
+	if json.Unmarshal(file, &js) != nil {
+		return json.RawMessage(fmt.Sprintf("\"%s\"", file)), nil
+	}
+
+	return json.RawMessage(file), nil
 }
 
-func (ls *LocalStorage) deleteItem(item Item) {
-	data := ls.getData()
-	index := getIndexOfItem(data.Items, item.Name)
-	data.Items = removeFromItems(data.Items, index)
-	ls.setData(data)
-}
-
-func ensureDirectories(storageDir, storageFile string) {
+func ensureDirectories(storageDir string) {
 	ensureStorageDir(storageDir)
 }
 
@@ -155,22 +187,97 @@ func ensureStorageDir(storageDir string) {
 	}
 }
 
-func (ls LocalStorage) getData() Data {
-	data := Data{}
-
-	_, err := os.Stat(ls.storageFile)
-	if err == nil {
-		file, _ := os.ReadFile(ls.storageFile)
-		_ = json.Unmarshal([]byte(file), &data)
+func (ls *LocalStorage) createItem(ctx context.Context, item Item, key []byte) error {
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return err
 	}
 
-	return data
+	items = append(items, item)
+	ls.SetItems(ctx, items, key)
+
+	return nil
 }
 
-func (ls LocalStorage) setData(data Data) {
-	_, err := os.Stat(ls.storageDir)
-	if err == nil {
-		file, _ := json.MarshalIndent(data, "", " ")
-		_ = os.WriteFile(ls.storageFile, file, 0644)
+func (ls *LocalStorage) deleteItem(ctx context.Context, item Item) error {
+	items, err := ls.getItems(ctx)
+	if err != nil {
+		return err
 	}
+
+	index := getIndexOfItem(items, item.Name)
+	items = removeFromItems(items, index)
+	ls.SetItems(ctx, items, []byte{})
+
+	return nil
+}
+
+func (ls LocalStorage) SetItems(ctx context.Context, items []Item, key []byte) error {
+
+	file, err := json.Marshal(items)
+	if err != nil {
+		return fmt.Errorf("failed to marshal items: %w", err)
+	}
+
+	encryption := ctxutil.GetEncryption(ctx)
+	if encryption == config.FullEncryption {
+		encryptedResult, err := crypt.AesGcmEncrypt(key, string(file))
+		if err != nil {
+			return fmt.Errorf("encryption failed: %w", err)
+		}
+
+		file = []byte(fmt.Sprintf("%s", encryptedResult))
+	}
+
+	err = os.WriteFile(ls.storageFile, file, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write to file: %w", err)
+	}
+
+	return nil
+}
+
+func (ls *LocalStorage) getItems(ctx context.Context) ([]Item, error) {
+	if len(ls.items) > 0 {
+		return ls.items, nil
+	}
+
+	_, err := os.Stat(ls.storageFile)
+	if err != nil {
+		return []Item{}, nil
+	}
+
+	key, err := ls.GetKey(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	file, _ := os.ReadFile(ls.storageFile)
+	rawItems := json.RawMessage(file)
+
+	// check if the file is full encrypted by checking if it is a valid json
+	var js json.RawMessage
+	if json.Unmarshal(file, &js) != nil {
+		globalPassword, err := input.MasterPassword(key, "to decrypt your vault")
+		if err != nil {
+			return nil, err
+		}
+
+		decryptedItems, err := crypt.AesGcmDecrypt(globalPassword, string(file))
+		if err != nil {
+			return nil, err
+		}
+
+		rawItems = json.RawMessage(decryptedItems)
+	}
+
+	items := []Item{}
+	err = json.Unmarshal(rawItems, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	ls.items = items
+
+	return ls.items, nil
 }
