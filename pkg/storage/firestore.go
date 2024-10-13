@@ -2,10 +2,14 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"passline/pkg/config"
+	"passline/pkg/crypt"
+	"passline/pkg/ctxutil"
 	"path"
 	"sort"
 
@@ -20,6 +24,7 @@ import (
 type FireStore struct {
 	client *firestore.Client
 	items  []Item
+	key    string
 }
 
 const (
@@ -58,12 +63,17 @@ func NewFirestore() (*FireStore, error) {
 }
 
 func (fs *FireStore) GetItemByName(ctx context.Context, name string) (Item, error) {
-	dsnap, err := fs.client.Collection(DataCollection).Doc(name).Get(context.Background())
+	items, err := fs.GetAllItems(ctx)
 	if err != nil {
 		return Item{}, err
 	}
+
 	var item Item
-	dsnap.DataTo(&item)
+	for i := 0; i < len(items); i++ {
+		if items[i].Name == name {
+			item = items[i]
+		}
+	}
 
 	// Add default Category if not exists
 	for index, cred := range item.Credentials {
@@ -120,7 +130,7 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 	return fs.items, nil
 }
 
-func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential) error {
+func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential, key []byte) error {
 	item, err := fs.GetItemByName(ctx, name)
 	if status.Code(err) == codes.NotFound {
 		item = Item{Name: name, Credentials: []Credential{credential}}
@@ -130,7 +140,7 @@ func (fs *FireStore) AddCredential(ctx context.Context, name string, credential 
 		item.Credentials = append(item.Credentials, credential)
 	}
 
-	err = fs.createItem(ctx, item)
+	err = fs.createItem(ctx, item, key)
 	if err != nil {
 		log.Fatalf("Failed updating credentials: %v", err)
 	}
@@ -138,7 +148,7 @@ func (fs *FireStore) AddCredential(ctx context.Context, name string, credential 
 	return nil
 }
 
-func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username string) error {
+func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username string, key []byte) error {
 	indexCredential := getIndexOfCredential(item.Credentials, username)
 	if indexCredential == -1 {
 		return errors.New("Item not found")
@@ -146,24 +156,24 @@ func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username s
 
 	if len(item.Credentials) > 1 {
 		item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
-		err := fs.createItem(ctx, item)
+		err := fs.createItem(ctx, item, key)
 		if err != nil {
 			log.Fatalf("Failed updating credentials: %v", err)
 		}
 	} else {
-		fs.deleteItem(ctx, item)
+		fs.deleteItem(ctx, item, key)
 	}
 
 	return nil
 }
 
-func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
-	err := fs.deleteItem(ctx, item)
+func (fs *FireStore) UpdateItem(ctx context.Context, item Item, key []byte) error {
+	err := fs.deleteItem(ctx, item, key)
 	if err != nil {
 		return err
 	}
 
-	err = fs.createItem(ctx, item)
+	err = fs.createItem(ctx, item, key)
 	if err != nil {
 		return err
 	}
@@ -171,17 +181,14 @@ func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
 	return nil
 }
 
-func (fs *FireStore) SetData(ctx context.Context, data Data) error {
+func (fs *FireStore) SetItems(ctx context.Context, items []Item, key []byte) error {
 	fs.deleteCollection(ctx, 100)
 	batch := fs.client.Batch()
 
-	for _, item := range data.Items {
+	for _, item := range items {
 		itemRef := fs.client.Collection(DataCollection).Doc(item.Name)
 		batch.Set(itemRef, item)
 	}
-
-	itemRef := fs.client.Collection(ConfigCollection).Doc("config")
-	batch.Set(itemRef, Config{Key: data.Key})
 
 	_, err := batch.Commit(ctx)
 	if err != nil {
@@ -212,16 +219,61 @@ func (fs *FireStore) SetKey(ctx context.Context, key string) error {
 	return nil
 }
 
-func (fs *FireStore) createItem(ctx context.Context, item Item) error {
-	_, err := fs.client.Collection(DataCollection).Doc(item.Name).Set(ctx, item)
-	if err != nil {
-		log.Fatalf("Failed adding item: %v", err)
+func (fs *FireStore) GetRawItems(ctx context.Context) (json.RawMessage, error) {
+	iter := fs.client.Collection(DataCollection).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		var item Item
+		doc.DataTo(&item)
+
+		// Add default Category if not exists
+		for index, cred := range item.Credentials {
+			if cred.Category == "" {
+				item.Credentials[index].Category = DefaultCategory
+			}
+		}
+
+		fs.items = append(fs.items, item)
+	}
+
+	return nil, nil
+}
+
+func (fs *FireStore) createItem(ctx context.Context, item Item, key []byte) error {
+	encryption := ctxutil.GetEncryption(ctx)
+	if encryption == config.FullEncryption {
+		items, err := fs.GetAllItems(ctx)
+		items = append(items, item)
+
+		file, err := json.Marshal(items)
+		if err != nil {
+			return fmt.Errorf("failed to marshal items: %w", err)
+		}
+
+		encryptedResult, err := crypt.AesGcmEncrypt(key, string(file))
+		if err != nil {
+			return fmt.Errorf("encryption failed: %w", err)
+		}
+
+		fs.client.Collection("vault").Doc("items").Set(ctx, encryptedResult)
+	} else {
+		_, err := fs.client.Collection(DataCollection).Doc(item.Name).Set(ctx, item)
+		if err != nil {
+			log.Fatalf("Failed adding item: %v", err)
+		}
 	}
 
 	return nil
 }
 
-func (fs *FireStore) deleteItem(ctx context.Context, item Item) error {
+func (fs *FireStore) deleteItem(ctx context.Context, item Item, key []byte) error {
 	_, err := fs.client.Collection(DataCollection).Doc(item.Name).Delete(ctx)
 	if err != nil {
 		log.Printf("An error has occured: %s", err)

@@ -3,9 +3,9 @@ package action
 import (
 	"passline/pkg/cli/selection"
 	"passline/pkg/clipboard"
-	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
+	"passline/pkg/storage"
 
 	ucli "github.com/urfave/cli/v2"
 )
@@ -13,7 +13,9 @@ import (
 func (s *Action) Default(c *ucli.Context) error {
 	ctx := ctxutil.WithGlobalFlags(c)
 
-	// Get all Sites
+	args := c.Args()
+	out.DisplayMessage()
+
 	names, err := s.getItemNamesByCategory(ctx)
 	if err != nil {
 		return err
@@ -23,9 +25,6 @@ func (s *Action) Default(c *ucli.Context) error {
 	if len(names) <= 0 {
 		return ExitError(ExitNotFound, err, "No items found")
 	}
-
-	args := c.Args()
-	out.DisplayMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)
 	if err != nil {
@@ -50,12 +49,12 @@ func (s *Action) Default(c *ucli.Context) error {
 	}
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx)
+	globalPassword, err := s.getMasterKey(ctx, "to decrypt the password")
 	if err != nil {
 		return err
 	}
 
-	err = crypt.DecryptCredential(&credential, globalPassword)
+	err = storage.DecryptCredential(&credential, globalPassword)
 	if err != nil {
 		return err
 	}

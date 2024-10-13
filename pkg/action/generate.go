@@ -35,6 +35,9 @@ func (s *Action) Generate(c *ucli.Context) error {
 	args := c.Args()
 	out.GenerateMessage()
 
+	// decrypt the storage here for a better user expericence
+	s.Store.GetAllItems(ctx)
+
 	options := crypt.DefaultOptions()
 
 	// User input name
@@ -120,7 +123,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	}
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx)
+	globalPassword, err := s.getMasterKey(ctx, "to encrypt the new password")
 	if err != nil {
 		return err
 	}
@@ -129,13 +132,13 @@ func (s *Action) Generate(c *ucli.Context) error {
 	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category}
 
 	// Encrypt credentials
-	err = crypt.EncryptCredential(&credential, globalPassword)
+	err = storage.EncryptCredential(&credential, globalPassword)
 	if err != nil {
 		return ExitError(ExitEncrypt, err, "Error Encrypting credentials")
 	}
 
 	// Save credentials
-	err = s.Store.AddCredential(ctx, name, credential)
+	err = s.Store.AddCredential(ctx, name, credential, globalPassword)
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Error occured: %s", err)
 	}
