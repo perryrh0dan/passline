@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"passline/pkg/cli/input"
+	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 	"passline/pkg/storage"
@@ -45,7 +46,11 @@ func (s *Action) Restore(c *ucli.Context) error {
 }
 
 func (s *Action) restore(ctx context.Context, path string) error {
-	data := storage.Data{}
+	type Alias storage.Backup
+	aux := struct {
+		Items json.RawMessage `json:"items"`
+		*Alias
+	}{}
 
 	_, err := os.Stat(path)
 	if err != nil {
@@ -54,12 +59,52 @@ func (s *Action) restore(ctx context.Context, path string) error {
 	}
 
 	file, _ := os.ReadFile(path)
-	_ = json.Unmarshal([]byte(file), &data)
+	_ = json.Unmarshal([]byte(file), &aux)
 
-	err = s.Store.SetData(ctx, data)
+	rawItems := json.RawMessage(aux.Items)
+
+	globalPassword, err := input.MasterPassword(aux.Key, "to decrypt your vault")
+	if err != nil {
+		return err
+	}
+
+	var js json.RawMessage
+	err = json.Unmarshal(aux.Items, &js)
+	if err == nil {
+		decryptedItems, err := crypt.AesGcmDecrypt(globalPassword, removeQuotes(string(aux.Items)))
+		if err != nil {
+			return err
+		}
+
+		rawItems = json.RawMessage(decryptedItems)
+	}
+
+	items := []storage.Item{}
+	err = json.Unmarshal(rawItems, &items)
+	if err != nil {
+		return err
+	}
+
+	err = s.Store.SetKey(ctx, aux.Key)
+	if err != nil {
+		return err
+	}
+
+	err = s.Store.SetItems(ctx, items, globalPassword)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func removeQuotes(s string) string {
+	if len(s) > 0 && s[0] == '"' {
+		s = s[1:]
+	}
+	if len(s) > 0 && s[len(s)-1] == '"' {
+		s = s[:len(s)-1]
+	}
+
+	return s
 }

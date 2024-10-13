@@ -23,8 +23,7 @@ func (s *Action) Backup(c *ucli.Context) error {
 	args := c.Args()
 	out.BackupMessage()
 
-	//TODO this should happen in config
-	path := config.Directory() + "/backup"
+	path := config.BackupDirectory()
 
 	now := time.Now().Format("2006-01-02-15-04-05")
 	path = filepath.Join(path, now)
@@ -44,7 +43,7 @@ func (s *Action) Backup(c *ucli.Context) error {
 }
 
 func (s *Action) backup(ctx context.Context, path string) error {
-	items, err := s.Store.GetAllItems(ctx)
+	items, err := s.Store.GetRawItems(ctx)
 	if err != nil {
 		return err
 	}
@@ -58,14 +57,24 @@ func (s *Action) backup(ctx context.Context, path string) error {
 		path = path + ".json"
 	}
 
-	time := time.Now()
-	data := storage.Backup{
-		Date:  time,
-		Key:   key,
+	t := time.Now()
+	type Alias storage.Backup
+	aux := struct {
+		Items json.RawMessage `json:"items"`
+		*Alias
+	}{
 		Items: items,
+		Alias: (*Alias)(&storage.Backup{
+			Date: t,
+			Key:  key,
+		}),
 	}
 
-	file, _ := json.MarshalIndent(data, "", " ")
+	file, err := json.MarshalIndent(aux, "", " ")
+	if err != nil {
+		return err
+	}
+
 	_ = os.WriteFile(path, file, 0644)
 
 	return nil

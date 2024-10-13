@@ -5,9 +5,9 @@ import (
 
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
-	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
+	"passline/pkg/storage"
 	"passline/pkg/util"
 
 	ucli "github.com/urfave/cli/v2"
@@ -48,13 +48,13 @@ func (s *Action) Edit(c *ucli.Context) error {
 	selectedUsername := credential.Username
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx)
+	globalPassword, err := s.getMasterKey(ctx, "to decrypt the password")
 	if err != nil {
 		return err
 	}
 
 	// Decrypt Credentials to display secrets
-	err = crypt.DecryptCredential(&credential, globalPassword)
+	err = storage.DecryptCredential(&credential, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 		credential.RecoveryCodes = util.StringToArray(newRecoveryCodes)
 	}
 
-	err = crypt.EncryptCredential(&credential, globalPassword)
+	err = storage.EncryptCredential(&credential, globalPassword)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return err
 	}
 
-	err = s.Store.AddCredential(ctx, newName, credential)
+	err = s.Store.AddCredential(ctx, newName, credential, globalPassword)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -20,6 +19,7 @@ var (
 
 type Config struct {
 	Storage         string `yaml:"storage"`
+	Encryption      int    `yaml:"encryption"`
 	AutoClip        bool   `yaml:"autoclip"`
 	Notifications   bool   `yaml:"notifications"`
 	QuickSelect     bool   `yaml:"quickselect"`
@@ -61,7 +61,7 @@ func ensureConfigFile() {
 
 	config := new()
 	file, _ := json.MarshalIndent(config, "", " ")
-	_ = ioutil.WriteFile(configLocation(), file, 0644)
+	_ = os.WriteFile(configLocation(), file, 0644)
 }
 
 func ensureMainDir(config *Config) error {
@@ -98,18 +98,24 @@ func formatPasslineDir(dirPath string) (string, error) {
 	return path.Join(homeDir, strings.Replace(dirPath, "~", "", 1), ".passline"), nil
 }
 
+const (
+	PartialEncryption = iota
+	FullEncryption    = iota
+)
+
 func new() Config {
 	return Config{
 		Storage:       "local",
 		AutoClip:      true,
 		Notifications: true,
+		Encryption:    PartialEncryption,
 	}
 }
 
 func Get() (*Config, error) {
 	config := new()
 
-	file, _ := ioutil.ReadFile(configLocation())
+	file, _ := os.ReadFile(configLocation())
 	_ = json.Unmarshal([]byte(file), &config)
 
 	return &config, nil
@@ -130,4 +136,8 @@ func configLocation() string {
 // Directory returns the configuration directory for the passline config file
 func Directory() string {
 	return filepath.Dir(configLocation())
+}
+
+func BackupDirectory() string {
+	return Directory() + "/backup"
 }

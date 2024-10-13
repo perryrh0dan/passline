@@ -26,6 +26,7 @@ func (c *Config) WithContext(ctx context.Context) context.Context {
 	if !ctxutil.HasPhoneNumber(ctx) {
 		ctx = ctxutil.WithPhoneNumber(ctx, c.PhoneNumber)
 	}
+	ctx = ctxutil.WithEncryption(ctx, c.Encryption)
 
 	return ctx
 }

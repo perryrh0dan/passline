@@ -24,7 +24,7 @@ func TestAddItem(t *testing.T) {
 		Password: "1234",
 	}
 
-	s.AddCredential(ctx, "test", credential)
+	s.AddCredential(ctx, "test", credential, []byte{})
 
 	i, _ := s.GetItemByName(ctx, "test")
 	c, _ := i.GetCredentialByUsername("tpoe")

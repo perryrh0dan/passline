@@ -15,7 +15,7 @@ func (s *Action) Password(c *ucli.Context) error {
 	ctx := ctxutil.WithGlobalFlags(c)
 
 	// User input
-	key, err := s.getMasterKey(ctx)
+	key, err := s.getMasterKey(ctx, "")
 	if err != nil {
 		return err
 	}

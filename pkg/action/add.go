@@ -3,7 +3,6 @@ package action
 import (
 	"context"
 	"passline/pkg/cli/input"
-	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 	"passline/pkg/storage"
@@ -26,6 +25,9 @@ func (s *Action) Add(c *ucli.Context) error {
 
 	args := c.Args()
 	out.CreateMessage()
+
+	// decrypt the storage here for a better user expericence
+	s.Store.GetAllItems(ctx)
 
 	// User input name
 	name, err := input.ArgOrInput(args, 0, "URL", "", "required")
@@ -86,7 +88,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	}
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx)
+	globalPassword, err := s.getMasterKey(ctx, "to encrypt the new password")
 	if err != nil {
 		return err
 	}
@@ -94,12 +96,12 @@ func (s *Action) Add(c *ucli.Context) error {
 	// Create Credentials
 	credential := storage.Credential{Username: username, Password: password, RecoveryCodes: recoveryCodes, Category: category, Comment: comment}
 
-	err = crypt.EncryptCredential(&credential, globalPassword)
+	err = storage.EncryptCredential(&credential, globalPassword)
 	if err != nil {
 		return ExitError(ExitEncrypt, err, "Error Encrypting credentials")
 	}
 
-	err = s.Store.AddCredential(ctx, name, credential)
+	err = s.Store.AddCredential(ctx, name, credential, globalPassword)
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Error occured: %s", err)
 	}

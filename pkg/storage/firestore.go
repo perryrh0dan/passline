@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -120,7 +121,7 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 	return fs.items, nil
 }
 
-func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential) error {
+func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential, key []byte) error {
 	item, err := fs.GetItemByName(ctx, name)
 	if status.Code(err) == codes.NotFound {
 		item = Item{Name: name, Credentials: []Credential{credential}}
@@ -157,7 +158,7 @@ func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username s
 	return nil
 }
 
-func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
+func (fs *FireStore) UpdateItem(ctx context.Context, item Item, key []byte) error {
 	err := fs.deleteItem(ctx, item)
 	if err != nil {
 		return err
@@ -171,17 +172,14 @@ func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
 	return nil
 }
 
-func (fs *FireStore) SetData(ctx context.Context, data Data) error {
+func (fs *FireStore) SetItems(ctx context.Context, items []Item, key []byte) error {
 	fs.deleteCollection(ctx, 100)
 	batch := fs.client.Batch()
 
-	for _, item := range data.Items {
+	for _, item := range items {
 		itemRef := fs.client.Collection(DataCollection).Doc(item.Name)
 		batch.Set(itemRef, item)
 	}
-
-	itemRef := fs.client.Collection(ConfigCollection).Doc("config")
-	batch.Set(itemRef, Config{Key: data.Key})
 
 	_, err := batch.Commit(ctx)
 	if err != nil {
@@ -210,6 +208,33 @@ func (fs *FireStore) SetKey(ctx context.Context, key string) error {
 	}
 
 	return nil
+}
+
+func (fs *FireStore) GetRawItems(ctx context.Context) (json.RawMessage, error) {
+	iter := fs.client.Collection(DataCollection).Documents(ctx)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		var item Item
+		doc.DataTo(&item)
+
+		// Add default Category if not exists
+		for index, cred := range item.Credentials {
+			if cred.Category == "" {
+				item.Credentials[index].Category = DefaultCategory
+			}
+		}
+
+		fs.items = append(fs.items, item)
+	}
+
+	return nil, nil
 }
 
 func (fs *FireStore) createItem(ctx context.Context, item Item) error {

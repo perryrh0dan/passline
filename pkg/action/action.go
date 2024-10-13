@@ -69,7 +69,7 @@ func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item stor
 	return credential, nil
 }
 
-func (s *Action) getMasterKey(ctx context.Context) ([]byte, error) {
+func (s *Action) getMasterKey(ctx context.Context, reason string) ([]byte, error) {
 	// Get encrypted content encryption key from store
 	encryptedEncryptionKey, err := s.Store.GetKey(ctx)
 	if err != nil {
@@ -77,32 +77,12 @@ func (s *Action) getMasterKey(ctx context.Context) ([]byte, error) {
 	}
 
 	if encryptedEncryptionKey != "" {
-		// If encrypted encryption key exists decrypt it
-		envKey := []byte(os.Getenv("PASSLINE_MASTER_KEY"))
-		if len(envKey) > 0 {
-			encryptionKey, err := crypt.DecryptKey(envKey, encryptedEncryptionKey)
-			if err == nil {
-				return []byte(encryptionKey), nil
-			}
+		encryptionKey, err := input.MasterPassword(encryptedEncryptionKey, reason)
+		if err != nil {
+			return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
 		}
 
-		// try password three times
-		counter := 0
-		for counter < 3 {
-			password := input.Password("Enter master password: ")
-			fmt.Println()
-
-			encryptionKey, err := crypt.DecryptKey(password, encryptedEncryptionKey)
-			if err == nil {
-				return []byte(encryptionKey), nil
-			} else if counter != 2 {
-				fmt.Println("Wrong password! Please try again")
-			}
-
-			counter++
-		}
-
-		return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
+		return encryptionKey, nil
 	}
 
 	// initiate new encryption key
