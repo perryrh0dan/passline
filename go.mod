@@ -1,6 +1,6 @@
 module passline
 
-go 1.22
+go 1.23.4
 
 require (
 	atomicgo.dev/keyboard v0.2.9
