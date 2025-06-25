@@ -157,6 +157,11 @@ func DisplayMessage() {
 	d.Printf("Display item...\n")
 }
 
+func SyncMessage() {
+	d := color.New(color.FgGreen)
+	d.Printf("Sync configuration...\n")
+}
+
 func BackupMessage() {
 	d := color.New(color.FgGreen)
 	d.Printf("Creating backup...\n")

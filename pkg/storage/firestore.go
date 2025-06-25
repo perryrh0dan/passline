@@ -229,7 +229,7 @@ func (fs *FireStore) GetDecryptedKey(ctx context.Context, reason string) ([]byte
 	return fs.decryptedKey, nil
 }
 
-func (fs *FireStore) SetItems(ctx context.Context, items []Item) error {
+func (fs *FireStore) SetItems(ctx context.Context, items []Item, key []byte) error {
 	fs.deleteCollection(ctx, 100)
 	batch := fs.client.Batch()
 

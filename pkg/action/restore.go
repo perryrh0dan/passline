@@ -70,7 +70,7 @@ func (s *Action) restore(ctx context.Context, path string) error {
 
 	var js json.RawMessage
 	err = json.Unmarshal(aux.Items, &js)
-	if err == nil {
+	if err != nil {
 		decryptedItems, err := crypt.AesGcmDecrypt(globalPassword, removeQuotes(string(aux.Items)))
 		if err != nil {
 			return err
@@ -90,7 +90,7 @@ func (s *Action) restore(ctx context.Context, path string) error {
 		return err
 	}
 
-	err = s.Store.SetItems(ctx, items)
+	err = s.Store.SetItems(ctx, items, globalPassword)
 	if err != nil {
 		return err
 	}
