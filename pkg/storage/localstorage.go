@@ -143,7 +143,9 @@ func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item, key []byte) e
 
 func (ls *LocalStorage) GetKey(ctx context.Context) (string, error) {
 	key, err := os.ReadFile(ls.keyFile)
-	if err != nil {
+	if os.IsNotExist(err) {
+		return "", nil
+	} else if err != nil {
 		return "", err
 	}
 
