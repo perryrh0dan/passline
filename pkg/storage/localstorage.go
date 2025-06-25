@@ -103,7 +103,7 @@ func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credenti
 		}
 	}
 
-	ls.SetItems(ctx, items)
+	ls.SetItems(ctx, items, nil)
 	return nil
 }
 
@@ -125,7 +125,7 @@ func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, usernam
 		}
 
 		items[indexItem].Credentials = removeFromCredentials(items[indexItem].Credentials, indexCredential)
-		ls.SetItems(ctx, items)
+		ls.SetItems(ctx, items, nil)
 	} else {
 		ls.deleteItem(ctx, items[indexItem])
 	}
@@ -243,7 +243,7 @@ func (ls *LocalStorage) createItem(ctx context.Context, item Item) error {
 	}
 
 	items = append(items, item)
-	ls.SetItems(ctx, items)
+	ls.SetItems(ctx, items, nil)
 
 	return nil
 }
@@ -256,12 +256,12 @@ func (ls *LocalStorage) deleteItem(ctx context.Context, item Item) error {
 
 	index := getIndexOfItem(items, item.Name)
 	items = removeFromItems(items, index)
-	ls.SetItems(ctx, items)
+	ls.SetItems(ctx, items, nil)
 
 	return nil
 }
 
-func (ls *LocalStorage) SetItems(ctx context.Context, items []Item) error {
+func (ls *LocalStorage) SetItems(ctx context.Context, items []Item, decryptedKey []byte) error {
 
 	file, err := json.Marshal(items)
 	if err != nil {
@@ -270,9 +270,12 @@ func (ls *LocalStorage) SetItems(ctx context.Context, items []Item) error {
 
 	encryption := ctxutil.GetEncryption(ctx)
 	if encryption == config.FullEncryption {
-		key, err := ls.GetDecryptedKey(ctx, "encrypt the password")
-		if err != nil {
-			return err
+		var key = decryptedKey
+		if decryptedKey == nil {
+			key, err = ls.GetDecryptedKey(ctx, "encrypt the password")
+			if err != nil {
+				return err
+			}
 		}
 
 		encryptedResult, err := crypt.AesGcmEncrypt(key, string(file))

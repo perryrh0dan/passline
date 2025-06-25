@@ -23,7 +23,7 @@ type Storage interface {
 	GetKey(context.Context) (string, error)
 	SetKey(context.Context, string) error
 	GetDecryptedKey(context.Context, string) ([]byte, error)
-	SetItems(context.Context, []Item) error
+	SetItems(context.Context, []Item, []byte) error
 	GetRawItems(context.Context) (json.RawMessage, error)
 }
 

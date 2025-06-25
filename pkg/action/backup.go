@@ -26,7 +26,7 @@ func (s *Action) Backup(c *ucli.Context) error {
 	path := config.BackupDirectory()
 
 	now := time.Now().Format("2006-01-02-15-04-05")
-	path = filepath.Join(path, now)
+	path = filepath.Join(path, now) + ".json"
 
 	path, err := input.ArgOrInput(args, 0, "Path", path, "required")
 	if err != nil {
