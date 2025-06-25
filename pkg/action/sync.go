@@ -13,12 +13,7 @@ func (s *Action) Sync(c *ucli.Context) error {
 		return ExitError(ExitUnknown, err, "Failed to get all items: %s", err)
 	}
 
-	key, err := s.getMasterKey(ctx, "Enter password to encrypt data")
-	if err != nil {
-		return ExitError(ExitUnknown, err, "Failed to update data: %s", err)
-	}
-
-	err = s.Store.SetItems(ctx, items, key)
+	err = s.Store.SetItems(ctx, items)
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Failed to update data: %s", err)
 	}

@@ -56,6 +56,10 @@ func SuccessfulCopiedToClipboard(name, username string) {
 	fmt.Fprintf(color.Output, "Copied Password for %s to clipboard\n", identifier)
 }
 
+func FailedCopyToClipboard() {
+	fmt.Printf("Failed to copy to clipboard\n")
+}
+
 func SuccessfulChangedItem(name, username string) {
 	identifier := color.YellowString(BuildIdentifier(name, username))
 	d := color.New(color.FgGreen)

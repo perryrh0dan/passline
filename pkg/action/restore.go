@@ -90,7 +90,7 @@ func (s *Action) restore(ctx context.Context, path string) error {
 		return err
 	}
 
-	err = s.Store.SetItems(ctx, items, globalPassword)
+	err = s.Store.SetItems(ctx, items)
 	if err != nil {
 		return err
 	}

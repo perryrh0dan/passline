@@ -6,7 +6,6 @@ import (
 
 	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
-	"passline/pkg/config"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 
@@ -52,17 +51,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 		return nil
 	}
 
-	globalPassword := []byte{}
-
-	encryption := ctxutil.GetEncryption(ctx)
-	if encryption == config.FullEncryption {
-		globalPassword, err = s.getMasterKey(ctx, "to encrypt the value")
-		if err != nil {
-			return err
-		}
-	}
-
-	err = s.delete(ctx, item.Name, credential.Username, globalPassword)
+	err = s.delete(ctx, item.Name, credential.Username)
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Unable to delete item: %s", err)
 	}
@@ -71,7 +60,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 	return nil
 }
 
-func (s *Action) delete(ctx context.Context, name, username string, key []byte) error {
+func (s *Action) delete(ctx context.Context, name, username string) error {
 	item, err := s.Store.GetItemByName(ctx, name)
 	if err != nil {
 		return err
@@ -82,7 +71,7 @@ func (s *Action) delete(ctx context.Context, name, username string, key []byte) 
 		return err
 	}
 
-	err = s.Store.DeleteCredential(ctx, item, username, key)
+	err = s.Store.DeleteCredential(ctx, item, username)
 	if err != nil {
 		return err
 	}
