@@ -49,7 +49,7 @@ func (s *Action) Default(c *ucli.Context) error {
 	}
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx, "to decrypt the password")
+	globalPassword, err := s.Store.GetDecryptedKey(ctx, "to decrypt the password")
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (s *Action) Default(c *ucli.Context) error {
 	if ctxutil.IsAutoClip(ctx) && !ctxutil.IsNoClip(ctx) {
 		identifier := out.BuildIdentifier(name, credential.Username)
 		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
-			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
+			out.FailedCopyToClipboard()
 		}
 		if !c.Bool("print") {
 			out.SuccessfulCopiedToClipboard(name, credential.Username)

@@ -66,7 +66,7 @@ func MigrateV1() error {
 		return err
 	}
 
-	err = store.SetItems(context.TODO(), items, []byte(newPassword))
+	err = store.SetItems(context.TODO(), items)
 	if err != nil {
 		return err
 	}

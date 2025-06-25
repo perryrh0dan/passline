@@ -123,7 +123,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	}
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx, "to encrypt the new password")
+	globalPassword, err := s.Store.GetDecryptedKey(ctx, "to encrypt the new password")
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	}
 
 	// Save credentials
-	err = s.Store.AddCredential(ctx, name, credential, globalPassword)
+	err = s.Store.AddCredential(ctx, name, credential)
 	if err != nil {
 		return ExitError(ExitUnknown, err, "Error occured: %s", err)
 	}

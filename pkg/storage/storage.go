@@ -17,12 +17,13 @@ type Storage interface {
 	GetItemByName(context.Context, string) (Item, error)
 	GetItemByIndex(context.Context, int) (Item, error)
 	GetAllItems(context.Context) ([]Item, error)
-	AddCredential(context.Context, string, Credential, []byte) error
-	DeleteCredential(context.Context, Item, string, []byte) error
-	UpdateItem(context.Context, Item, []byte) error
+	AddCredential(context.Context, string, Credential) error
+	DeleteCredential(context.Context, Item, string) error
+	UpdateItem(context.Context, Item) error
 	GetKey(context.Context) (string, error)
 	SetKey(context.Context, string) error
-	SetItems(context.Context, []Item, []byte) error
+	GetDecryptedKey(context.Context, string) ([]byte, error)
+	SetItems(context.Context, []Item) error
 	GetRawItems(context.Context) (json.RawMessage, error)
 }
 

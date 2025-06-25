@@ -48,7 +48,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 	selectedUsername := credential.Username
 
 	// get and check global password
-	globalPassword, err := s.getMasterKey(ctx, "to decrypt the password")
+	globalPassword, err := s.Store.GetDecryptedKey(ctx, "to decrypt the password")
 	if err != nil {
 		return err
 	}
@@ -123,12 +123,12 @@ func (s *Action) Edit(c *ucli.Context) error {
 		}
 	}
 
-	err = s.Store.DeleteCredential(ctx, item, selectedUsername, globalPassword)
+	err = s.Store.DeleteCredential(ctx, item, selectedUsername)
 	if err != nil {
 		return err
 	}
 
-	err = s.Store.AddCredential(ctx, newName, credential, globalPassword)
+	err = s.Store.AddCredential(ctx, newName, credential)
 	if err != nil {
 		return err
 	}

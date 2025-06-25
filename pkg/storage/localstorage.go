@@ -16,11 +16,11 @@ import (
 )
 
 type LocalStorage struct {
-	storageDir  string
-	storageFile string
-	keyFile     string
-	items       []Item
-	key         string
+	storageDir   string
+	storageFile  string
+	keyFile      string
+	items        []Item
+	decryptedKey []byte
 }
 
 func NewLocalStorage() (*LocalStorage, error) {
@@ -75,13 +75,13 @@ func (ls *LocalStorage) GetAllItems(ctx context.Context) ([]Item, error) {
 	return items, nil
 }
 
-func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credential Credential, key []byte) error {
+func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credential Credential) error {
 	// Check if item already exists
 	_, err := ls.GetItemByName(ctx, name)
 	if err != nil {
 		// Generate new item entry
 		item := Item{Name: name, Credentials: []Credential{credential}}
-		ls.createItem(ctx, item, key)
+		ls.createItem(ctx, item)
 		return nil
 	}
 
@@ -103,11 +103,11 @@ func (ls *LocalStorage) AddCredential(ctx context.Context, name string, credenti
 		}
 	}
 
-	ls.SetItems(ctx, items, key)
+	ls.SetItems(ctx, items)
 	return nil
 }
 
-func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, username string, key []byte) error {
+func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, username string) error {
 	items, err := ls.getItems(ctx)
 	if err != nil {
 		return err
@@ -125,18 +125,18 @@ func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, usernam
 		}
 
 		items[indexItem].Credentials = removeFromCredentials(items[indexItem].Credentials, indexCredential)
-		ls.SetItems(ctx, items, key)
+		ls.SetItems(ctx, items)
 	} else {
 		ls.deleteItem(ctx, items[indexItem])
 	}
 	return nil
 }
 
-func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item, key []byte) error {
+func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 	// TODO check if username is valid
 
 	ls.deleteItem(ctx, item)
-	ls.createItem(ctx, item, key)
+	ls.createItem(ctx, item)
 
 	return nil
 }
@@ -150,6 +150,53 @@ func (ls *LocalStorage) GetKey(ctx context.Context) (string, error) {
 	}
 
 	return string(key), nil
+}
+
+func (ls *LocalStorage) GetDecryptedKey(ctx context.Context, reason string) ([]byte, error) {
+	if ls.decryptedKey != nil {
+		return ls.decryptedKey, nil
+	}
+
+	// Get encrypted content encryption key from store
+	encryptedEncryptionKey, err := ls.GetKey(ctx)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	if encryptedEncryptionKey != "" {
+		encryptionKey, err := input.MasterPassword(encryptedEncryptionKey, reason)
+		if err != nil {
+			return []byte{}, err
+		}
+
+		ls.decryptedKey = encryptionKey
+
+		return encryptionKey, nil
+	}
+
+	decryptedEncryptionKey, err := crypt.GenerateKey()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	password := input.Password("Enter master password: ")
+	fmt.Println()
+	passwordTwo := input.Password("Enter master password again: ")
+	fmt.Println()
+
+	if string(password) != string(passwordTwo) {
+		return []byte{}, err
+	}
+
+	encryptedEncryptionKey, err = crypt.EncryptKey(password, decryptedEncryptionKey)
+	if err != nil {
+		return []byte{}, err
+	}
+	ls.SetKey(ctx, encryptedEncryptionKey)
+
+	ls.decryptedKey = []byte(decryptedEncryptionKey)
+
+	return ls.decryptedKey, nil
 }
 
 func (ls *LocalStorage) SetKey(ctx context.Context, key string) error {
@@ -189,14 +236,14 @@ func ensureStorageDir(storageDir string) {
 	}
 }
 
-func (ls *LocalStorage) createItem(ctx context.Context, item Item, key []byte) error {
+func (ls *LocalStorage) createItem(ctx context.Context, item Item) error {
 	items, err := ls.getItems(ctx)
 	if err != nil {
 		return err
 	}
 
 	items = append(items, item)
-	ls.SetItems(ctx, items, key)
+	ls.SetItems(ctx, items)
 
 	return nil
 }
@@ -209,12 +256,12 @@ func (ls *LocalStorage) deleteItem(ctx context.Context, item Item) error {
 
 	index := getIndexOfItem(items, item.Name)
 	items = removeFromItems(items, index)
-	ls.SetItems(ctx, items, []byte{})
+	ls.SetItems(ctx, items)
 
 	return nil
 }
 
-func (ls LocalStorage) SetItems(ctx context.Context, items []Item, key []byte) error {
+func (ls *LocalStorage) SetItems(ctx context.Context, items []Item) error {
 
 	file, err := json.Marshal(items)
 	if err != nil {
@@ -223,6 +270,11 @@ func (ls LocalStorage) SetItems(ctx context.Context, items []Item, key []byte) e
 
 	encryption := ctxutil.GetEncryption(ctx)
 	if encryption == config.FullEncryption {
+		key, err := ls.GetDecryptedKey(ctx, "encrypt the password")
+		if err != nil {
+			return err
+		}
+
 		encryptedResult, err := crypt.AesGcmEncrypt(key, string(file))
 		if err != nil {
 			return fmt.Errorf("encryption failed: %w", err)
@@ -249,23 +301,18 @@ func (ls *LocalStorage) getItems(ctx context.Context) ([]Item, error) {
 		return []Item{}, nil
 	}
 
-	key, err := ls.GetKey(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	file, _ := os.ReadFile(ls.storageFile)
 	rawItems := json.RawMessage(file)
 
-	// check if the file is full encrypted by checking if it is a valid json
+	// Check if the file is full encrypted by checking if it is a valid json
 	var js json.RawMessage
 	if json.Unmarshal(file, &js) != nil {
-		globalPassword, err := input.MasterPassword(key, "to decrypt your vault")
+		decryptedKey, err := ls.GetDecryptedKey(ctx, "to decrypt your vault")
 		if err != nil {
 			return nil, err
 		}
 
-		decryptedItems, err := crypt.AesGcmDecrypt(globalPassword, string(file))
+		decryptedItems, err := crypt.AesGcmDecrypt(decryptedKey, string(file))
 		if err != nil {
 			return nil, err
 		}

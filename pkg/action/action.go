@@ -2,14 +2,11 @@ package action
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 
-	"passline/pkg/cli/input"
 	"passline/pkg/cli/selection"
 	"passline/pkg/config"
-	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 	"passline/pkg/storage"
@@ -67,55 +64,6 @@ func (s *Action) selectCredential(ctx context.Context, args ucli.Args, item stor
 	}
 
 	return credential, nil
-}
-
-func (s *Action) getMasterKey(ctx context.Context, reason string) ([]byte, error) {
-	// Get encrypted content encryption key from store
-	encryptedEncryptionKey, err := s.Store.GetKey(ctx)
-	if err != nil {
-		return []byte{}, ExitError(ExitUnknown, err, "Unable to load key: %s", err)
-	}
-
-	if encryptedEncryptionKey != "" {
-		encryptionKey, err := input.MasterPassword(encryptedEncryptionKey, reason)
-		if err != nil {
-			return []byte{}, ExitError(ExitPassword, err, "Wrong Password")
-		}
-
-		return encryptionKey, nil
-	}
-
-	// initiate new encryption key
-	encryptionKey, err := s.initMasterKey(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return encryptionKey, nil
-}
-
-func (s *Action) initMasterKey(ctx context.Context) ([]byte, error) {
-	decryptedEncryptionKey, err := crypt.GenerateKey()
-	if err != nil {
-		return []byte{}, ExitError(ExitUnknown, err, "Unable to generate key: %s", err)
-	}
-
-	password := input.Password("Enter master password: ")
-	fmt.Println()
-	passwordTwo := input.Password("Enter master password again: ")
-	fmt.Println()
-
-	if string(password) != string(passwordTwo) {
-		return []byte{}, ExitError(ExitPassword, err, "Password do not match")
-	}
-
-	encryptedEncryptionKey, err := crypt.EncryptKey(password, decryptedEncryptionKey)
-	if err != nil {
-		return []byte{}, ExitError(ExitUnknown, err, "Unable to store key: %s", err)
-	}
-	s.Store.SetKey(ctx, encryptedEncryptionKey)
-
-	return []byte(decryptedEncryptionKey), nil
 }
 
 func (s *Action) getSites(ctx context.Context) ([]storage.Item, error) {

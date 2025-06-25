@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"passline/pkg/cli/input"
 	"passline/pkg/config"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
@@ -22,9 +23,9 @@ import (
 )
 
 type FireStore struct {
-	client *firestore.Client
-	items  []Item
-	key    string
+	client       *firestore.Client
+	items        []Item
+	decryptedKey []byte
 }
 
 const (
@@ -130,7 +131,7 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 	return fs.items, nil
 }
 
-func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential, key []byte) error {
+func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential) error {
 	item, err := fs.GetItemByName(ctx, name)
 	if status.Code(err) == codes.NotFound {
 		item = Item{Name: name, Credentials: []Credential{credential}}
@@ -140,7 +141,7 @@ func (fs *FireStore) AddCredential(ctx context.Context, name string, credential 
 		item.Credentials = append(item.Credentials, credential)
 	}
 
-	err = fs.createItem(ctx, item, key)
+	err = fs.createItem(ctx, item)
 	if err != nil {
 		log.Fatalf("Failed updating credentials: %v", err)
 	}
@@ -148,7 +149,7 @@ func (fs *FireStore) AddCredential(ctx context.Context, name string, credential 
 	return nil
 }
 
-func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username string, key []byte) error {
+func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username string) error {
 	indexCredential := getIndexOfCredential(item.Credentials, username)
 	if indexCredential == -1 {
 		return errors.New("Item not found")
@@ -156,24 +157,24 @@ func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username s
 
 	if len(item.Credentials) > 1 {
 		item.Credentials = removeFromCredentials(item.Credentials, indexCredential)
-		err := fs.createItem(ctx, item, key)
+		err := fs.createItem(ctx, item)
 		if err != nil {
 			log.Fatalf("Failed updating credentials: %v", err)
 		}
 	} else {
-		fs.deleteItem(ctx, item, key)
+		fs.deleteItem(ctx, item)
 	}
 
 	return nil
 }
 
-func (fs *FireStore) UpdateItem(ctx context.Context, item Item, key []byte) error {
-	err := fs.deleteItem(ctx, item, key)
+func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
+	err := fs.deleteItem(ctx, item)
 	if err != nil {
 		return err
 	}
 
-	err = fs.createItem(ctx, item, key)
+	err = fs.createItem(ctx, item)
 	if err != nil {
 		return err
 	}
@@ -181,7 +182,54 @@ func (fs *FireStore) UpdateItem(ctx context.Context, item Item, key []byte) erro
 	return nil
 }
 
-func (fs *FireStore) SetItems(ctx context.Context, items []Item, key []byte) error {
+func (fs *FireStore) GetDecryptedKey(ctx context.Context, reason string) ([]byte, error) {
+	if fs.decryptedKey != nil {
+		return fs.decryptedKey, nil
+	}
+
+	// Get encrypted content encryption key from store
+	encryptedEncryptionKey, err := fs.GetKey(ctx)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	if encryptedEncryptionKey != "" {
+		encryptionKey, err := input.MasterPassword(encryptedEncryptionKey, reason)
+		if err != nil {
+			return []byte{}, err
+		}
+
+		fs.decryptedKey = encryptionKey
+
+		return encryptionKey, nil
+	}
+
+	decryptedEncryptionKey, err := crypt.GenerateKey()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	password := input.Password("Enter master password: ")
+	fmt.Println()
+	passwordTwo := input.Password("Enter master password again: ")
+	fmt.Println()
+
+	if string(password) != string(passwordTwo) {
+		return []byte{}, err
+	}
+
+	encryptedEncryptionKey, err = crypt.EncryptKey(password, decryptedEncryptionKey)
+	if err != nil {
+		return []byte{}, err
+	}
+	fs.SetKey(ctx, encryptedEncryptionKey)
+
+	fs.decryptedKey = []byte(decryptedEncryptionKey)
+
+	return fs.decryptedKey, nil
+}
+
+func (fs *FireStore) SetItems(ctx context.Context, items []Item) error {
 	fs.deleteCollection(ctx, 100)
 	batch := fs.client.Batch()
 
@@ -246,7 +294,7 @@ func (fs *FireStore) GetRawItems(ctx context.Context) (json.RawMessage, error) {
 	return nil, nil
 }
 
-func (fs *FireStore) createItem(ctx context.Context, item Item, key []byte) error {
+func (fs *FireStore) createItem(ctx context.Context, item Item) error {
 	encryption := ctxutil.GetEncryption(ctx)
 	if encryption == config.FullEncryption {
 		items, err := fs.GetAllItems(ctx)
@@ -255,6 +303,11 @@ func (fs *FireStore) createItem(ctx context.Context, item Item, key []byte) erro
 		file, err := json.Marshal(items)
 		if err != nil {
 			return fmt.Errorf("failed to marshal items: %w", err)
+		}
+
+		key, err := fs.GetDecryptedKey(ctx, "to decrypt the password")
+		if err != nil {
+			return err
 		}
 
 		encryptedResult, err := crypt.AesGcmEncrypt(key, string(file))
@@ -273,7 +326,7 @@ func (fs *FireStore) createItem(ctx context.Context, item Item, key []byte) erro
 	return nil
 }
 
-func (fs *FireStore) deleteItem(ctx context.Context, item Item, key []byte) error {
+func (fs *FireStore) deleteItem(ctx context.Context, item Item) error {
 	_, err := fs.client.Collection(DataCollection).Doc(item.Name).Delete(ctx)
 	if err != nil {
 		log.Printf("An error has occured: %s", err)
