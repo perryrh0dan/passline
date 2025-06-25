@@ -99,6 +99,11 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Action:    s.Restore,
 		},
 		{
+			Name:    "sync",
+			Aliases: []string{"s"},
+			Action:  s.Sync,
+		},
+		{
 			Name:        "unclip",
 			Usage:       "Internal command to clear clipboard",
 			Description: "Clear the clipboard if the content matches the checksum.",

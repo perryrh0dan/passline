@@ -35,7 +35,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	args := c.Args()
 	out.GenerateMessage()
 
-	// decrypt the storage here for a better user expericence
+	// Decrypt the storage here for a better user expericence
 	s.Store.GetAllItems(ctx)
 
 	options := crypt.DefaultOptions()
