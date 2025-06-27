@@ -14,6 +14,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/rhysd/go-github-selfupdate v1.2.3
+	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.25.3
 	golang.org/x/crypto v0.21.0
 	golang.org/x/net v0.23.0
@@ -33,6 +34,7 @@ require (
 	cloud.google.com/go/storage v1.30.1 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
@@ -45,7 +47,9 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tcnksm/go-gitconfig v0.1.2 // indirect
 	github.com/ulikunitz/xz v0.5.9 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
@@ -58,4 +62,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -8,6 +8,7 @@ import (
 
 	"passline/pkg/cli/selection"
 	"passline/pkg/config"
+	"passline/pkg/util"
 
 	"golang.org/x/net/context"
 )
@@ -122,7 +123,7 @@ func New(cfg *config.Config) (Storage, error) {
 			return nil, err
 		}
 	default:
-		store, err = NewLocalStorage()
+		store, err = NewLocalStorage(util.OSFileSystem{})
 		if err != nil {
 			return nil, err
 		}

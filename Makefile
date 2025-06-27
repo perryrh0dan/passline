@@ -6,7 +6,7 @@ COMMAND ?=
 test:
 	go test $(PKG)
 
-debug:
+test-debug:
 	dlv test $(PKG) --headless --listen=:$(DLV_PORT) --api-version=2
 
 build:

@@ -26,9 +26,6 @@ func (s *Action) Add(c *ucli.Context) error {
 	args := c.Args()
 	out.CreateMessage()
 
-	// decrypt the storage here for a better user expericence
-	s.Store.GetAllItems(ctx)
-
 	// User input name
 	name, err := input.ArgOrInput(args, 0, "URL", "", "required")
 	if err != nil {

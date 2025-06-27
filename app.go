@@ -9,6 +9,7 @@ import (
 	ap "passline/pkg/action"
 	"passline/pkg/config"
 	"passline/pkg/ctxutil"
+	"passline/pkg/util"
 
 	"github.com/blang/semver"
 	ucli "github.com/urfave/cli/v2"
@@ -17,7 +18,7 @@ import (
 
 func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.App) {
 	// try to load config
-	cfg, err := config.Get()
+	cfg, err := config.Get(util.OSFileSystem{})
 	if err != nil {
 		os.Exit(ap.ExitConfig)
 	}
