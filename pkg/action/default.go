@@ -44,7 +44,7 @@ func (s *Action) Default(c *ucli.Context) error {
 	if ctxutil.IsQuickSelect(ctx) && !ctxutil.IsNoClip(ctx) {
 		// disable notifications for quick select
 		if err = clipboard.CopyTo(ctxutil.WithNotifications(ctx, false), "", []byte(credential.Username)); err != nil {
-			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
+			out.ClipboardError()
 		}
 	}
 

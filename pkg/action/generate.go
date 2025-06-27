@@ -149,7 +149,7 @@ func (s *Action) Generate(c *ucli.Context) error {
 	if ctxutil.IsAutoClip(ctx) {
 		identifier := out.BuildIdentifier(name, credential.Username)
 		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
-			return ExitError(ExitIO, err, "failed to copy to clipboard: %s", err)
+			out.FailedCopyToClipboard()
 		}
 		if ctxutil.IsAutoClip(ctx) && !c.Bool("print") {
 			out.SuccessfulCopiedToClipboard(name, credential.Username)
