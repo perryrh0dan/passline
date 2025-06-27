@@ -66,7 +66,7 @@ func MigrateV1() error {
 		return err
 	}
 
-	err = store.SetItems(context.TODO(), items)
+	err = store.SetItems(context.TODO(), items, pwKey)
 	if err != nil {
 		return err
 	}

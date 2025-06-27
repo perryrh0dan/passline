@@ -1,6 +1,8 @@
 package util
 
-import "strings"
+import (
+	"strings"
+)
 
 func ArrayContains(l []string, i string) bool {
 	for _, li := range l {
@@ -28,4 +30,50 @@ func ArrayToString(l []string) string {
 
 func StringToArray(s string) []string {
 	return strings.Split(s, ",")
+}
+
+func LevenshteinDistanceSubstring(target, pattern string) (string, int) {
+	minDistance := len(pattern)
+	bestMatch := ""
+	patternLength := len(pattern)
+
+	for i := 0; i <= len(target)-patternLength; i++ {
+		substring := target[i : i+patternLength]
+		distance := LevenshteinDistance(substring, pattern)
+
+		if distance < minDistance {
+			minDistance = distance
+			bestMatch = substring
+		}
+	}
+
+	return bestMatch, minDistance
+}
+
+func LevenshteinDistance(a string, b string) int {
+	rows := len(b) + 1
+	cols := len(a) + 1
+
+	matrix := make([][]int, rows)
+
+	for i := range matrix {
+		matrix[i] = make([]int, cols)
+		matrix[i][0] = i
+	}
+
+	for i := range matrix[0] {
+		matrix[0][i] = i
+	}
+
+	for y := 1; y < len(matrix); y++ {
+		for x := 1; x < len(matrix[y]); x++ {
+			if a[x-1] == b[y-1] {
+				matrix[y][x] = matrix[y-1][x-1]
+			} else {
+				matrix[y][x] = min(matrix[y][x-1], matrix[y-1][x-1], matrix[y-1][x]) + 1
+			}
+		}
+	}
+
+	return matrix[rows-1][cols-1]
 }
