@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"passline/pkg/cli/terminal"
+	"passline/pkg/util"
 
 	ucli "github.com/urfave/cli/v2"
 )
@@ -61,7 +61,8 @@ func arrayContains(l []SelectItem, i string) bool {
 func filterArray(l []SelectItem, filter string) []SelectItem {
 	filteredNames := make([]SelectItem, 0)
 	for _, i := range l {
-		if strings.Contains(i.Label, filter) {
+		_, distance := util.LevenshteinDistanceSubstring(i.Label, filter)
+		if distance <= 2 {
 			filteredNames = append(filteredNames, i)
 		}
 	}
