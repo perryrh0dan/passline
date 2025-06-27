@@ -13,9 +13,11 @@ import (
 	"passline/pkg/config"
 	"passline/pkg/crypt"
 	"passline/pkg/ctxutil"
+	"passline/pkg/util"
 )
 
 type LocalStorage struct {
+	fs           util.FileSystem
 	storageDir   string
 	storageFile  string
 	keyFile      string
@@ -23,16 +25,21 @@ type LocalStorage struct {
 	decryptedKey []byte
 }
 
-func NewLocalStorage() (*LocalStorage, error) {
+func NewLocalStorage(fs util.FileSystem) (*LocalStorage, error) {
 	mainDir := config.Directory()
 
 	storageDir := path.Join(mainDir, "storage")
 	storageFile := path.Join(storageDir, "storage")
 	keyFile := path.Join(storageDir, "key")
 
-	ensureDirectories(storageDir)
+	ensureDirectories(fs, storageDir)
 
-	ls := LocalStorage{storageDir: storageDir, storageFile: storageFile, keyFile: keyFile}
+	ls := LocalStorage{
+		fs:          fs,
+		storageDir:  storageDir,
+		storageFile: storageFile,
+		keyFile:     keyFile,
+	}
 
 	return &ls, nil
 }
@@ -142,8 +149,8 @@ func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
 }
 
 func (ls *LocalStorage) GetKey(ctx context.Context) (string, error) {
-	key, err := os.ReadFile(ls.keyFile)
-	if os.IsNotExist(err) {
+	key, err := ls.fs.ReadFile(ls.keyFile)
+	if ls.fs.IsNotExist(err) {
 		return "", nil
 	} else if err != nil {
 		return "", err
@@ -200,7 +207,7 @@ func (ls *LocalStorage) GetDecryptedKey(ctx context.Context, reason string) ([]b
 }
 
 func (ls *LocalStorage) SetKey(ctx context.Context, key string) error {
-	err := os.WriteFile(ls.keyFile, []byte(key), 0644)
+	err := ls.fs.WriteFile(ls.keyFile, []byte(key), 0644)
 	if err != nil {
 		return err
 	}
@@ -209,7 +216,7 @@ func (ls *LocalStorage) SetKey(ctx context.Context, key string) error {
 }
 
 func (ls *LocalStorage) GetRawItems(ctx context.Context) (json.RawMessage, error) {
-	file, err := os.ReadFile(ls.storageFile)
+	file, err := ls.fs.ReadFile(ls.storageFile)
 	if err != nil {
 		return nil, err
 	}
@@ -222,12 +229,12 @@ func (ls *LocalStorage) GetRawItems(ctx context.Context) (json.RawMessage, error
 	return json.RawMessage(file), nil
 }
 
-func ensureDirectories(storageDir string) {
-	ensureStorageDir(storageDir)
+func ensureDirectories(fs util.FileSystem, storageDir string) {
+	ensureStorageDir(fs, storageDir)
 }
 
-func ensureStorageDir(storageDir string) {
-	_, err := os.Stat(storageDir)
+func ensureStorageDir(fs util.FileSystem, storageDir string) {
+	_, err := fs.Stat(storageDir)
 	if err != nil {
 		err := os.Mkdir(storageDir, os.ModePerm)
 		if err != nil {
@@ -286,7 +293,7 @@ func (ls *LocalStorage) SetItems(ctx context.Context, items []Item, decryptedKey
 		file = []byte(fmt.Sprintf("%s", encryptedResult))
 	}
 
-	err = os.WriteFile(ls.storageFile, file, 0644)
+	err = ls.fs.WriteFile(ls.storageFile, file, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write to file: %w", err)
 	}
@@ -304,7 +311,7 @@ func (ls *LocalStorage) getItems(ctx context.Context) ([]Item, error) {
 		return []Item{}, nil
 	}
 
-	file, _ := os.ReadFile(ls.storageFile)
+	file, _ := ls.fs.ReadFile(ls.storageFile)
 	rawItems := json.RawMessage(file)
 
 	// Check if the file is full encrypted by checking if it is a valid json

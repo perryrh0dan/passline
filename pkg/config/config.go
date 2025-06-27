@@ -3,9 +3,9 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"passline/pkg/util"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -48,9 +48,8 @@ func (c *Config) UnmarshalJSON(data []byte) error {
 
 func init() {
 	ensureConfigFile()
-	config, _ := Get()
-	_ = ensureMainDir(config)
-	_ = ensureBackupDir(config)
+	_ = ensureMainDir()
+	_ = ensureBackupDir()
 }
 
 func ensureConfigFile() {
@@ -64,7 +63,7 @@ func ensureConfigFile() {
 	_ = os.WriteFile(configLocation(), file, 0644)
 }
 
-func ensureMainDir(config *Config) error {
+func ensureMainDir() error {
 	mainDir := Directory()
 	_, err := os.Stat(mainDir)
 	if err != nil {
@@ -77,7 +76,7 @@ func ensureMainDir(config *Config) error {
 	return nil
 }
 
-func ensureBackupDir(config *Config) error {
+func ensureBackupDir() error {
 	backupDir := Directory() + "/backup"
 	_, err := os.Stat(backupDir)
 	if err != nil {
@@ -88,14 +87,6 @@ func ensureBackupDir(config *Config) error {
 	}
 
 	return nil
-}
-
-func formatPasslineDir(dirPath string) (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(homeDir, strings.Replace(dirPath, "~", "", 1), ".passline"), nil
 }
 
 const (
@@ -112,10 +103,10 @@ func new() Config {
 	}
 }
 
-func Get() (*Config, error) {
+func Get(fs util.FileSystem) (*Config, error) {
 	config := new()
 
-	file, _ := os.ReadFile(configLocation())
+	file, _ := fs.ReadFile(configLocation())
 	_ = json.Unmarshal([]byte(file), &config)
 
 	return &config, nil

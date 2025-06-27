@@ -5,6 +5,7 @@ import (
 	"passline/pkg/config"
 	"passline/pkg/crypt"
 	"passline/pkg/storage"
+	"passline/pkg/util"
 )
 
 const (
@@ -14,7 +15,7 @@ const (
 
 // 0.7.3 -> 1.0.0
 func MigrateV1() error {
-	cfg, err := config.Get()
+	cfg, err := config.Get(util.OSFileSystem{})
 	if err != nil {
 		return err
 	}
