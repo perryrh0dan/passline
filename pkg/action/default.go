@@ -63,14 +63,11 @@ func (s *Action) Default(c *ucli.Context) error {
 		identifier := out.BuildIdentifier(name, credential.Username)
 		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
 			out.FailedCopyToClipboard()
-		}
-		if !c.Bool("print") {
+		} else {
 			out.SuccessfulCopiedToClipboard(name, credential.Username)
-			return nil
 		}
 	}
 
 	out.DisplayCredential(credential)
-	out.SuccessfulCopiedToClipboard(name, credential.Username)
 	return nil
 }

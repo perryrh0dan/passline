@@ -57,7 +57,8 @@ func SuccessfulCopiedToClipboard(name, username string) {
 }
 
 func FailedCopyToClipboard() {
-	fmt.Printf("Failed to copy to clipboard\n")
+	d := color.New(color.FgRed)
+	d.Printf("Failed to copy to clipboard\n")
 }
 
 func SuccessfulChangedItem(name, username string) {
