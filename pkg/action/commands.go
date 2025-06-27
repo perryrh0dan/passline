@@ -29,7 +29,8 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Action:    s.Backup,
 		},
 		{
-			Name: "category",
+			Name:  "category",
+			Usage: "Manage categories",
 			Subcommands: []*ucli.Command{
 				{
 					Name:    "list",
@@ -76,7 +77,7 @@ func (s *Action) GetCommands() []*ucli.Command {
 		},
 		{
 			Name:   "me",
-			Usage:  "Display info card with default username and phone number",
+			Usage:  "Displays default username and phone number",
 			Action: s.Me,
 		},
 		{
@@ -95,6 +96,7 @@ func (s *Action) GetCommands() []*ucli.Command {
 		{
 			Name:    "sync",
 			Aliases: []string{"s"},
+			Usage:   "Reapply config, such as encryption mode",
 			Action:  s.Sync,
 		},
 		{
