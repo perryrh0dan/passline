@@ -69,9 +69,10 @@ func (s *Action) restore(ctx context.Context, path string) error {
 	}
 
 	var js json.RawMessage
-	err = json.Unmarshal(aux.Items, &js)
-	if err != nil {
-		decryptedItems, err := crypt.AesGcmDecrypt(globalPassword, removeQuotes(string(aux.Items)))
+
+	preparedItems := removeQuotes(string(aux.Items))
+	if json.Unmarshal([]byte(preparedItems), &js) != nil {
+		decryptedItems, err := crypt.AesGcmDecrypt(globalPassword, preparedItems)
 		if err != nil {
 			return err
 		}
