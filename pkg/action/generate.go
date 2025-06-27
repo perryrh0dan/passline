@@ -143,21 +143,18 @@ func (s *Action) Generate(c *ucli.Context) error {
 		return ExitError(ExitUnknown, err, "Error occured: %s", err)
 	}
 
-	// set unencrypted password to copy to clipboard and to show in terminal
+	// Set decrypted password to copy to clipboard and to show in terminal
 	credential.Password = password
 
 	if ctxutil.IsAutoClip(ctx) {
 		identifier := out.BuildIdentifier(name, credential.Username)
 		if err = clipboard.CopyTo(ctx, identifier, []byte(credential.Password)); err != nil {
 			out.FailedCopyToClipboard()
-		}
-		if ctxutil.IsAutoClip(ctx) && !c.Bool("print") {
+		} else {
 			out.SuccessfulCopiedToClipboard(name, credential.Username)
-			return nil
 		}
 	}
 
 	out.DisplayCredential(credential)
-	out.SuccessfulCopiedToClipboard(name, credential.Username)
 	return nil
 }
