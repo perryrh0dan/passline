@@ -8,4 +8,7 @@ test:
 debug:
 	dlv test $(PKG) --headless --listen=:$(DLV_PORT) --api-version=2
 
-.PHONY: test debug
+build:
+	go build
+
+.PHONY: test debug build
