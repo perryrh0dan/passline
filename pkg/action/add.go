@@ -8,22 +8,22 @@ import (
 	"passline/pkg/storage"
 	"passline/pkg/util"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func addParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("advanced") {
-		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
+func addParseArgs(c context.Context, cmd *ucli.Command) context.Context {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
+	if cmd.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, cmd.Bool("advanced"))
 	}
 
 	return ctx
 }
 
-func (s *Action) Add(c *ucli.Context) error {
-	ctx := addParseArgs(c)
+func (s *Action) Add(c context.Context, cmd *ucli.Command) error {
+	ctx := addParseArgs(c, cmd)
 
-	args := c.Args()
+	args := cmd.Args()
 	out.CreateMessage()
 
 	// User input name
@@ -106,7 +106,7 @@ func (s *Action) Add(c *ucli.Context) error {
 	credential.Password = password
 
 	out.SuccessfulAddedItem(name, credential.Username)
-	if c.Bool("print") {
+	if cmd.Bool("print") {
 		out.DisplayCredential(credential)
 	}
 

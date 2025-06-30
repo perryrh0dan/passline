@@ -1,21 +1,22 @@
 package action
 
 import (
+	"context"
 	"log"
 	"os"
-	
+
 	"passline/pkg/cli/input"
 	"passline/pkg/out"
 
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 const (
 	repo = "perryrh0dan/passline"
 )
 
-func (s *Action) Update(c *ucli.Context) error {
+func (s *Action) Update(c context.Context, cmd *ucli.Command) error {
 	latest, found, err := selfupdate.DetectLatest(repo)
 	if err != nil {
 		out.DetectVersionError(err)

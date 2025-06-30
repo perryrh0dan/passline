@@ -1,6 +1,7 @@
 package action
 
 import (
+	"context"
 	"errors"
 
 	"passline/pkg/cli/input"
@@ -8,11 +9,11 @@ import (
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) Password(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) Password(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
 	// User input
 	key, err := s.Store.GetDecryptedKey(ctx, "")

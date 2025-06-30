@@ -1,6 +1,7 @@
 package action
 
 import (
+	"context"
 	"fmt"
 
 	"passline/pkg/cli/input"
@@ -10,11 +11,11 @@ import (
 	"passline/pkg/storage"
 	"passline/pkg/util"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) Edit(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) Edit(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
 	// Get all Sites
 	names, err := s.getItemNamesByCategory(ctx)
@@ -27,7 +28,7 @@ func (s *Action) Edit(c *ucli.Context) error {
 		return ExitError(ExitNotFound, err, "No items found")
 	}
 
-	args := c.Args()
+	args := cmd.Args()
 	out.EditMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)

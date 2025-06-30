@@ -1,19 +1,20 @@
 package action
 
 import (
+	"context"
 	"passline/pkg/cli/selection"
 	"passline/pkg/clipboard"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 	"passline/pkg/storage"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) Default(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) Default(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
-	args := c.Args()
+	args := cmd.Args()
 	out.DisplayMessage()
 
 	names, err := s.getItemNamesByCategory(ctx)

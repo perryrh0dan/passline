@@ -3,7 +3,7 @@ package ctxutil
 import (
 	"context"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type contextKey int
@@ -33,8 +33,7 @@ const (
 
 // WithGlobalFlags parses any global flags from the cli context and returns
 // a regular context
-func WithGlobalFlags(c *cli.Context) context.Context {
-	ctx := c.Context
+func WithGlobalFlags(ctx context.Context, c *cli.Command) context.Context {
 	if c.Bool("yes") {
 		ctx = WithAlwaysYes(ctx, true)
 	}

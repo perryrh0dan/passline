@@ -12,11 +12,11 @@ import (
 	"passline/pkg/util"
 
 	"github.com/blang/semver"
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 	"golang.org/x/term"
 )
 
-func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.App) {
+func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.Command) {
 	// try to load config
 	cfg, err := config.Get(util.OSFileSystem{})
 	if err != nil {
@@ -31,20 +31,18 @@ func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.Ap
 		os.Exit(ap.ExitUnknown)
 	}
 
-	app := ucli.NewApp()
-	app.Name = "Passline"
-	app.Usage = "Password manager"
-	app.HelpName = "passline"
-	app.Version = sv.String()
-	app.Description = "Password manager for the command line"
-	app.EnableBashCompletion = true
+	var app = ucli.Command{
+		Name:                  "Passline",
+		Usage:                 "Password manager",
+		Version:               sv.String(),
+		Description:           "Password manager for the command line",
+		EnableShellCompletion: true,
+	}
 
 	// Append website information to default helper print
-	app.CustomAppHelpTemplate = fmt.Sprintf(`%s
+	app.CustomRootCommandHelpTemplate = fmt.Sprintf(`%s
 WEBSITE: 
-   https://github.com/perryrh0dan/passline
-
-	`, ucli.AppHelpTemplate)
+   https://github.com/perryrh0dan/passline`)
 
 	app.Flags = []ucli.Flag{
 		&ucli.BoolFlag{
@@ -68,16 +66,15 @@ WEBSITE:
 	}
 
 	// default command to get password
-	app.Action = func(c *ucli.Context) error {
-		return action.Default(c)
+	app.Action = func(c context.Context, command *ucli.Command) error {
+		return action.Default(c, command)
 	}
 
 	app.Commands = action.GetCommands()
 
 	sort.Sort(ucli.FlagsByName(app.Flags))
-	sort.Sort(ucli.CommandsByName(app.Commands))
 
-	return ctx, app
+	return ctx, &app
 }
 
 func initContext(ctx context.Context, cfg *config.Config) context.Context {

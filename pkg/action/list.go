@@ -1,16 +1,17 @@
 package action
 
 import (
+	"context"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) List(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) List(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
-	args := c.Args()
+	args := cmd.Args()
 
 	if args.Len() >= 1 {
 		item, err := s.getSite(ctx, args.Get(0))

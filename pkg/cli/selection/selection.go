@@ -8,7 +8,7 @@ import (
 	"passline/pkg/cli/terminal"
 	"passline/pkg/util"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 type SelectItem struct {
