@@ -34,7 +34,7 @@ func main() {
 	// Get the initial state of the terminal.
 	initialTermState, _ := term.GetState(int(syscall.Stdin))
 
-	//trap Ctrl+C and call cancel on the context
+	// Trap Ctrl+C and call cancel on the context
 	ctx, cancel := context.WithCancel(ctx)
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, os.Kill)
@@ -63,7 +63,7 @@ func main() {
 	}
 
 	ctx, app := setupApp(ctx, sv)
-	if err := app.RunContext(ctx, os.Args); err != nil {
+	if err := app.Run(ctx, os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

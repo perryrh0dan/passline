@@ -14,13 +14,13 @@ import (
 	"passline/pkg/out"
 	"passline/pkg/storage"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) Backup(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) Backup(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
-	args := c.Args()
+	args := cmd.Args()
 	out.BackupMessage()
 
 	path := config.BackupDirectory()

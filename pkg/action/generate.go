@@ -12,31 +12,28 @@ import (
 	"passline/pkg/storage"
 	"passline/pkg/util"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 const PASSWORD_MIN_LENGTH = 8
 
-func generateParseArgs(c *ucli.Context) context.Context {
-	ctx := ctxutil.WithGlobalFlags(c)
-	if c.IsSet("advanced") {
-		ctx = ctxutil.WithAdvanced(ctx, c.Bool("advanced"))
+func generateParseArgs(c context.Context, cmd *ucli.Command) context.Context {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
+	if cmd.IsSet("advanced") {
+		ctx = ctxutil.WithAdvanced(ctx, cmd.Bool("advanced"))
 	}
-	if c.IsSet("force") {
-		ctx = ctxutil.WithForce(ctx, c.Bool("force"))
+	if cmd.IsSet("force") {
+		ctx = ctxutil.WithForce(ctx, cmd.Bool("force"))
 	}
 
 	return ctx
 }
 
-func (s *Action) Generate(c *ucli.Context) error {
-	ctx := generateParseArgs(c)
+func (s *Action) Generate(c context.Context, cmd *ucli.Command) error {
+	ctx := generateParseArgs(c, cmd)
 
-	args := c.Args()
+	args := cmd.Args()
 	out.GenerateMessage()
-
-	// Decrypt the storage here for a better user expericence
-	s.Store.GetAllItems(ctx)
 
 	options := crypt.DefaultOptions()
 

@@ -3,7 +3,7 @@ package action
 import (
 	"fmt"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 const (

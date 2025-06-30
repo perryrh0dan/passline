@@ -11,7 +11,7 @@ import (
 	"strings"
 	"syscall"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 	"golang.org/x/term"
 )
 

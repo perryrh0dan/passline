@@ -1,7 +1,7 @@
 package action
 
 import (
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 // GetCommands returns the ucli commands exported by this module
@@ -31,7 +31,7 @@ func (s *Action) GetCommands() []*ucli.Command {
 		{
 			Name:  "category",
 			Usage: "Manage categories",
-			Subcommands: []*ucli.Command{
+			Commands: []*ucli.Command{
 				{
 					Name:    "list",
 					Aliases: []string{"ls"},

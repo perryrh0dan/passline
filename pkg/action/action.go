@@ -12,7 +12,7 @@ import (
 	"passline/pkg/storage"
 
 	"github.com/blang/semver"
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
 // Action knows everything to run passline CLI actions

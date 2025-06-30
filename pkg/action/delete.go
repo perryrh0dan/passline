@@ -9,11 +9,11 @@ import (
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) Delete(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) Delete(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
 	// Get all Sites
 	names, err := s.getItemNamesByCategory(ctx)
@@ -26,7 +26,7 @@ func (s *Action) Delete(c *ucli.Context) error {
 		return ExitError(ExitNotFound, err, "No items found")
 	}
 
-	args := c.Args()
+	args := cmd.Args()
 	out.DeleteMessage()
 
 	name, err := selection.ArgOrSelect(ctx, args, 0, "URL", names)

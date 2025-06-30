@@ -1,14 +1,15 @@
 package action
 
 import (
+	"context"
 	"passline/pkg/ctxutil"
 	"passline/pkg/out"
 
-	ucli "github.com/urfave/cli/v2"
+	ucli "github.com/urfave/cli/v3"
 )
 
-func (s *Action) Me(c *ucli.Context) error {
-	ctx := ctxutil.WithGlobalFlags(c)
+func (s *Action) Me(c context.Context, cmd *ucli.Command) error {
+	ctx := ctxutil.WithGlobalFlags(c, cmd)
 
 	username := ctxutil.GetDefaultUsername(ctx)
 	phoneNumber := ctxutil.GetPhoneNumber(ctx)
