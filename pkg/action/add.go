@@ -64,12 +64,12 @@ func (s *Action) Add(c context.Context, cmd *ucli.Command) error {
 	}
 
 	if ctxutil.IsAdvanced(ctx) {
-		category, err = input.Default("Please enter a category []: (%s)", "default", "")
+		category, err = input.Default("Please enter a category (%s): ", ctxutil.GetCategory(ctx), "")
 		if err != nil {
 			return err
 		}
 
-		comment, err = input.Default("Please enter a comment []: (%s)", "default", "")
+		comment, err = input.Default("Please enter a comment []:", "", "")
 		if err != nil {
 			return err
 		}
