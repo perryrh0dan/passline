@@ -106,6 +106,7 @@ func (s *Action) Add(c context.Context, cmd *ucli.Command) error {
 	credential.Password = password
 
 	out.SuccessfulAddedItem(name, credential.Username)
+
 	if cmd.Bool("print") {
 		out.DisplayCredential(credential)
 	}

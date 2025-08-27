@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"sort"
 
@@ -39,17 +38,7 @@ func setupApp(ctx context.Context, sv semver.Version) (context.Context, *ucli.Co
 		EnableShellCompletion: true,
 	}
 
-	// Append website information to default helper print
-	app.CustomRootCommandHelpTemplate = fmt.Sprintf(`%s
-WEBSITE: 
-   https://github.com/perryrh0dan/passline`)
-
 	app.Flags = []ucli.Flag{
-		&ucli.BoolFlag{
-			Name:    "print",
-			Aliases: []string{"p"},
-			Usage:   "Prints the password to the terminal",
-		},
 		&ucli.BoolFlag{
 			Name:  "yes",
 			Usage: "Assume yes on all yes/no questions or use the default on all others",
@@ -62,6 +51,11 @@ WEBSITE:
 		&ucli.BoolFlag{
 			Name:  "noclip",
 			Usage: "Disable copy to clipboard",
+		},
+		&ucli.BoolFlag{
+			Name:    "print",
+			Aliases: []string{"p"},
+			Usage:   "Prints the password to the terminal",
 		},
 	}
 

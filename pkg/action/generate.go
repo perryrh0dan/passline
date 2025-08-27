@@ -152,6 +152,9 @@ func (s *Action) Generate(c context.Context, cmd *ucli.Command) error {
 		}
 	}
 
-	out.DisplayCredential(credential)
+	if cmd.Bool("print") {
+		out.DisplayCredential(credential)
+	}
+
 	return nil
 }

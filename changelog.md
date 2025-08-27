@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.15.0
+
+### Feature
+
+- Add experimental full encryption mode
+
 ## Version 1.12.0
 
 ### Feature
@@ -52,7 +58,7 @@ Changelog for passline
 
 ### Fix
 
-- Set default category to "*"
+- Set default category to "\*"
 - Display Bug in edit crdential
 
 ## Version 1.7.0
@@ -60,7 +66,7 @@ Changelog for passline
 ### Feature
 
 - Add filterable categories to credentials
-- Set Default category in the config.json 
+- Set Default category in the config.json
 
 ## Version 1.5.4
 
@@ -105,7 +111,6 @@ Changelog for passline
 ## Version 0.3.1
 
 - Increment version indicator
-
 
 ## Version 0.3.0
 

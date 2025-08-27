@@ -21,9 +21,9 @@ func ArgOrInput(args ucli.Args, index int, message, defaultValue, rules string) 
 	if userInput == "" {
 		message := fmt.Sprintf("Please enter a %s", message)
 		if defaultValue != "" {
-			message += " (%s): "
+			message += " [%s]: "
 		} else {
-			message += " []: "
+			message += ": "
 		}
 
 		var err error

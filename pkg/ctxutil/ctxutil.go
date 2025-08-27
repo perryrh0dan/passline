@@ -29,6 +29,7 @@ const (
 	ctxKeyPhoneNumber
 	ctxEncryption
 	ctxNoClip
+	ctxPrint
 )
 
 // WithGlobalFlags parses any global flags from the cli context and returns
