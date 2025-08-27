@@ -12,14 +12,7 @@ func (s *Action) GetCommands() []*ucli.Command {
 			Aliases:   []string{"a"},
 			Usage:     "Adds an existing password for a website",
 			ArgsUsage: "<name> <username> <password>",
-			Flags: []ucli.Flag{
-				&ucli.BoolFlag{
-					Name:    "advanced",
-					Aliases: []string{"a"},
-					Usage:   "Enable advanced mode",
-				},
-			},
-			Action: s.Add,
+			Action:    s.Add,
 		},
 		{
 			Name:      "backup",

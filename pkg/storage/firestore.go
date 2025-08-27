@@ -168,20 +168,6 @@ func (fs *FireStore) DeleteCredential(ctx context.Context, item Item, username s
 	return nil
 }
 
-func (fs *FireStore) UpdateItem(ctx context.Context, item Item) error {
-	err := fs.deleteItem(ctx, item)
-	if err != nil {
-		return err
-	}
-
-	err = fs.createItem(ctx, item)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (fs *FireStore) GetDecryptedKey(ctx context.Context, reason string) ([]byte, error) {
 	if fs.decryptedKey != nil {
 		return fs.decryptedKey, nil
@@ -323,6 +309,8 @@ func (fs *FireStore) createItem(ctx context.Context, item Item) error {
 		}
 	}
 
+	fs.items = []Item{}
+
 	return nil
 }
 
@@ -332,6 +320,8 @@ func (fs *FireStore) deleteItem(ctx context.Context, item Item) error {
 		log.Printf("An error has occured: %s", err)
 		return err
 	}
+
+	fs.items = []Item{}
 
 	return nil
 }

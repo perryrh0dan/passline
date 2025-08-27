@@ -139,15 +139,6 @@ func (ls *LocalStorage) DeleteCredential(ctx context.Context, item Item, usernam
 	return nil
 }
 
-func (ls *LocalStorage) UpdateItem(ctx context.Context, item Item) error {
-	// TODO check if username is valid
-
-	ls.deleteItem(ctx, item)
-	ls.createItem(ctx, item)
-
-	return nil
-}
-
 func (ls *LocalStorage) GetKey(ctx context.Context) (string, error) {
 	key, err := ls.fs.ReadFile(ls.keyFile)
 	if ls.fs.IsNotExist(err) {
@@ -269,7 +260,6 @@ func (ls *LocalStorage) deleteItem(ctx context.Context, item Item) error {
 }
 
 func (ls *LocalStorage) SetItems(ctx context.Context, items []Item, decryptedKey []byte) error {
-
 	file, err := json.Marshal(items)
 	if err != nil {
 		return fmt.Errorf("failed to marshal items: %w", err)
@@ -297,6 +287,8 @@ func (ls *LocalStorage) SetItems(ctx context.Context, items []Item, decryptedKey
 	if err != nil {
 		return fmt.Errorf("failed to write to file: %w", err)
 	}
+
+	ls.items = items
 
 	return nil
 }

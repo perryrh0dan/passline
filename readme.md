@@ -99,7 +99,7 @@ COMMANDS:
    help, h      Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --print, -p   Displays password on the terminal (default: false)
+   --print, -p    Displays password on the terminal (default: false)
    --help, -h     Shows help (default: false)
    --version, -v  Prints the version (default: false)
 
@@ -113,14 +113,15 @@ To configure passline open to the ~/.passline/config.json file and modify any of
 
 The following illustrates all the available options with their respective default values.
 
-``` json
+```json
 {
- "Storage": "firestore",
- "AutoClip": true,
- "Notifications": true,
- "QuickSelect": true,
- "DefaultUsername": "thomaspoehlmann96@googlemail.com",
- "DefaultCategory": "*"
+  "Storage": "firestore",
+  "AutoClip": true,
+  "Notifications": true,
+  "QuickSelect": true,
+  "DefaultUsername": "thomaspoehlmann96@googlemail.com",
+  "DefaultCategory": "*",
+  "Encryption": 1
 }
 ```
 
@@ -146,7 +147,11 @@ Default username to suggest
 
 ### DefaultCategory
 
-If this is set to something else then "*" only this category will be used to suggest items. This can be overwritten by the --category option.
+If this is set to something else then "\*" only this category will be used to suggest items. This can be overwritten by the --category option.
+
+### Encryption (EXPERIMENTAL)
+
+Encryption mode. When set to `1` only passwords and recovery codes are encrypted. When set to `2` the complete vault is encrypted.
 
 ## Before flight
 
@@ -159,7 +164,6 @@ When you want to use the local storage module there is no further configuration 
 3. Download the authorization.json file and insert it in the ~/.passline directory with the name `firestore.json`.
 
 or follow this [instruction page](https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application).
-
 
 ## Development
 
@@ -177,13 +181,13 @@ VS-Code settings
 
 ### Build
 
-``` bash
+```bash
 GOOS=windows GOARCH=amd64 go build
 ```
 
 ### Test
 
-``` bash
+```bash
 go test ./...
 ```
 

@@ -90,8 +90,8 @@ func ensureBackupDir() error {
 }
 
 const (
-	PartialEncryption = iota
-	FullEncryption    = iota
+	PartialEncryption = 1
+	FullEncryption    = 2
 )
 
 func new() Config {

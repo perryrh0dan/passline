@@ -20,7 +20,6 @@ type Storage interface {
 	GetAllItems(context.Context) ([]Item, error)
 	AddCredential(context.Context, string, Credential) error
 	DeleteCredential(context.Context, Item, string) error
-	UpdateItem(context.Context, Item) error
 	GetKey(context.Context) (string, error)
 	SetKey(context.Context, string) error
 	GetDecryptedKey(context.Context, string) ([]byte, error)

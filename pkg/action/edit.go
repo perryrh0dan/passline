@@ -61,37 +61,45 @@ func (s *Action) Edit(c context.Context, cmd *ucli.Command) error {
 	}
 
 	// Get new URL
-	newName, err := input.Default("Please enter a new URL []: (%s) ", item.Name, "")
+	newName, err := input.Default("Please enter a new URL [%s]: ", item.Name, "")
 	if err != nil {
 		return err
 	}
 
 	// Get new username
-	newUsername, err := input.Default("Please enter a new username/Login []: (%s) ", credential.Username, "")
+	newUsername, err := input.Default("Please enter a new username/Login [%s]: ", credential.Username, "")
 	if err != nil {
 		return err
+	}
+
+	// Get new password
+	newPassword := input.Password("Please enter a new password [****]: ")
+	println()
+	if len(newPassword) == 0 {
+		newPassword = []byte(credential.Password)
 	}
 
 	// Get new category
-	newCategory, err := input.Default("Please enter a new category []: (%s) ", credential.Category, "")
+	newCategory, err := input.Default("Please enter a new category [%s]: ", credential.Category, "")
 	if err != nil {
 		return err
 	}
 
-	newComment, err := input.Default("Please enter a new comment []: (%s) ", credential.Comment, "")
+	newComment, err := input.Default("Please enter a new comment [%s]: ", credential.Comment, "")
 	if err != nil {
 		return err
 	}
 
-	// Get new recoveryCodes
+	// Get new recovery codes
 	recoveryCodes := util.ArrayToString(credential.RecoveryCodes)
-	newRecoveryCodes, err := input.Default("Please enter your recovery codes []: (%s) ", recoveryCodes, "")
+	newRecoveryCodes, err := input.Default("Please enter your recovery codes [%s]: ", recoveryCodes, "")
 	if err != nil {
 		return err
 	}
 
 	// Edit credential
 	credential.Username = newUsername
+	credential.Password = string(newPassword)
 	credential.Category = newCategory
 	credential.Comment = newComment
 	credential.RecoveryCodes = make([]string, 0) // TODO remove spaces
