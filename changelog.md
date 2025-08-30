@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 1.15.1
+
+### Fix
+
+- Not able to add new items
+
 ## Version 1.15.0
 
 ### Feature

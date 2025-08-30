@@ -18,8 +18,6 @@ import (
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type FireStore struct {
@@ -69,11 +67,15 @@ func (fs *FireStore) GetItemByName(ctx context.Context, name string) (Item, erro
 		return Item{}, err
 	}
 
-	var item Item
+	var item *Item
 	for i := 0; i < len(items); i++ {
 		if items[i].Name == name {
-			item = items[i]
+			item = &items[i]
 		}
+	}
+
+	if item == nil {
+		return Item{}, errors.New("Item not found")
 	}
 
 	// Add default Category if not exists
@@ -83,7 +85,7 @@ func (fs *FireStore) GetItemByName(ctx context.Context, name string) (Item, erro
 		}
 	}
 
-	return item, nil
+	return *item, nil
 }
 
 func (fs *FireStore) GetItemByIndex(ctx context.Context, index int) (Item, error) {
@@ -133,10 +135,8 @@ func (fs *FireStore) GetAllItems(ctx context.Context) ([]Item, error) {
 
 func (fs *FireStore) AddCredential(ctx context.Context, name string, credential Credential) error {
 	item, err := fs.GetItemByName(ctx, name)
-	if status.Code(err) == codes.NotFound {
+	if err != nil {
 		item = Item{Name: name, Credentials: []Credential{credential}}
-	} else if err != nil {
-		return err
 	} else {
 		item.Credentials = append(item.Credentials, credential)
 	}
