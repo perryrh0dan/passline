@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"passline/pkg/cli/terminal"
 	"passline/pkg/util"
@@ -14,6 +15,11 @@ import (
 type SelectItem struct {
 	Value string
 	Label string
+}
+
+type SelectItemWithDistance struct {
+	item  SelectItem
+	score int
 }
 
 func ArgOrSelect(ctx context.Context, args ucli.Args, index int, message string, items []SelectItem) (string, error) {
@@ -59,12 +65,23 @@ func arrayContains(l []SelectItem, i string) bool {
 }
 
 func filterArray(l []SelectItem, filter string) []SelectItem {
-	filteredNames := make([]SelectItem, 0)
+	selectItemsWithDistance := make([]SelectItemWithDistance, 0)
+
 	for _, i := range l {
 		_, distance := util.LevenshteinDistanceSubstring(i.Label, filter)
-		if distance <= 2 {
-			filteredNames = append(filteredNames, i)
+		if distance <= max(0, min(len(filter)-2, 2)) {
+			selectItemsWithDistance = append(selectItemsWithDistance, SelectItemWithDistance{item: i, score: distance})
 		}
 	}
-	return filteredNames
+
+	slices.SortFunc(selectItemsWithDistance, func(a, b SelectItemWithDistance) int {
+		return a.score - b.score
+	})
+
+	filteredItems := make([]SelectItem, 0)
+	for _, i := range selectItemsWithDistance {
+		filteredItems = append(filteredItems, i.item)
+	}
+
+	return filteredItems
 }

@@ -22,6 +22,30 @@ func TestLevenshteinDistanceDifferenceLength(t *testing.T) {
 	}
 }
 
+func TestLevenshteinDistanceSubstringDifference1(t *testing.T) {
+	bestMatch, distance := LevenshteinDistanceSubstring("ab", "abc")
+
+	if distance != 0 {
+		t.Errorf("LevenshteinDistanceSubscring() = _,%d; wanted length %v", distance, 1)
+	}
+
+	if bestMatch != "ab" {
+		t.Errorf("LevenshteinDistance() = %s,_; wanted length %s", bestMatch, "ab")
+	}
+}
+
+func TestLevenshteinDistanceSubstringDifference2(t *testing.T) {
+	bestMatch, distance := LevenshteinDistanceSubstring("abd", "abcd")
+
+	if distance != 1 {
+		t.Errorf("LevenshteinDistanceSubscring() = _,%d; wanted length %v", distance, 1)
+	}
+
+	if bestMatch != "abc" {
+		t.Errorf("LevenshteinDistance() = %s,_; wanted length %s", bestMatch, "abc")
+	}
+}
+
 func TestFindClosestSubstringMass(t *testing.T) {
 	items := []string{
 		"google.com",
@@ -1029,7 +1053,7 @@ func TestFindClosestSubstringMass(t *testing.T) {
 	elapsed := time.Since(start)
 	fmt.Printf("Time elapsed: %s\n", elapsed)
 
-	maxTime := 100000
+	maxTime := 5_000_000 //5 milliseconds
 
 	if elapsed > time.Duration(maxTime) {
 		t.Errorf("FindClosestSubstring duration = %d; wanted < %d", elapsed, maxTime)

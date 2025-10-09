@@ -35,15 +35,26 @@ func StringToArray(s string) []string {
 func LevenshteinDistanceSubstring(target, pattern string) (string, int) {
 	minDistance := len(pattern)
 	bestMatch := ""
-	patternLength := len(pattern)
 
-	for i := 0; i <= len(target)-patternLength; i++ {
-		substring := target[i : i+patternLength]
-		distance := LevenshteinDistance(substring, pattern)
+	if len(target) >= len(pattern) {
+		for i := 0; i <= len(target)-len(pattern); i++ {
+			substring := target[i : i+len(pattern)]
+			distance := LevenshteinDistance(substring, pattern)
 
-		if distance < minDistance {
-			minDistance = distance
-			bestMatch = substring
+			if distance < minDistance {
+				minDistance = distance
+				bestMatch = substring
+			}
+		}
+	} else {
+		for i := 0; i <= len(pattern)-len(target); i++ {
+			substring := pattern[i : i+len(target)]
+			distance := LevenshteinDistance(target, substring)
+
+			if distance < minDistance {
+				minDistance = distance
+				bestMatch = substring
+			}
 		}
 	}
 
