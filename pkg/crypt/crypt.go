@@ -4,14 +4,16 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"crypto/sha1"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
-
-	"golang.org/x/crypto/pbkdf2"
 )
+
+// LegacyStaticSalt is the salt used by v1/v2 vaults. It is kept here solely
+// for backward-compatible decryption of existing key files. New vaults always
+// use a randomly generated per-vault salt (see GenerateSalt).
+var LegacyStaticSalt = []byte("This is the salt")
 
 type Options struct {
 	Length            int
@@ -36,18 +38,34 @@ func DefaultOptions() Options {
 	}
 }
 
-func EncryptKey(password []byte, key string) (string, error) {
-	pwKey := GetKey(password)
-	encryptedKey, err := AesGcmEncrypt(pwKey, key)
+// GenerateSalt returns 16 cryptographically random bytes for use as a
+// per-vault PBKDF2 salt.
+func GenerateSalt() ([]byte, error) {
+	salt := make([]byte, 16)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return nil, err
+	}
+	return salt, nil
+}
+
+// EncryptKey derives a KEK from password+salt (v3 KDF) and uses it to
+// AES-GCM-encrypt key. Only call this when creating or re-keying a vault;
+// decryption must go through DecryptKey which dispatches on KeyRecord.Version.
+func EncryptKey(password, salt []byte, key string) (string, error) {
+	kek := KeyRecord{Salt: salt, Version: KeyVersionV3}.DeriveKEK(password)
+	encryptedKey, err := AesGcmEncrypt(kek, key)
 	if err != nil {
 		return "", err
 	}
 	return encryptedKey, nil
 }
 
-func DecryptKey(password []byte, encryptedKey string) (string, error) {
-	pwKey := GetKey(password)
-	key, err := AesGcmDecrypt(pwKey, encryptedKey)
+// DecryptKey uses the KDF parameters encoded in kr to derive the KEK, then
+// AES-GCM-decrypts kr.EncryptedCEK. This is the single correct entry point
+// for decryption — it handles both legacy and v3 vaults transparently.
+func DecryptKey(password []byte, kr KeyRecord) (string, error) {
+	kek := kr.DeriveKEK(password)
+	key, err := AesGcmDecrypt(kek, kr.EncryptedCEK)
 	if err != nil {
 		return "", err
 	}
@@ -89,7 +107,10 @@ func AesGcmEncrypt(key []byte, text string) (string, error) {
 
 // AesGcmDecrypt takes an decryption key, a ciphertext and the corresponding nonce and decrypts it with AES256 in GCM mode. Returns the plaintext string.
 func AesGcmDecrypt(key []byte, cryptoText string) (string, error) {
-	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
+	ciphertext, err := base64.URLEncoding.DecodeString(cryptoText)
+	if err != nil {
+		return "", fmt.Errorf("base64 decode failed: %w", err)
+	}
 
 	if len(key) != 32 {
 		return "", errors.New("Wrong key length")
@@ -106,17 +127,14 @@ func AesGcmDecrypt(key []byte, cryptoText string) (string, error) {
 	}
 
 	nonceSize := aesgcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return "", errors.New("ciphertext too short")
+	}
 	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
 	plaintextBytes, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("%s", plaintextBytes), nil
-}
-
-func GetKey(password []byte) []byte {
-	salt := []byte("This is the salt")
-	dk := pbkdf2.Key(password, salt, 4096, 32, sha1.New)
-	return dk
+	return string(plaintextBytes), nil
 }

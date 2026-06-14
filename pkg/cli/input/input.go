@@ -101,11 +101,14 @@ func Password(message string) []byte {
 	return p
 }
 
-func MasterPassword(encryptedEncryptionKey string, reason string) ([]byte, error) {
-	// If encrypted encryption key exists decrypt it
+// MasterPassword prompts for the master password and decrypts the CEK stored
+// in kr. The KeyRecord carries the correct KDF parameters for both legacy and
+// v3 vaults, so callers do not need to distinguish between them.
+func MasterPassword(kr crypt.KeyRecord, reason string) ([]byte, error) {
+	// Allow non-interactive use via environment variable.
 	envKey := []byte(os.Getenv("PASSLINE_MASTER_KEY"))
 	if len(envKey) > 0 {
-		encryptionKey, err := crypt.DecryptKey(envKey, encryptedEncryptionKey)
+		encryptionKey, err := crypt.DecryptKey(envKey, kr)
 		if err == nil {
 			return []byte(encryptionKey), nil
 		}
@@ -121,7 +124,7 @@ func MasterPassword(encryptedEncryptionKey string, reason string) ([]byte, error
 		password := Password(prompt)
 		fmt.Println()
 
-		encryptionKey, err := crypt.DecryptKey(password, encryptedEncryptionKey)
+		encryptionKey, err := crypt.DecryptKey(password, kr)
 		if err == nil {
 			return []byte(encryptionKey), nil
 		} else if counter != 2 {
@@ -132,7 +135,6 @@ func MasterPassword(encryptedEncryptionKey string, reason string) ([]byte, error
 	}
 
 	return []byte{}, fmt.Errorf("Wrong password")
-
 }
 
 func validate(input string, meta string) bool {

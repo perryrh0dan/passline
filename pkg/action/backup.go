@@ -75,7 +75,7 @@ func (s *Action) backup(ctx context.Context, path string) error {
 		return err
 	}
 
-	_ = os.WriteFile(path, file, 0644)
+	_ = os.WriteFile(path, file, 0600)
 
 	return nil
 }

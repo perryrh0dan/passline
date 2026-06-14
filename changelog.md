@@ -2,6 +2,12 @@
 
 Changelog for passline
 
+## Version 2.0.0
+
+### Feature
+
+- Introduced the v3 key format. Legacy key formats remain fully supported, and executing the password command will migrate keys to the current v3 format.
+
 ## Version 1.15.1
 
 ### Fix

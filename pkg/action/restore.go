@@ -63,7 +63,12 @@ func (s *Action) restore(ctx context.Context, path string) error {
 
 	rawItems := json.RawMessage(aux.Items)
 
-	globalPassword, err := input.MasterPassword(aux.Key, "to decrypt your vault")
+	kr, err := crypt.ParseKeyString(aux.Key)
+	if err != nil {
+		return err
+	}
+
+	globalPassword, err := input.MasterPassword(kr, "to decrypt your vault")
 	if err != nil {
 		return err
 	}

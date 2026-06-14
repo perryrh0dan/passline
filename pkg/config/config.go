@@ -60,7 +60,7 @@ func ensureConfigFile() {
 
 	config := new()
 	file, _ := json.MarshalIndent(config, "", " ")
-	_ = os.WriteFile(configLocation(), file, 0644)
+	_ = os.WriteFile(configLocation(), file, 0600)
 }
 
 func ensureMainDir() error {

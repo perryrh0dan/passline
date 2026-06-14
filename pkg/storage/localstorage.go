@@ -156,23 +156,33 @@ func (ls *LocalStorage) GetDecryptedKey(ctx context.Context, reason string) ([]b
 	}
 
 	// Get encrypted content encryption key from store
-	encryptedEncryptionKey, err := ls.GetKey(ctx)
+	rawKey, err := ls.GetKey(ctx)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	if encryptedEncryptionKey != "" {
-		encryptionKey, err := input.MasterPassword(encryptedEncryptionKey, reason)
+	if rawKey != "" {
+		kr, err := crypt.ParseKeyString(rawKey)
+		if err != nil {
+			return []byte{}, err
+		}
+
+		encryptionKey, err := input.MasterPassword(kr, reason)
 		if err != nil {
 			return []byte{}, err
 		}
 
 		ls.decryptedKey = encryptionKey
-
 		return encryptionKey, nil
 	}
 
-	decryptedEncryptionKey, err := crypt.GenerateKey()
+	// First-run: no key file exists yet. Generate a CEK and a fresh salt.
+	decryptedCEK, err := crypt.GenerateKey()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	salt, err := crypt.GenerateSalt()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -183,22 +193,22 @@ func (ls *LocalStorage) GetDecryptedKey(ctx context.Context, reason string) ([]b
 	fmt.Println()
 
 	if string(password) != string(passwordTwo) {
-		return []byte{}, err
+		return []byte{}, fmt.Errorf("passwords do not match")
 	}
 
-	encryptedEncryptionKey, err = crypt.EncryptKey(password, decryptedEncryptionKey)
+	encryptedCEK, err := crypt.EncryptKey(password, salt, decryptedCEK)
 	if err != nil {
 		return []byte{}, err
 	}
-	ls.SetKey(ctx, encryptedEncryptionKey)
 
-	ls.decryptedKey = []byte(decryptedEncryptionKey)
+	ls.SetKey(ctx, crypt.EncodeKeyString(encryptedCEK, salt))
 
+	ls.decryptedKey = []byte(decryptedCEK)
 	return ls.decryptedKey, nil
 }
 
 func (ls *LocalStorage) SetKey(ctx context.Context, key string) error {
-	err := ls.fs.WriteFile(ls.keyFile, []byte(key), 0644)
+	err := ls.fs.WriteFile(ls.keyFile, []byte(key), 0600)
 	if err != nil {
 		return err
 	}
@@ -283,7 +293,7 @@ func (ls *LocalStorage) SetItems(ctx context.Context, items []Item, decryptedKey
 		file = []byte(fmt.Sprintf("%s", encryptedResult))
 	}
 
-	err = ls.fs.WriteFile(ls.storageFile, file, 0644)
+	err = ls.fs.WriteFile(ls.storageFile, file, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write to file: %w", err)
 	}

@@ -81,7 +81,7 @@ USAGE:
    passline [global options] command [command options] [arguments...]
 
 VERSION:
-   1.5.4
+   2.0.0
 
 DESCRIPTION:
    Password manager for the command line

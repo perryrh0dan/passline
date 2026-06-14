@@ -174,23 +174,33 @@ func (fs *FireStore) GetDecryptedKey(ctx context.Context, reason string) ([]byte
 	}
 
 	// Get encrypted content encryption key from store
-	encryptedEncryptionKey, err := fs.GetKey(ctx)
+	rawKey, err := fs.GetKey(ctx)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	if encryptedEncryptionKey != "" {
-		encryptionKey, err := input.MasterPassword(encryptedEncryptionKey, reason)
+	if rawKey != "" {
+		kr, err := crypt.ParseKeyString(rawKey)
+		if err != nil {
+			return []byte{}, err
+		}
+
+		encryptionKey, err := input.MasterPassword(kr, reason)
 		if err != nil {
 			return []byte{}, err
 		}
 
 		fs.decryptedKey = encryptionKey
-
 		return encryptionKey, nil
 	}
 
-	decryptedEncryptionKey, err := crypt.GenerateKey()
+	// First-run: no key stored yet. Generate a CEK and a fresh salt.
+	decryptedCEK, err := crypt.GenerateKey()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	salt, err := crypt.GenerateSalt()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -201,17 +211,17 @@ func (fs *FireStore) GetDecryptedKey(ctx context.Context, reason string) ([]byte
 	fmt.Println()
 
 	if string(password) != string(passwordTwo) {
-		return []byte{}, err
+		return []byte{}, fmt.Errorf("passwords do not match")
 	}
 
-	encryptedEncryptionKey, err = crypt.EncryptKey(password, decryptedEncryptionKey)
+	encryptedCEK, err := crypt.EncryptKey(password, salt, decryptedCEK)
 	if err != nil {
 		return []byte{}, err
 	}
-	fs.SetKey(ctx, encryptedEncryptionKey)
 
-	fs.decryptedKey = []byte(decryptedEncryptionKey)
+	fs.SetKey(ctx, crypt.EncodeKeyString(encryptedCEK, salt))
 
+	fs.decryptedKey = []byte(decryptedCEK)
 	return fs.decryptedKey, nil
 }
 
